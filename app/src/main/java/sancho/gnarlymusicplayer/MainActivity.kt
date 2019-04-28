@@ -62,14 +62,14 @@ class MainActivity : Activity()
 			}
 		}
 
-		updateDirectoryView()
+		requestReadPermishon()
 	}
 
-	private fun updateDirectoryView()
+	private fun requestReadPermishon()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			actuallyUpdateDirectoryView()
+			updateDirectoryView()
 		}
 		else
 		{
@@ -83,21 +83,23 @@ class MainActivity : Activity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				actuallyUpdateDirectoryView()
+				updateDirectoryView()
 			}
 			else
 			{
 				Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show()
-				updateDirectoryView()
+				requestReadPermishon()
 			}
 		}
 	}
 
-	private fun actuallyUpdateDirectoryView()
+	// assuming the read permission is granted
+	private fun updateDirectoryView()
 	{
 		if(_currentDir == null || _currentDepth == 0)
 		{
 			// list storage devices
+			title = "Storage"
 			val externalStorageFiles = getExternalFilesDirs(null)
 			_dirList.clear()
 			for(f in externalStorageFiles)
@@ -110,6 +112,7 @@ class MainActivity : Activity()
 		else
 		{
 			// list current dir
+			title = _currentDir?.absolutePath
 			val list = _currentDir?.listFiles{file ->
 				file.isDirectory || isFileExtensionInArray(file, SUPPORTED_FILE_EXTENSIONS)
 			}
