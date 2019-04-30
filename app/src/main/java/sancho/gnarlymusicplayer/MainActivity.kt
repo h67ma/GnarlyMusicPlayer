@@ -1,58 +1,43 @@
 package sancho.gnarlymusicplayer
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import java.io.File
 import java.util.*
 
-class MainActivity : Activity()
+class MainActivity : AppCompatActivity()
 {
-	companion object
-	{
-		private const val REQUEST_READ_STORAGE = 42
-
-		// from https://developer.android.com/guide/topics/media/media-formats
-		private val SUPPORTED_FILE_EXTENSIONS = arrayOf(
-			"3gp",
-			"mp4",
-			"m4a",
-			"aac",
-			"ts",
-			"flac",
-			"gsm",
-			"mid",
-			"xmf",
-			"mxmf",
-			"rtttl",
-			"rtx",
-			"ota",
-			"imy",
-			"mp3",
-			"mkv",
-			"wav",
-			"ogg",
-			"m3u",
-			"m3u8"
-		)
-	}
-
 	private val _dirList = mutableListOf<File>()
 	private var _currentDir : File? = null
 	private var _currentDepth : Int = 0
 	private var _explorerAdapter : ExplorerAdapter? = null
-	private var _backPressedOnce : Boolean = false
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 
+		setSupportActionBar(toolbar)
+
+		// navigation arrow left
+		/*val toggle = ActionBarDrawerToggle(
+			this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+		)
+		drawer_layout.addDrawerListener(toggle)
+		toggle.syncState()*/
+
 		_explorerAdapter = ExplorerAdapter(this, _dirList)
-		libraryListView.adapter = _explorerAdapter
-		libraryListView.setOnItemClickListener{parent, _, position, _ ->
+		library_list_view.adapter = _explorerAdapter
+		library_list_view.setOnItemClickListener{parent, _, position, _ ->
 			val selected = parent.adapter.getItem(position) as File
 			if(selected.isDirectory)
 			{
@@ -63,6 +48,22 @@ class MainActivity : Activity()
 		}
 
 		requestReadPermishon()
+	}
+
+	// adds items to the action bar
+	override fun onCreateOptionsMenu(menu: Menu): Boolean
+	{
+		menuInflater.inflate(R.menu.main, menu)
+		return true
+	}
+
+	// toolbar item clicks
+	override fun onOptionsItemSelected(item: MenuItem): Boolean
+	{
+		return when (item.itemId) {
+			R.id.action_settings -> true
+			else -> super.onOptionsItemSelected(item)
+		}
 	}
 
 	private fun requestReadPermishon()
@@ -138,22 +139,23 @@ class MainActivity : Activity()
 
 	override fun onBackPressed()
 	{
-		if(_currentDir != null && _currentDepth != 0)
+		if(drawer_layout.isDrawerOpen(GravityCompat.START))
 		{
-			_backPressedOnce = false
+			drawer_layout.closeDrawer(GravityCompat.START)
+		}
+		else if(drawer_layout.isDrawerOpen(GravityCompat.END))
+		{
+			drawer_layout.closeDrawer(GravityCompat.END)
+		}
+		else if(_currentDir != null && _currentDepth != 0)
+		{
 			_currentDir = _currentDir?.parentFile
 			_currentDepth--
 			updateDirectoryView()
 		}
 		else
 		{
-			if(!_backPressedOnce)
-			{
-				_backPressedOnce = true
-				Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
-			}
-			else
-				super.onBackPressed() // exit app
+			super.onBackPressed() // exit app
 		}
 	}
 }

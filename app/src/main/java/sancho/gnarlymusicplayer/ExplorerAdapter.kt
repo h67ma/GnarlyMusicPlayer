@@ -10,10 +10,6 @@ import android.widget.TextView
 
 class ExplorerAdapter(context: Context, items: MutableList<File>) : ArrayAdapter<File>(context, 0, items)
 {
-	private val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
-		"m3u", "m3u8"
-	)
-
 	override fun getView(position: Int, convertView: View?, parent: ViewGroup): View
 	{
 		val item : File? = getItem(position)
@@ -23,7 +19,7 @@ class ExplorerAdapter(context: Context, items: MutableList<File>) : ArrayAdapter
 		{
 			val inflater : LayoutInflater = LayoutInflater.from(context)
 			retView = inflater.inflate(R.layout.explorer_item, parent, false)
-			holder = retView.findViewById(R.id.explorerText)
+			holder = retView.findViewById(R.id.explorer_text)
 			retView.tag = holder
 		}
 		else

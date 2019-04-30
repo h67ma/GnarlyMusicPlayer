@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/search"/>
+
+    <item android:id="@+id/action_clearqueue"
+        android:title="Clear queue"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_addtopbottom"
+        android:title="Add at top/bottom"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_removeplayedtrack"
+        android:title="Remove track after played"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_removeprevtracks"
+        android:title="Remove tracks before current track"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_savequeuetoplaylist"
+        android:title="Save queue to playlist"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_settings"
+        android:title="Settings"
+        app:showAsAction="never"/>
+</menu>
