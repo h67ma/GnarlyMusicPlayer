@@ -1,5 +1,5 @@
 .DS_Store
-.idea/shelf
+.idea
 /android.tests.dependencies
 /confluence/target
 /dependencies/repo
@@ -23,7 +23,6 @@ build/
 !**/test/**/build
 *.iml
 !**/testData/**/*.iml
-.idea
 kotlin-ultimate/
 node_modules/
 .rpt2_cache/
