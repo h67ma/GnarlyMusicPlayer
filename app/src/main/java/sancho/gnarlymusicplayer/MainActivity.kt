@@ -3,7 +3,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -100,7 +99,7 @@ class MainActivity : AppCompatActivity()
 		if(_currentDir == null || _currentDepth == 0)
 		{
 			// list storage devices
-			title = "Storage"
+			toolbar_title.text = "Storage"
 			val externalStorageFiles = getExternalFilesDirs(null)
 			_dirList.clear()
 			for(f in externalStorageFiles)
@@ -113,7 +112,7 @@ class MainActivity : AppCompatActivity()
 		else
 		{
 			// list current dir
-			title = _currentDir?.absolutePath
+			toolbar_title.text = _currentDir?.absolutePath
 			val list = _currentDir?.listFiles{file ->
 				file.isDirectory || isFileExtensionInArray(file, SUPPORTED_FILE_EXTENSIONS)
 			}
