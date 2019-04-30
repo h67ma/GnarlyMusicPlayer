@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
+
+		title = ""
 
 		setSupportActionBar(toolbar)
 
@@ -53,7 +56,27 @@ class MainActivity : AppCompatActivity()
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
 	{
 		menuInflater.inflate(R.menu.main, menu)
-		return true
+
+		val mSearch = menu.findItem(R.id.action_search)
+
+		val mSearchView = mSearch.actionView as SearchView
+		mSearchView.queryHint = getString(R.string.search_bar_hint)
+
+		mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener
+		{
+			override fun onQueryTextSubmit(query: String): Boolean
+			{
+				// TODO filter
+				return true // don't do default action
+			}
+
+			override fun onQueryTextChange(newText: String): Boolean
+			{
+				return true // don't do default action
+			}
+		})
+
+		return super.onCreateOptionsMenu(menu)
 	}
 
 	// toolbar item clicks
