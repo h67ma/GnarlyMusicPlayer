@@ -3,6 +3,7 @@ package sancho.gnarlymusicplayer
 import java.io.File
 
 const val REQUEST_READ_STORAGE = 42
+const val PREFERENCE_BOOKMARKS = "sancho.gnarlymusicplayer.preference.bookmarks"
 
 // from https://developer.android.com/guide/topics/media/media-formats
 val SUPPORTED_FILE_EXTENSIONS = arrayOf(

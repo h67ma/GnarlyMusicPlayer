@@ -44,7 +44,8 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context=".MainActivity">
 
-            <ListView android:id="@+id/library_list_view"
+            <ListView
+                android:id="@+id/library_list_view"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"/>
 
@@ -56,14 +57,42 @@
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         android:fitsSystemWindows="true"/>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view_right"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
-        android:fitsSystemWindows="true"/>
+        android:layout_gravity="end"
+        android:fitsSystemWindows="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/bookmark_root"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/storage_devices"
+                android:drawableStart="@drawable/sd_card"/>
+
+            <Button
+                android:id="@+id/bookmark_add_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_current_dir"
+                android:drawableStart="@drawable/plus"/>
+
+            <ListView
+                android:id="@+id/bookmark_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>
