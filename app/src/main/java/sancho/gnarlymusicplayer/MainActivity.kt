@@ -1,5 +1,6 @@
 package sancho.gnarlymusicplayer
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
@@ -14,14 +15,18 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.util.*
+import com.google.gson.reflect.TypeToken
+import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity()
 {
 	private val _dirList = mutableListOf<File>()
 	private var _currentDir : File? = null
 	private lateinit var _explorerAdapter : ExplorerAdapter
-	private var _mountedDevices = mutableListOf<File>()
-	private lateinit var _db: BookmarksDbHelper
+	private lateinit var _mountedDevices: MutableList<File>
+	private lateinit var _bookmarks: MutableList<Bookmark>
+	private var _bookmarksChanged = false
+	private var _queueChanged = false
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -32,7 +37,7 @@ class MainActivity : AppCompatActivity()
 
 		title = ""
 
-		_db = BookmarksDbHelper(applicationContext)
+		restoreFromPrefs() // TODO this in here or in onStart/onResume? https://developer.android.com/guide/components/activities/activity-lifecycle
 
 		getStorageDevices() // prepare list with storage devices
 
@@ -41,6 +46,18 @@ class MainActivity : AppCompatActivity()
 		setupFileList()
 
 		requestReadPermishon() // check for permissions and initial update of file list
+	}
+
+	private fun restoreFromPrefs()
+	{
+		val gson = Gson()
+		val sharedPref = getPreferences(Context.MODE_PRIVATE)
+
+		val bookmarks = sharedPref.getString(PREFERENCE_BOOKMARKS, "[]")
+		val collectionType = object : TypeToken<Collection<Bookmark>>() {}.type
+		_bookmarks = gson.fromJson(bookmarks, collectionType)
+
+		//val queue = sharedPref.getString(PREFERENCE_QUEUE, "[]")
 	}
 
 	private fun setupFileList()
@@ -58,10 +75,8 @@ class MainActivity : AppCompatActivity()
 
 	private fun setupBookmarks()
 	{
-		val bookmarkList = _db.getBookmarks()
-
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
-		val bookmarksAdapter = BookmarksAdapter(this, bookmarkList) { bookmark ->
+		val bookmarksAdapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 			val dir = File(bookmark.path)
 			if(dir.exists())
 			{
@@ -79,7 +94,7 @@ class MainActivity : AppCompatActivity()
 			if(path != null && label != null)
 			{
 				// check if bookmark already exists
-				if(bookmarkList.any{item -> item.path == path})
+				if(_bookmarks.any{item -> item.path == path})
 				{
 					Toast.makeText(applicationContext, getString(R.string.bookmark_exists), Toast.LENGTH_SHORT).show()
 					return@setOnClickListener
@@ -87,12 +102,10 @@ class MainActivity : AppCompatActivity()
 
 				val bookmark = Bookmark(path, label)
 
-				// insert to db
-				_db.insertBookmark(path, label)
-
 				// also add to bookmark menu
-				bookmarkList.add(bookmark)
-				bookmarksAdapter.notifyItemInserted(bookmarkList.size - 1)
+				_bookmarks.add(bookmark)
+				_bookmarksChanged = true
+				bookmarksAdapter.notifyItemInserted(_bookmarks.size - 1)
 			}
 			else
 				Toast.makeText(applicationContext, getString(R.string.cant_add_root_dir), Toast.LENGTH_SHORT).show()
@@ -113,8 +126,8 @@ class MainActivity : AppCompatActivity()
 			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
 			{
 				val position = viewHolder.adapterPosition
-				_db.deleteBookmark(bookmarkList[position].id)
-				bookmarkList.removeAt(position)
+				_bookmarks.removeAt(position)
+				_bookmarksChanged = true
 				bookmarksAdapter.notifyItemRemoved(position)
 			}
 		})
@@ -123,7 +136,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun getStorageDevices()
 	{
-		_mountedDevices.clear()
+		_mountedDevices = mutableListOf()
 		val externalStorageFiles = getExternalFilesDirs(null)
 		for(f in externalStorageFiles)
 		{
@@ -232,6 +245,28 @@ class MainActivity : AppCompatActivity()
 			else
 				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 		}
+	}
+
+	override fun onPause()
+	{
+		if(_bookmarksChanged || _queueChanged)
+		{
+			val sharedPref = getPreferences(Context.MODE_PRIVATE)
+
+			with(sharedPref.edit())
+			{
+				val gson = Gson()
+				if(_bookmarksChanged)
+					putString(PREFERENCE_BOOKMARKS, gson.toJson(_bookmarks))
+
+				/*if(_queueChanged)
+					putString(PREFERENCE_QUEUE, "TODO")*/
+
+				apply()
+			}
+		}
+
+		super.onPause()
 	}
 
 	override fun onBackPressed()
