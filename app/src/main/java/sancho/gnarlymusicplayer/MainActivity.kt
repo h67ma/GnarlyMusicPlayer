@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity()
 				val bookmark = Bookmark(path, label)
 
 				// also add to bookmark menu
-				_bookmarks.add(bookmark)
+				bookmarksAdapter.onItemAdded(bookmark)
 				_bookmarksChanged = true
 				bookmarksAdapter.notifyItemInserted(_bookmarks.size - 1)
 			}
@@ -116,22 +116,33 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 
-		val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT)
+		ItemTouchHelper(object : ItemTouchHelper.Callback()
 		{
-			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, viewHolder1: RecyclerView.ViewHolder): Boolean
+			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
 			{
-				return false
+				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
+			}
+
+			override fun isLongPressDragEnabled(): Boolean
+			{
+				return true
+			}
+
+			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
+			{
+				bookmarksAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+				_bookmarksChanged = true
+				return true
 			}
 
 			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
 			{
 				val position = viewHolder.adapterPosition
-				_bookmarks.removeAt(position)
+				bookmarksAdapter.onItemRemoved(position)
 				_bookmarksChanged = true
 				bookmarksAdapter.notifyItemRemoved(position)
 			}
-		})
-		itemTouchHelper.attachToRecyclerView(bookmark_list_view)
+		}).attachToRecyclerView(bookmark_list_view)
 	}
 
 	private fun getStorageDevices()

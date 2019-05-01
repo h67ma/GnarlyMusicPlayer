@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.bookmark_item.view.*
+import java.util.Collections.swap
 
 class BookmarksAdapter(
 	private val context: Context,
@@ -31,5 +32,34 @@ class BookmarksAdapter(
 			itemView.bookmark_text.text = bookmark.label
 			itemView.setOnClickListener { clickListener(bookmark)}
 		}
+	}
+
+	fun onItemRemoved(position: Int)
+	{
+		bookmarks.removeAt(position)
+	}
+
+	fun onItemAdded(bookmark: Bookmark)
+	{
+		bookmarks.add(bookmark)
+	}
+
+	fun onItemMoved(fromPosition: Int, toPosition: Int)
+	{
+		if (fromPosition < toPosition)
+		{
+			for (i in fromPosition until toPosition)
+			{
+				swap(bookmarks, i, i + 1)
+			}
+		}
+		else
+		{
+			for (i in fromPosition downTo toPosition + 1)
+			{
+				swap(bookmarks, i, i - 1)
+			}
+		}
+		notifyItemMoved(fromPosition, toPosition)
 	}
 }
