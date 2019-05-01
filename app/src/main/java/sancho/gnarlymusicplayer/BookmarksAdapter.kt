@@ -3,6 +3,7 @@ package sancho.gnarlymusicplayer
 import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.bookmark_item.view.*
@@ -11,11 +12,12 @@ import java.util.Collections.swap
 class BookmarksAdapter(
 	private val context: Context,
 	private val bookmarks: MutableList<Bookmark>,
+	private val startDragListener: StartDragListener,
 	private val cliccListener: (Bookmark) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
 {
 	override fun onBindViewHolder(holder: BookmarkHolder, position: Int)
 	{
-		holder.bind(bookmarks[position], cliccListener)
+		holder.bind(bookmarks[position], cliccListener, startDragListener)
 	}
 
 	override fun getItemCount() = bookmarks.size
@@ -27,10 +29,17 @@ class BookmarksAdapter(
 
 	class BookmarkHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Bookmark, clickListener: (Bookmark) -> Unit)
+		fun bind(bookmark: Bookmark, clickListener: (Bookmark) -> Unit, startDragListener: StartDragListener)
 		{
 			itemView.bookmark_text.text = bookmark.label
 			itemView.setOnClickListener { clickListener(bookmark)}
+			itemView.bookmark_reorder.setOnTouchListener{ _, event ->
+				if (event.action == MotionEvent.ACTION_DOWN)
+				{
+					startDragListener.requestDrag(this)
+				}
+				false
+			}
 		}
 	}
 

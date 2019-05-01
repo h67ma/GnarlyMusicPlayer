@@ -18,13 +18,14 @@ import java.util.*
 import com.google.gson.reflect.TypeToken
 import com.google.gson.Gson
 
-class MainActivity : AppCompatActivity()
+class MainActivity : AppCompatActivity(), StartDragListener
 {
 	private val _dirList = mutableListOf<File>()
 	private var _currentDir : File? = null
 	private lateinit var _explorerAdapter : ExplorerAdapter
 	private lateinit var _mountedDevices: MutableList<File>
 	private lateinit var _bookmarks: MutableList<Bookmark>
+	private lateinit var _bookmarkTouchHelper: ItemTouchHelper
 	private var _bookmarksChanged = false
 	private var _queueChanged = false
 
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity()
 	private fun setupBookmarks()
 	{
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
-		val bookmarksAdapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
+		val bookmarksAdapter = BookmarksAdapter(this, _bookmarks, this) { bookmark ->
 			val dir = File(bookmark.path)
 			if(dir.exists())
 			{
@@ -87,6 +88,35 @@ class MainActivity : AppCompatActivity()
 				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 		}
 		bookmark_list_view.adapter = bookmarksAdapter
+
+		_bookmarkTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
+		{
+			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
+			{
+				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
+			}
+
+			override fun isLongPressDragEnabled(): Boolean
+			{
+				return false
+			}
+
+			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
+			{
+				bookmarksAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+				_bookmarksChanged = true
+				return true
+			}
+
+			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
+			{
+				val position = viewHolder.adapterPosition
+				bookmarksAdapter.onItemRemoved(position)
+				_bookmarksChanged = true
+				bookmarksAdapter.notifyItemRemoved(position)
+			}
+		})
+		_bookmarkTouchHelper.attachToRecyclerView(bookmark_list_view)
 
 		bookmark_add_btn.setOnClickListener{
 			val path = _currentDir?.absolutePath
@@ -115,34 +145,11 @@ class MainActivity : AppCompatActivity()
 			updateDirectoryView(null)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
+	}
 
-		ItemTouchHelper(object : ItemTouchHelper.Callback()
-		{
-			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
-			{
-				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
-			}
-
-			override fun isLongPressDragEnabled(): Boolean
-			{
-				return true
-			}
-
-			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
-			{
-				bookmarksAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
-				_bookmarksChanged = true
-				return true
-			}
-
-			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
-			{
-				val position = viewHolder.adapterPosition
-				bookmarksAdapter.onItemRemoved(position)
-				_bookmarksChanged = true
-				bookmarksAdapter.notifyItemRemoved(position)
-			}
-		}).attachToRecyclerView(bookmark_list_view)
+	override fun requestDrag(viewHolder: RecyclerView.ViewHolder)
+	{
+		_bookmarkTouchHelper.startDrag(viewHolder)
 	}
 
 	private fun getStorageDevices()
