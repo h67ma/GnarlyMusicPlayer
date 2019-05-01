@@ -51,8 +51,7 @@ class MainActivity : AppCompatActivity()
 			val selected = parent.adapter.getItem(position) as File
 			if(selected.isDirectory)
 			{
-				_currentDir = selected
-				updateDirectoryView()
+				updateDirectoryView(selected)
 			}
 		}
 	}
@@ -66,8 +65,7 @@ class MainActivity : AppCompatActivity()
 			val dir = File(bookmark.path)
 			if(dir.exists())
 			{
-				_currentDir = dir
-				updateDirectoryView()
+				updateDirectoryView(dir)
 				drawer_layout.closeDrawer(GravityCompat.END)
 			}
 			else
@@ -101,8 +99,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener{
-			_currentDir = null
-			updateDirectoryView()
+			updateDirectoryView(null)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 
@@ -139,7 +136,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView()
+			updateDirectoryView(null)
 		}
 		else
 		{
@@ -189,7 +186,7 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView()
+				updateDirectoryView(null)
 			}
 			else
 			{
@@ -199,9 +196,10 @@ class MainActivity : AppCompatActivity()
 	}
 
 	// assuming the read permission is granted
-	private fun updateDirectoryView()
+	private fun updateDirectoryView(newDir: File?)
 	{
-		if(_currentDir == null)
+		_currentDir = newDir
+		if(newDir == null || !newDir.isDirectory)
 		{
 			// list storage devices
 			toolbar_title.text = getString(R.string.root_dir_name)
@@ -212,8 +210,8 @@ class MainActivity : AppCompatActivity()
 		else
 		{
 			// list current dir
-			toolbar_title.text = _currentDir?.absolutePath
-			val list = _currentDir?.listFiles{file ->
+			toolbar_title.text = newDir.absolutePath
+			val list = newDir.listFiles{file ->
 				file.isDirectory || isFileExtensionInArray(file, SUPPORTED_FILE_EXTENSIONS)
 			}
 
@@ -244,8 +242,7 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
 			_currentDir != null ->
 			{
-				_currentDir = _currentDir?.parentFile
-				updateDirectoryView()
+				updateDirectoryView(_currentDir?.parentFile)
 			}
 			else -> super.onBackPressed() // exit app
 		}
