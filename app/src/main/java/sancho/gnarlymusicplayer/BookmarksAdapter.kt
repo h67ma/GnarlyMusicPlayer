@@ -1,37 +1,35 @@
 package sancho.gnarlymusicplayer
 
 import android.content.Context
+import android.support.v7.widget.RecyclerView
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.view.LayoutInflater
-import android.widget.TextView
+import kotlinx.android.synthetic.main.bookmark_item.view.*
 
-class BookmarksAdapter(context: Context, items: MutableList<Bookmark>) : ArrayAdapter<Bookmark>(context, 0, items)
+class BookmarksAdapter(
+	private val context: Context,
+	private val bookmarks: MutableList<Bookmark>,
+	private val cliccListener: (Bookmark) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
 {
-	override fun getView(position: Int, convertView: View?, parent: ViewGroup): View
+	override fun onBindViewHolder(holder: BookmarkHolder, position: Int)
 	{
-		val item : Bookmark? = getItem(position)
-		val retView : View
-		val holder : TextView
-		if(convertView == null)
-		{
-			val inflater : LayoutInflater = LayoutInflater.from(context)
-			retView = inflater.inflate(android.R.layout.simple_list_item_1, parent, false)
-			holder = retView.findViewById(android.R.id.text1)
-			retView.tag = holder
-		}
-		else
-		{
-			retView = convertView
-			holder = retView.tag as TextView
-		}
+		holder.bind(bookmarks[position], cliccListener)
+	}
 
-		if (item != null)
-		{
-			holder.text = item.label
-		}
+	override fun getItemCount() = bookmarks.size
 
-		return retView
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookmarkHolder
+	{
+		return BookmarkHolder(LayoutInflater.from(context).inflate(R.layout.bookmark_item, parent, false))
+	}
+
+	class BookmarkHolder(view: View) : RecyclerView.ViewHolder(view)
+	{
+		fun bind(bookmark: Bookmark, clickListener: (Bookmark) -> Unit)
+		{
+			itemView.bookmark_text.text = bookmark.label
+			itemView.setOnClickListener { clickListener(bookmark)}
+		}
 	}
 }

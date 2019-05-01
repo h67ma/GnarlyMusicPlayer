@@ -50,7 +50,7 @@ class BookmarksDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
 	{
 		val projection = arrayOf(COLUMN_ID, BOOKMARKS_COLUMN_PATH, BOOKMARKS_COLUMN_LABEL)
 
-		val sortOrder = "$COLUMN_ID DESC"
+		val sortOrder = "$COLUMN_ID ASC"
 
 		val cursor = writableDatabase.query(
 			TABLE_BOOKMARKS,

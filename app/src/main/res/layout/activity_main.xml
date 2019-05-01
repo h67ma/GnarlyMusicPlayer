@@ -79,17 +79,18 @@
                 android:text="@string/storage_devices"
                 android:drawableStart="@drawable/sd_card"/>
 
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/bookmark_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
             <Button
                 android:id="@+id/bookmark_add_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_current_dir"
                 android:drawableStart="@drawable/plus"/>
-
-            <ListView
-                android:id="@+id/bookmark_list_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
 
         </LinearLayout>
 
