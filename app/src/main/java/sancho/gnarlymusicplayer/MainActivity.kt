@@ -62,21 +62,26 @@ class MainActivity : AppCompatActivity()
 
 	private fun setupFileList()
 	{
-		_explorerAdapter = ExplorerAdapter(this, _dirList)
-		library_list_view.adapter = _explorerAdapter
-		library_list_view.setOnItemClickListener{parent, _, position, _ ->
-			val selected = parent.adapter.getItem(position) as File
-			if(selected.isDirectory)
+		library_list_view.layoutManager = LinearLayoutManager(this)
+
+		_explorerAdapter = ExplorerAdapter(this, _dirList) { file ->
+			if(file.exists())
 			{
-				updateDirectoryView(selected)
+				if(file.isDirectory)
+					updateDirectoryView(file)
+				/*else
+					TODO queue file*/
 			}
+			else
+				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 		}
+		library_list_view.adapter = _explorerAdapter
 	}
 
 	private fun setupBookmarks()
 	{
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
-		val bookmarksAdapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
+		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 			val dir = File(bookmark.path)
 			if(dir.exists())
 			{
@@ -86,9 +91,9 @@ class MainActivity : AppCompatActivity()
 			else
 				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 		}
-		bookmark_list_view.adapter = bookmarksAdapter
+		bookmark_list_view.adapter = adapter
 
-		val bookmarkTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
+		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
 		{
 			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
 			{
@@ -102,7 +107,7 @@ class MainActivity : AppCompatActivity()
 
 			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
 			{
-				bookmarksAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+				adapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
 				_bookmarksChanged = true
 				return true
 			}
@@ -110,13 +115,13 @@ class MainActivity : AppCompatActivity()
 			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
 			{
 				val position = viewHolder.adapterPosition
-				bookmarksAdapter.onItemRemoved(position)
+				adapter.onItemRemoved(position)
 				_bookmarksChanged = true
-				bookmarksAdapter.notifyItemRemoved(position)
+				adapter.notifyItemRemoved(position)
 			}
 		})
-		bookmarksAdapter.touchHelper = bookmarkTouchHelper
-		bookmarkTouchHelper.attachToRecyclerView(bookmark_list_view)
+		adapter.touchHelper = touchHelper
+		touchHelper.attachToRecyclerView(bookmark_list_view)
 
 		bookmark_add_btn.setOnClickListener{
 			val path = _currentDir?.absolutePath
@@ -133,9 +138,9 @@ class MainActivity : AppCompatActivity()
 				val bookmark = Bookmark(path, label)
 
 				// also add to bookmark menu
-				bookmarksAdapter.onItemAdded(bookmark)
+				adapter.onItemAdded(bookmark)
 				_bookmarksChanged = true
-				bookmarksAdapter.notifyItemInserted(_bookmarks.size - 1)
+				adapter.notifyItemInserted(_bookmarks.size - 1)
 			}
 			else
 				Toast.makeText(applicationContext, getString(R.string.cant_add_root_dir), Toast.LENGTH_SHORT).show()

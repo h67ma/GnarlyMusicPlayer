@@ -6,6 +6,6 @@
     <string name="cant_add_root_dir">Can\'t add root dir</string>
     <string name="root_dir_name">Storage devices</string>
     <string name="file_list_error">Can\'t list files</string>
-    <string name="dir_doesnt_exist">Dir doesn\'t exist</string>
+    <string name="dir_doesnt_exist">Dir or file doesn\'t exist</string>
     <string name="storage_devices">Storage devices</string>
 </resources>

@@ -1,45 +1,45 @@
 package sancho.gnarlymusicplayer
 
 import android.content.Context
+import android.support.v7.widget.RecyclerView
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.explorer_item.view.*
 import java.io.File
-import android.view.LayoutInflater
-import android.widget.TextView
 
-class ExplorerAdapter(context: Context, items: MutableList<File>) : ArrayAdapter<File>(context, 0, items)
+class ExplorerAdapter(
+	private val context: Context,
+	private val files: MutableList<File>,
+	private val cliccListener: (File) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
-	override fun getView(position: Int, convertView: View?, parent: ViewGroup): View
+	override fun onBindViewHolder(holder: FileHolder, position: Int)
 	{
-		val item : File? = getItem(position)
-		val retView : View
-		val holder : TextView
-		if(convertView == null)
-		{
-			val inflater : LayoutInflater = LayoutInflater.from(context)
-			retView = inflater.inflate(R.layout.explorer_item, parent, false)
-			holder = retView.findViewById(R.id.explorer_text)
-			retView.tag = holder
-		}
-		else
-		{
-			retView = convertView
-			holder = retView.tag as TextView
-		}
+		holder.bind(files[position], cliccListener)
+	}
 
-		if (item != null)
+	override fun getItemCount() = files.size
+
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileHolder
+	{
+		return FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_item, parent, false))
+	}
+
+	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
+	{
+		fun bind(file: File, clickListener: (File) -> Unit)
 		{
-			holder.text = item.name
+			itemView.explorer_text.text = file.name
+
 			val drawable : Int = when
 			{
-				item.isDirectory -> R.drawable.folder
-				isFileExtensionInArray(item, SUPPORTED_PLAYLIST_EXTENSIONS) -> R.drawable.playlist
+				file.isDirectory -> R.drawable.folder
+				isFileExtensionInArray(file, SUPPORTED_PLAYLIST_EXTENSIONS) -> R.drawable.playlist
 				else -> R.drawable.note
 			}
-			holder.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
-		}
+			itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
 
-		return retView
+			itemView.setOnClickListener { clickListener(file)}
+		}
 	}
 }
