@@ -18,14 +18,13 @@ import java.util.*
 import com.google.gson.reflect.TypeToken
 import com.google.gson.Gson
 
-class MainActivity : AppCompatActivity(), StartDragListener
+class MainActivity : AppCompatActivity()
 {
 	private val _dirList = mutableListOf<File>()
 	private var _currentDir : File? = null
 	private lateinit var _explorerAdapter : ExplorerAdapter
 	private lateinit var _mountedDevices: MutableList<File>
 	private lateinit var _bookmarks: MutableList<Bookmark>
-	private lateinit var _bookmarkTouchHelper: ItemTouchHelper
 	private var _bookmarksChanged = false
 	private var _queueChanged = false
 
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity(), StartDragListener
 	private fun setupBookmarks()
 	{
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
-		val bookmarksAdapter = BookmarksAdapter(this, _bookmarks, this) { bookmark ->
+		val bookmarksAdapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 			val dir = File(bookmark.path)
 			if(dir.exists())
 			{
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity(), StartDragListener
 		}
 		bookmark_list_view.adapter = bookmarksAdapter
 
-		_bookmarkTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
+		val bookmarkTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
 		{
 			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
 			{
@@ -116,7 +115,8 @@ class MainActivity : AppCompatActivity(), StartDragListener
 				bookmarksAdapter.notifyItemRemoved(position)
 			}
 		})
-		_bookmarkTouchHelper.attachToRecyclerView(bookmark_list_view)
+		bookmarksAdapter.touchHelper = bookmarkTouchHelper
+		bookmarkTouchHelper.attachToRecyclerView(bookmark_list_view)
 
 		bookmark_add_btn.setOnClickListener{
 			val path = _currentDir?.absolutePath
@@ -145,11 +145,6 @@ class MainActivity : AppCompatActivity(), StartDragListener
 			updateDirectoryView(null)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
-	}
-
-	override fun requestDrag(viewHolder: RecyclerView.ViewHolder)
-	{
-		_bookmarkTouchHelper.startDrag(viewHolder)
 	}
 
 	private fun getStorageDevices()

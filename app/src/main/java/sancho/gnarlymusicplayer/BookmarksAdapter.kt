@@ -2,6 +2,7 @@ package sancho.gnarlymusicplayer
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,12 +13,13 @@ import java.util.Collections.swap
 class BookmarksAdapter(
 	private val context: Context,
 	private val bookmarks: MutableList<Bookmark>,
-	private val startDragListener: StartDragListener,
 	private val cliccListener: (Bookmark) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
 {
+	var touchHelper: ItemTouchHelper? = null
+
 	override fun onBindViewHolder(holder: BookmarkHolder, position: Int)
 	{
-		holder.bind(bookmarks[position], cliccListener, startDragListener)
+		holder.bind(bookmarks[position], cliccListener, touchHelper)
 	}
 
 	override fun getItemCount() = bookmarks.size
@@ -29,16 +31,19 @@ class BookmarksAdapter(
 
 	class BookmarkHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Bookmark, clickListener: (Bookmark) -> Unit, startDragListener: StartDragListener)
+		fun bind(bookmark: Bookmark, clickListener: (Bookmark) -> Unit, touchHelper: ItemTouchHelper?)
 		{
 			itemView.bookmark_text.text = bookmark.label
 			itemView.setOnClickListener { clickListener(bookmark)}
-			itemView.bookmark_reorder.setOnTouchListener{ _, event ->
-				if (event.action == MotionEvent.ACTION_DOWN)
-				{
-					startDragListener.requestDrag(this)
+			if(touchHelper != null)
+			{
+				itemView.bookmark_reorder.setOnTouchListener { _, event ->
+					if (event.action == MotionEvent.ACTION_DOWN)
+					{
+						touchHelper.startDrag(this)
+					}
+					false
 				}
-				false
 			}
 		}
 	}
