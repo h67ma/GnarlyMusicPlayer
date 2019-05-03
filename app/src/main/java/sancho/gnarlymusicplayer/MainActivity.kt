@@ -223,10 +223,19 @@ class MainActivity : AppCompatActivity()
 	// toolbar item clicks
 	override fun onOptionsItemSelected(item: MenuItem): Boolean
 	{
-		return when (item.itemId) {
-			R.id.action_settings -> true
-			else -> super.onOptionsItemSelected(item)
+		when (item.itemId)
+		{
+			/*R.id.action_search ->
+			R.id.action_clearqueue ->
+			R.id.action_addtopbottom ->
+			R.id.action_removeplayedtrack ->
+			R.id.action_removeprevtracks ->
+			R.id.action_savequeuetoplaylist ->
+			R.id.action_setcolor -> */
+			R.id.action_about -> showAboutDialog(this)
+			else -> return super.onOptionsItemSelected(item)
 		}
+		return true
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)

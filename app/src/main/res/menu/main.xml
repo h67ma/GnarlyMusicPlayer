@@ -12,23 +12,28 @@
         android:title="Clear queue"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_removeprevtracks"
+        android:title="Clear queue before current track"
+        app:showAsAction="never"/>
+
     <item android:id="@+id/action_addtopbottom"
         android:title="Add at top/bottom"
         app:showAsAction="never"/>
 
     <item android:id="@+id/action_removeplayedtrack"
-        android:title="Remove track after played"
-        app:showAsAction="never"/>
-
-    <item android:id="@+id/action_removeprevtracks"
-        android:title="Remove tracks before current track"
+        android:title="Remove tracks after played"
+        android:checkable="true"
         app:showAsAction="never"/>
 
     <item android:id="@+id/action_savequeuetoplaylist"
         android:title="Save queue to playlist"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/action_settings"
-        android:title="Settings"
+    <item android:id="@+id/action_setcolor"
+        android:title="Set accent color"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_about"
+        android:title="About"
         app:showAsAction="never"/>
 </menu>

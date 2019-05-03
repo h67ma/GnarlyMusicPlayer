@@ -1,5 +1,9 @@
 package sancho.gnarlymusicplayer
 
+import android.app.AlertDialog
+import android.content.Context
+import android.graphics.Color
+import android.widget.Toast
 import java.io.File
 
 const val REQUEST_READ_STORAGE = 42
@@ -38,4 +42,14 @@ val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
 fun isFileExtensionInArray(file : File, extensions : Array<String>): Boolean
 {
 	return file.name.lastIndexOf('.') > 0 && file.name.substring(file.name.lastIndexOf('.') + 1) in extensions
+}
+
+fun showAboutDialog(context: Context)
+{
+	AlertDialog.Builder(context)
+		.setTitle(context.getString(R.string.about))
+		.setMessage(context.getString(R.string.about_message))
+		.setPositiveButton(context.getString(R.string.ok), null)
+		.create()
+		.show()
 }
