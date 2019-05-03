@@ -91,8 +91,12 @@ class MainActivity : AppCompatActivity()
 	{
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
 		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
+
 			if(bookmark.path == _currentDir?.absolutePath)
+			{
+				drawer_layout.closeDrawer(GravityCompat.END)
 				return@BookmarksAdapter // already open
+			}
 
 			val dir = File(bookmark.path)
 			if(dir.exists())
