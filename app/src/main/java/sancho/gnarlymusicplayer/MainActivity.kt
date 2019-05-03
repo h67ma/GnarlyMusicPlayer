@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _bookmarks: MutableList<Bookmark>
 	private var _bookmarksChanged = false
 	private var _queueChanged = false
+	private var _prevExplorerScrollPositions = Stack<Int>()
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -64,11 +65,14 @@ class MainActivity : AppCompatActivity()
 	{
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
-		_explorerAdapter = ExplorerAdapter(this, _dirList) { file ->
+		_explorerAdapter = ExplorerAdapter(this, _dirList) { file, pos ->
 			if(file.exists())
 			{
 				if(file.isDirectory)
-					updateDirectoryView(file)
+				{
+					updateDirectoryView(file, false)
+					_prevExplorerScrollPositions.push(pos)
+				}
 				/*else
 					TODO queue file*/
 			}
@@ -82,10 +86,14 @@ class MainActivity : AppCompatActivity()
 	{
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
 		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
+			if(bookmark.path == _currentDir?.absolutePath)
+				return@BookmarksAdapter // already open
+
 			val dir = File(bookmark.path)
 			if(dir.exists())
 			{
-				updateDirectoryView(dir)
+				_prevExplorerScrollPositions.clear()
+				updateDirectoryView(dir, false)
 				drawer_layout.closeDrawer(GravityCompat.END)
 			}
 			else
@@ -147,7 +155,8 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener{
-			updateDirectoryView(null)
+			_prevExplorerScrollPositions.clear()
+			updateDirectoryView(null, false)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 	}
@@ -167,7 +176,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView(null)
+			updateDirectoryView(null, false)
 		}
 		else
 		{
@@ -217,7 +226,7 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView(null)
+				updateDirectoryView(null, false)
 			}
 			else
 			{
@@ -227,7 +236,7 @@ class MainActivity : AppCompatActivity()
 	}
 
 	// assuming the read permission is granted
-	private fun updateDirectoryView(newDir: File?)
+	private fun updateDirectoryView(newDir: File?, restoreScroll: Boolean)
 	{
 		_currentDir = newDir
 		if(newDir == null || !newDir.isDirectory)
@@ -263,6 +272,12 @@ class MainActivity : AppCompatActivity()
 			else
 				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 		}
+		if (restoreScroll && !_prevExplorerScrollPositions.empty())
+		{
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(_prevExplorerScrollPositions.pop(), 200)
+		}
+		else
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
 	}
 
 	override fun onPause()
@@ -295,7 +310,7 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
 			_currentDir != null ->
 			{
-				updateDirectoryView(_currentDir?.parentFile)
+				updateDirectoryView(_currentDir?.parentFile, true)
 			}
 			else -> super.onBackPressed() // exit app
 		}
