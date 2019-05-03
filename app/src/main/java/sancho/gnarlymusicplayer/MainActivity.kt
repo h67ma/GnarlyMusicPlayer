@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity()
 {
 	private val _dirList = mutableListOf<File>()
 	private var _currentDir : File? = null
+	private var _lastDir : File? = null // from shared preferences
 	private lateinit var _explorerAdapter : ExplorerAdapter
 	private lateinit var _mountedDevices: MutableList<File>
 	private lateinit var _bookmarks: MutableList<Bookmark>
@@ -59,6 +60,10 @@ class MainActivity : AppCompatActivity()
 		_bookmarks = gson.fromJson(bookmarks, collectionType)
 
 		//val queue = sharedPref.getString(PREFERENCE_QUEUE, "[]")
+
+		val lastDir = File(sharedPref.getString(PREFERENCE_LASTDIR, ""))
+		if(lastDir.exists() && lastDir.isDirectory)
+			_lastDir = lastDir
 	}
 
 	private fun setupFileList()
@@ -176,7 +181,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView(null, false)
+			updateDirectoryView(_lastDir, false)
 		}
 		else
 		{
@@ -226,7 +231,7 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView(null, false)
+				updateDirectoryView(_lastDir, false)
 			}
 			else
 			{
@@ -282,11 +287,10 @@ class MainActivity : AppCompatActivity()
 
 	override fun onPause()
 	{
-		if(_bookmarksChanged || _queueChanged)
+		val sharedPref = getPreferences(Context.MODE_PRIVATE)
+		with(sharedPref.edit())
 		{
-			val sharedPref = getPreferences(Context.MODE_PRIVATE)
-
-			with(sharedPref.edit())
+			if(_bookmarksChanged || _queueChanged)
 			{
 				val gson = Gson()
 				if(_bookmarksChanged)
@@ -294,9 +298,9 @@ class MainActivity : AppCompatActivity()
 
 				/*if(_queueChanged)
 					putString(PREFERENCE_QUEUE, "TODO")*/
-
-				apply()
 			}
+			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
+			apply()
 		}
 
 		super.onPause()
