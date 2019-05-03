@@ -1,5 +1,6 @@
 package sancho.gnarlymusicplayer
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -29,17 +30,27 @@ class MainActivity : AppCompatActivity()
 	private var _bookmarksChanged = false
 	private var _queueChanged = false
 	private var _prevExplorerScrollPositions = Stack<Int>()
+	private var _accentColorIdx: Int = 0
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
+		restoreFromPrefs() // TODO this in here or in onStart/onResume? https://developer.android.com/guide/components/activities/activity-lifecycle
+
+		val colorResources = arrayOf(
+			R.style.AppThemeGreen,
+			R.style.AppThemeBlu,
+			R.style.AppThemeCyan,
+			R.style.AppThemeRed,
+			R.style.AppThemeOrang,
+			R.style.AppThemePurple,
+			R.style.AppThemePink)
+		if(_accentColorIdx >= colorResources.size) _accentColorIdx = 0
+		setTheme(colorResources[_accentColorIdx])
+
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
-
 		setSupportActionBar(toolbar)
-
 		title = ""
-
-		restoreFromPrefs() // TODO this in here or in onStart/onResume? https://developer.android.com/guide/components/activities/activity-lifecycle
 
 		getStorageDevices() // prepare list with storage devices
 
@@ -64,6 +75,8 @@ class MainActivity : AppCompatActivity()
 		val lastDir = File(sharedPref.getString(PREFERENCE_LASTDIR, ""))
 		if(lastDir.exists() && lastDir.isDirectory)
 			_lastDir = lastDir
+
+		_accentColorIdx = sharedPref.getInt(PREFERENCE_ACCENTCOLOR, 0)
 	}
 
 	private fun setupFileList()
@@ -230,8 +243,8 @@ class MainActivity : AppCompatActivity()
 			R.id.action_addtopbottom ->
 			R.id.action_removeplayedtrack ->
 			R.id.action_removeprevtracks ->
-			R.id.action_savequeuetoplaylist ->
-			R.id.action_setcolor -> */
+			R.id.action_savequeuetoplaylist ->*/
+			R.id.action_setcolor -> selectAccent()
 			R.id.action_about -> showAboutDialog(this)
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -298,7 +311,27 @@ class MainActivity : AppCompatActivity()
 			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
 	}
 
-	override fun onPause()
+	private fun selectAccent()
+	{
+		AlertDialog.Builder(this)
+			.setTitle(getString(R.string.select_accent))
+			.setItems(arrayOf(
+				"Green",
+				"Blu",
+				"Cyan",
+				"Red",
+				"Orang",
+				"Purple",
+				"Pink")){_, which ->
+				_accentColorIdx = which
+				recreate()
+			}
+			.setNegativeButton(android.R.string.cancel, null)
+			.create()
+			.show()
+	}
+
+	override fun onDestroy()
 	{
 		val sharedPref = getPreferences(Context.MODE_PRIVATE)
 		with(sharedPref.edit())
@@ -313,10 +346,11 @@ class MainActivity : AppCompatActivity()
 					putString(PREFERENCE_QUEUE, "TODO")*/
 			}
 			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
+			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
 			apply()
 		}
 
-		super.onPause()
+		super.onDestroy()
 	}
 
 	override fun onBackPressed()

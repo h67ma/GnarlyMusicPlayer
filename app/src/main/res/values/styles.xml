@@ -1,10 +1,51 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:colorPrimary">#000000</item>
     </style>
+
+    <style name="AppThemeGreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#4CAF50</item>
+        <item name="android:colorPrimaryDark">#388E3C</item>
+        <!--<item name="android:colorAccent">#D81B60</item>-->
+    </style>
+
+    <style name="AppThemeBlu" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#2196F3</item>
+        <item name="android:colorPrimaryDark">#1976D2</item>
+    </style>
+
+    <style name="AppThemeCyan" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#00BCD4</item>
+        <item name="android:colorPrimaryDark">#0097A7</item>
+    </style>
+
+    <style name="AppThemeRed" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#F4292C</item>
+        <item name="android:colorPrimaryDark">#D32F2F</item>
+    </style>
+
+    <style name="AppThemeOrang" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#FF9800</item>
+        <item name="android:colorPrimaryDark">#F57C00</item>
+    </style>
+
+    <style name="AppThemePurple" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#9C27B0</item>
+        <item name="android:colorPrimaryDark">#7B1FA2</item>
+    </style>
+
+    <style name="AppThemePink" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#FF94C2</item>
+        <item name="android:colorPrimaryDark">#F06292</item>
+    </style>
+
+    <!--<style name="AppThemeYello" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#FFEB3B</item>
+        <item name="android:colorPrimaryDark">#FBC02D</item>
+        <item name="android:titleTextColor">#000000</item>
+    </style>-->
+
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
 </resources>
