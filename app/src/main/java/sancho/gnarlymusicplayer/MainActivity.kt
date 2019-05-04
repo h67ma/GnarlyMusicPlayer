@@ -34,7 +34,10 @@ class MainActivity : AppCompatActivity()
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
-		restoreFromPrefs() // TODO this in here or in onStart/onResume? https://developer.android.com/guide/components/activities/activity-lifecycle
+		if(savedInstanceState != null)
+			restoreFromBundle(savedInstanceState)
+		else
+			restoreFromPrefs()
 
 		val colorResources = arrayOf(
 			R.style.AppThemeBlack,
@@ -60,6 +63,30 @@ class MainActivity : AppCompatActivity()
 		setupFileList()
 
 		requestReadPermishon() // check for permissions and initial update of file list
+	}
+
+	override fun onSaveInstanceState(outState: Bundle?)
+	{
+		outState?.run{
+			putParcelableArrayList(PREFERENCE_BOOKMARKS, ArrayList<Bookmark>(_bookmarks))
+			// putParcelableArrayList(PREFERENCE_QUEUE, ArrayList<Bookmark>(_queue))
+			putString(PREFERENCE_LASTDIR, _lastDir?.absolutePath)
+			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
+		}
+
+		super.onSaveInstanceState(outState)
+	}
+
+	private fun restoreFromBundle(savedInstanceState: Bundle)
+	{
+		_bookmarks = savedInstanceState.getParcelableArrayList<Bookmark>(PREFERENCE_BOOKMARKS)?.toMutableList() ?: mutableListOf()
+		// _queue = savedInstanceState.getParcelableArrayList<Bookmark>(PREFERENCE_QUEUE)?.toMutableList() ?: mutableListOf()
+
+		val lastDir = File(savedInstanceState.getString(PREFERENCE_LASTDIR, ""))
+		if(lastDir.exists() && lastDir.isDirectory)
+			_lastDir = lastDir
+
+		_accentColorIdx = savedInstanceState.getInt(PREFERENCE_ACCENTCOLOR, 0)
 	}
 
 	private fun restoreFromPrefs()
