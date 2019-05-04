@@ -212,6 +212,10 @@ class MainActivity : AppCompatActivity()
 	{
 		menuInflater.inflate(R.menu.main, menu)
 
+		// don't show "clear queue" header
+		menu.findItem(R.id.menu_clearqueue)?.subMenu?.clearHeader()
+
+		// search thing
 		val mSearch = menu.findItem(R.id.action_search)
 
 		val mSearchView = mSearch.actionView as SearchView
@@ -239,11 +243,12 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			/*R.id.action_search ->
-			R.id.action_clearqueue ->
+			// R.id.action_search ->
+			/*action_clearprev ->
+			action_clearall ->
+			action_clearafter ->
 			R.id.action_addtopbottom ->
 			R.id.action_removeplayedtrack ->
-			R.id.action_removeprevtracks ->
 			R.id.action_savequeuetoplaylist ->*/
 			R.id.action_setcolor -> selectAccent()
 			R.id.action_about -> showAboutDialog(this)

@@ -2,38 +2,56 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/action_search"
+    <item
+        android:id="@+id/action_search"
         android:title="Search"
         android:icon="@drawable/search"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView"/>
 
-    <item android:id="@+id/action_clearqueue"
+    <item
+        android:id="@+id/menu_clearqueue"
         android:title="Clear queue"
-        app:showAsAction="never"/>
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_clearprev"
+                android:title="Clear before current track"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/action_clearall"
+                android:title="Clear all"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/action_clearafter"
+                android:title="Clear after current track"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
 
-    <item android:id="@+id/action_removeprevtracks"
-        android:title="Clear queue before current track"
-        app:showAsAction="never"/>
-
-    <item android:id="@+id/action_addtopbottom"
+    <item
+        android:id="@+id/action_addtopbottom"
         android:title="Add at top/bottom"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/action_removeplayedtrack"
+    <item
+        android:id="@+id/action_removeplayedtrack"
         android:title="Remove tracks after played"
         android:checkable="true"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/action_savequeuetoplaylist"
+    <item
+        android:id="@+id/action_savequeuetoplaylist"
         android:title="Save queue to playlist"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/action_setcolor"
+    <item
+        android:id="@+id/action_setcolor"
         android:title="Set accent color"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/action_about"
+    <item
+        android:id="@+id/action_about"
         android:title="About"
         app:showAsAction="never"/>
 </menu>
