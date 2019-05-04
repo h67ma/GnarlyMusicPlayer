@@ -299,7 +299,7 @@ class MainActivity : AppCompatActivity()
 					{
 						a.isFile && b.isDirectory -> 1
 						a.isDirectory && b.isFile -> -1
-						else -> a.compareTo(b)
+						else -> a.name.compareTo(b.name, true)
 					}
 				}
 				_dirList.clear()
