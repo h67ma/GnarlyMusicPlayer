@@ -1,7 +1,8 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:colorPrimary">#000000</item>
+    <style name="AppThemeBlack" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorPrimary">#222222</item>
+        <item name="android:colorPrimaryDark">#000000</item>
     </style>
 
     <style name="AppThemeGreen" parent="Theme.AppCompat.NoActionBar">
@@ -30,7 +31,7 @@
         <item name="android:colorPrimaryDark">#F57C00</item>
     </style>
 
-    <style name="AppThemePurple" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppThemePurpl" parent="Theme.AppCompat.NoActionBar">
         <item name="android:colorPrimary">#9C27B0</item>
         <item name="android:colorPrimaryDark">#7B1FA2</item>
     </style>

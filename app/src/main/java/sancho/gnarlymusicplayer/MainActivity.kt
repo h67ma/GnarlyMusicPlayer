@@ -37,12 +37,13 @@ class MainActivity : AppCompatActivity()
 		restoreFromPrefs() // TODO this in here or in onStart/onResume? https://developer.android.com/guide/components/activities/activity-lifecycle
 
 		val colorResources = arrayOf(
+			R.style.AppThemeBlack,
 			R.style.AppThemeGreen,
 			R.style.AppThemeBlu,
 			R.style.AppThemeCyan,
 			R.style.AppThemeRed,
 			R.style.AppThemeOrang,
-			R.style.AppThemePurple,
+			R.style.AppThemePurpl,
 			R.style.AppThemePink)
 		if(_accentColorIdx >= colorResources.size) _accentColorIdx = 0
 		setTheme(colorResources[_accentColorIdx])
@@ -316,12 +317,13 @@ class MainActivity : AppCompatActivity()
 		AlertDialog.Builder(this)
 			.setTitle(getString(R.string.select_accent))
 			.setItems(arrayOf(
+				"Black",
 				"Green",
 				"Blu",
 				"Cyan",
 				"Red",
 				"Orang",
-				"Purple",
+				"Purpl",
 				"Pink")){_, which ->
 				_accentColorIdx = which
 				recreate()
