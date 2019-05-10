@@ -12,4 +12,5 @@
     <string name="about_message">Made by Sancho\nApril-May 2019\n\nDirectory press = open directory\nDirectory longpress = add all tracks from directory to queue (recursively)\nTrack press = add to queue\nTrack longpress = add to queue and play\nPlaylist press = show playlist content\nPlaylist longpress = add playlist content to queue\nSwipe from left = queue\nSwipe from right = bookmarks\nSwipe on queue/bookmark items = remove\nQueue/bookmark items four line icon grab = reorder\nQueue inactive item press = play\nQueue active item press = control playback (play/pause)\nBookmark press = navigate to bookmark\nBack = go to parent directory</string>
     <string name="ok">Affirmative!</string>
     <string name="select_accent">Select accent color</string>
+    <string name="added_to_queue">“%1$s” added to queue</string>
 </resources>

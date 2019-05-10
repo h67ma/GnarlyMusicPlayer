@@ -26,8 +26,10 @@ class MainActivity : AppCompatActivity()
 	private var _currentDir : File? = null
 	private var _lastDir : File? = null // from shared preferences
 	private lateinit var _explorerAdapter : ExplorerAdapter
+	private lateinit var _queueAdapter : QueueAdapter
 	private lateinit var _mountedDevices: MutableList<File>
 	private lateinit var _bookmarks: MutableList<Track>
+	private lateinit var _queue: MutableList<Track>
 	private var _bookmarksChanged = false
 	private var _queueChanged = false
 	private var _prevExplorerScrollPositions = Stack<Int>()
@@ -36,18 +38,11 @@ class MainActivity : AppCompatActivity()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		restoreFromPrefs()
+		_bookmarksChanged = false
+		_queueChanged = false
 
-		val colorResources = arrayOf(
-			R.style.AppThemeBlack,
-			R.style.AppThemeGreen,
-			R.style.AppThemeBlu,
-			R.style.AppThemeCyan,
-			R.style.AppThemeRed,
-			R.style.AppThemeOrang,
-			R.style.AppThemePurpl,
-			R.style.AppThemePink)
-		if(_accentColorIdx >= colorResources.size) _accentColorIdx = 0
-		setTheme(colorResources[_accentColorIdx])
+		if(_accentColorIdx >= COLOR_RESOURCES.size) _accentColorIdx = 0
+		setTheme(COLOR_RESOURCES[_accentColorIdx])
 
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
@@ -57,6 +52,8 @@ class MainActivity : AppCompatActivity()
 		getStorageDevices() // prepare list with storage devices
 
 		setupBookmarks()
+
+		setupQueue()
 
 		setupFileList()
 
@@ -72,7 +69,8 @@ class MainActivity : AppCompatActivity()
 		val collectionType = object : TypeToken<Collection<Track>>() {}.type
 		_bookmarks = gson.fromJson(bookmarks, collectionType)
 
-		//val queue = sharedPref.getString(PREFERENCE_QUEUE, "[]")
+		val queue = sharedPref.getString(PREFERENCE_QUEUE, "[]")
+		_queue = gson.fromJson(queue, collectionType)
 
 		val lastDir = File(sharedPref.getString(PREFERENCE_LASTDIR, ""))
 		if(lastDir.exists() && lastDir.isDirectory)
@@ -95,10 +93,10 @@ class MainActivity : AppCompatActivity()
 				}
 				else
 				{
-					val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
-					intent.action = ACTION_START_PLAYBACK_SERVICE
-					intent.putExtra(EXTRA_TRACK, Track(file.absolutePath, file.name))
-					startService(intent)
+					_queue.add(Track(file.absolutePath, file.name))
+					_queueChanged = true
+					_queueAdapter.notifyItemInserted(_queue.size - 1)
+					Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT).show()
 				}
 			}
 			else
@@ -186,6 +184,49 @@ class MainActivity : AppCompatActivity()
 			updateDirectoryView(null, false)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
+	}
+
+	private fun setupQueue()
+	{
+		queue_list_view.layoutManager = LinearLayoutManager(this)
+		_queueAdapter = QueueAdapter(this, _queue) { track ->
+			// play track
+			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
+			intent.action = ACTION_START_PLAYBACK_SERVICE
+			intent.putExtra(EXTRA_TRACK, track)
+			startService(intent)
+		}
+		queue_list_view.adapter = _queueAdapter
+
+		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
+		{
+			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
+			{
+				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT)
+			}
+
+			override fun isLongPressDragEnabled(): Boolean
+			{
+				return false
+			}
+
+			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
+			{
+				_queueAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+				_queueChanged = true
+				return true
+			}
+
+			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
+			{
+				val position = viewHolder.adapterPosition
+				_queue.removeAt(position)
+				_queueChanged = true
+				_queueAdapter.notifyItemRemoved(position)
+			}
+		})
+		_queueAdapter.touchHelper = touchHelper
+		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
 	private fun getStorageDevices()
@@ -326,15 +367,7 @@ class MainActivity : AppCompatActivity()
 	{
 		AlertDialog.Builder(this)
 			.setTitle(getString(R.string.select_accent))
-			.setItems(arrayOf(
-				"Black",
-				"Green",
-				"Blu",
-				"Cyan",
-				"Red",
-				"Orang",
-				"Purpl",
-				"Pink")){_, which ->
+			.setItems(COLOR_NAMES){_, which ->
 				_accentColorIdx = which
 				recreate()
 			}
@@ -354,8 +387,8 @@ class MainActivity : AppCompatActivity()
 				if(_bookmarksChanged)
 					putString(PREFERENCE_BOOKMARKS, gson.toJson(_bookmarks))
 
-				/*if(_queueChanged)
-					putString(PREFERENCE_QUEUE, "TODO")*/
+				if(_queueChanged)
+					putString(PREFERENCE_QUEUE, gson.toJson(_queue))
 			}
 			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)

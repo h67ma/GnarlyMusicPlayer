@@ -50,6 +50,26 @@ val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
 	"m3u", "m3u8"
 )
 
+val COLOR_RESOURCES = arrayOf(
+	R.style.AppThemeBlack,
+	R.style.AppThemeGreen,
+	R.style.AppThemeBlu,
+	R.style.AppThemeCyan,
+	R.style.AppThemeRed,
+	R.style.AppThemeOrang,
+	R.style.AppThemePurpl,
+	R.style.AppThemePink)
+
+val COLOR_NAMES = arrayOf(
+	"Black",
+	"Green",
+	"Blu",
+	"Cyan",
+	"Red",
+	"Orang",
+	"Purpl",
+	"Pink")
+
 fun isFileExtensionInArray(file : File, extensions : Array<String>): Boolean
 {
 	return file.name.lastIndexOf('.') > 0 && file.name.substring(file.name.lastIndexOf('.') + 1) in extensions
