@@ -17,7 +17,7 @@ const val ACTION_PREV_TRACK = "sancho.gnarlymusicplayer.action.prevtrack"
 const val ACTION_PLAYPAUSE = "sancho.gnarlymusicplayer.action.playpause"
 const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
 
-const val EXTRA_TRACK_PATH = "sancho.gnarlymusicplayer.extra.track"
+const val EXTRA_TRACK = "sancho.gnarlymusicplayer.extra.track"
 
 const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
 const val NOTIFICATION_ID = 69

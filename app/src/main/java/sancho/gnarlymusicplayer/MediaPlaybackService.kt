@@ -13,7 +13,7 @@ class MediaPlaybackService : Service()
 {
 	private val _player: MediaPlayer = MediaPlayer()
 	private var _notificationManager: NotificationManagerCompat? = null
-	private var _track: Track? = null
+	private lateinit var _track: Track
 	private var _initialized = false
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -22,39 +22,38 @@ class MediaPlaybackService : Service()
 		{
 			intent.action == ACTION_START_PLAYBACK_SERVICE ->
 			{
-				_track = intent.getParcelableExtra(EXTRA_TRACK_PATH)
+				_track = intent.getParcelableExtra(EXTRA_TRACK)
 
-				val path = _track?.path
-				val name = _track?.name
-
-				if(path != null && name != null)
+				if(!_initialized)
 				{
-					_player.setDataSource(path)
+					// first service call
+
+					_player.isLooping = false
+
+					_player.setDataSource(_track.path)
 					_player.prepare()
 					_player.start()
 
-					if(!_initialized)
-					{
-						// first service call
+					_notificationManager = NotificationManagerCompat.from(applicationContext)
 
-						_notificationManager = NotificationManagerCompat.from(applicationContext)
+					_initialized = true
 
-						_player.isLooping = false
+					val notification = createNotification()
 
-						_initialized = true
+					startForeground(NOTIFICATION_ID, notification)
+				}
+				else
+				{
+					// service already running
 
-						val notification = createNotification(name, false)
+					_player.reset()
+					_player.setDataSource(_track.path)
+					_player.prepare()
+					_player.start()
 
-						startForeground(NOTIFICATION_ID, notification)
-					}
-					else
-					{
-						// service already running
+					val notification = createNotification()
 
-						val notification = createNotification(name, false)
-
-						_notificationManager?.notify(NOTIFICATION_ID, notification)
-					}
+					_notificationManager?.notify(NOTIFICATION_ID, notification)
 				}
 			}
 			intent.action == ACTION_PREV_TRACK ->
@@ -67,6 +66,10 @@ class MediaPlaybackService : Service()
 					_player.pause()
 				else
 					_player.start()
+
+				val notification = createNotification()
+
+				_notificationManager?.notify(NOTIFICATION_ID, notification)
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
@@ -85,7 +88,7 @@ class MediaPlaybackService : Service()
 		return START_STICKY
 	}
 
-	private fun createNotification(title: String, paused: Boolean): Notification
+	private fun createNotification(): Notification
 	{
 		/*val notificationIntent = Intent(this, MainActivity::class.java)
 					notificationIntent.action = ACTION_MAIN
@@ -112,12 +115,12 @@ class MediaPlaybackService : Service()
 		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
 
 		return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-			.setContentTitle(title)
-			.setContentText(title)
+			.setContentTitle(_track.name)
+			//.setContentText(title)
 			.setSmallIcon(R.drawable.play)
 			.setContentIntent(pcontentIntent).setOngoing(true)
 			.addAction(R.drawable.prev, "Previous", ppreviousIntent)
-			.addAction(if (paused) R.drawable.play else R.drawable.pause, "Play/pause", pplayIntent)
+			.addAction(if (_player.isPlaying) R.drawable.pause else R.drawable.play, "Play/pause", pplayIntent)
 			.addAction(R.drawable.next, "Next", pnextIntent)
 			.addAction(R.drawable.close, "Close", pcloseIntent).setStyle(
 				androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(1, 2, 3)
