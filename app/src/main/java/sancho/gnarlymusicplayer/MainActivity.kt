@@ -281,7 +281,7 @@ class MainActivity : AppCompatActivity()
 	private fun updateDirectoryView(newDir: File?, restoreScroll: Boolean)
 	{
 		_currentDir = newDir
-		if(newDir == null || !newDir.isDirectory)
+		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
 		{
 			// list storage devices
 			toolbar_title.text = getString(R.string.root_dir_name)
