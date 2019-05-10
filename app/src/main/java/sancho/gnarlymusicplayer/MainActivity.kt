@@ -370,7 +370,7 @@ class MainActivity : AppCompatActivity()
 			.show()
 	}
 
-	override fun onDestroy()
+	override fun onPause()
 	{
 		val sharedPref = getPreferences(Context.MODE_PRIVATE)
 		with(sharedPref.edit())
@@ -389,7 +389,7 @@ class MainActivity : AppCompatActivity()
 			apply()
 		}
 
-		super.onDestroy()
+		super.onPause()
 	}
 
 	override fun onBackPressed()
