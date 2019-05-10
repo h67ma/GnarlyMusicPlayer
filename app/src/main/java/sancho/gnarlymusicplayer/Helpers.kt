@@ -5,10 +5,22 @@ import android.content.Context
 import java.io.File
 
 const val REQUEST_READ_STORAGE = 42
+
 const val PREFERENCE_BOOKMARKS = "sancho.gnarlymusicplayer.preference.bookmarks"
 const val PREFERENCE_QUEUE = "sancho.gnarlymusicplayer.preference.queue"
 const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
 const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
+
+const val ACTION_START_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.startplayback"
+const val ACTION_STOP_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.stopplayback"
+const val ACTION_PREV_TRACK = "sancho.gnarlymusicplayer.action.prevtrack"
+const val ACTION_PLAYPAUSE = "sancho.gnarlymusicplayer.action.playpause"
+const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
+
+const val EXTRA_TRACK_PATH = "sancho.gnarlymusicplayer.extra.track"
+
+const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
+const val NOTIFICATION_ID = 69
 
 // from https://developer.android.com/guide/topics/media/media-formats
 val SUPPORTED_FILE_EXTENSIONS = arrayOf(

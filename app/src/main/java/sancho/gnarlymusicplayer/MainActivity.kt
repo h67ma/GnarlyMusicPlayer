@@ -2,22 +2,23 @@ package sancho.gnarlymusicplayer
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.core.view.GravityCompat
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.widget.SearchView
-import androidx.recyclerview.widget.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.GravityCompat
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.util.*
-import com.google.gson.reflect.TypeToken
-import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity()
 {
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity()
 	private var _lastDir : File? = null // from shared preferences
 	private lateinit var _explorerAdapter : ExplorerAdapter
 	private lateinit var _mountedDevices: MutableList<File>
-	private lateinit var _bookmarks: MutableList<Bookmark>
+	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
 	private var _queueChanged = false
 	private var _prevExplorerScrollPositions = Stack<Int>()
@@ -68,7 +69,7 @@ class MainActivity : AppCompatActivity()
 	override fun onSaveInstanceState(outState: Bundle?)
 	{
 		outState?.run{
-			putParcelableArrayList(PREFERENCE_BOOKMARKS, ArrayList<Bookmark>(_bookmarks))
+			putParcelableArrayList(PREFERENCE_BOOKMARKS, ArrayList<Track>(_bookmarks))
 			// putParcelableArrayList(PREFERENCE_QUEUE, ArrayList<Bookmark>(_queue))
 			putString(PREFERENCE_LASTDIR, _lastDir?.absolutePath)
 			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
@@ -79,7 +80,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun restoreFromBundle(savedInstanceState: Bundle)
 	{
-		_bookmarks = savedInstanceState.getParcelableArrayList<Bookmark>(PREFERENCE_BOOKMARKS)?.toMutableList() ?: mutableListOf()
+		_bookmarks = savedInstanceState.getParcelableArrayList<Track>(PREFERENCE_BOOKMARKS)?.toMutableList() ?: mutableListOf()
 		// _queue = savedInstanceState.getParcelableArrayList<Bookmark>(PREFERENCE_QUEUE)?.toMutableList() ?: mutableListOf()
 
 		val lastDir = File(savedInstanceState.getString(PREFERENCE_LASTDIR, ""))
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity()
 		val sharedPref = getPreferences(Context.MODE_PRIVATE)
 
 		val bookmarks = sharedPref.getString(PREFERENCE_BOOKMARKS, "[]")
-		val collectionType = object : TypeToken<Collection<Bookmark>>() {}.type
+		val collectionType = object : TypeToken<Collection<Track>>() {}.type
 		_bookmarks = gson.fromJson(bookmarks, collectionType)
 
 		//val queue = sharedPref.getString(PREFERENCE_QUEUE, "[]")
@@ -119,8 +120,13 @@ class MainActivity : AppCompatActivity()
 					updateDirectoryView(file, false)
 					_prevExplorerScrollPositions.push(pos)
 				}
-				/*else
-					TODO queue file*/
+				else
+				{
+					val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
+					intent.action = ACTION_START_PLAYBACK_SERVICE
+					intent.putExtra(EXTRA_TRACK_PATH, Track(file.absolutePath, file.name))
+					startService(intent)
+				}
 			}
 			else
 				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
@@ -193,10 +199,8 @@ class MainActivity : AppCompatActivity()
 					return@setOnClickListener
 				}
 
-				val bookmark = Bookmark(path, label)
-
 				// also add to bookmark menu
-				adapter.onItemAdded(bookmark)
+				adapter.onItemAdded(Track(path, label))
 				_bookmarksChanged = true
 				adapter.notifyItemInserted(_bookmarks.size - 1)
 			}

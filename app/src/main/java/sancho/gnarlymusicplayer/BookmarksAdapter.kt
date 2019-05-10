@@ -12,8 +12,8 @@ import java.util.Collections.swap
 
 class BookmarksAdapter(
 	private val context: Context,
-	private val bookmarks: MutableList<Bookmark>,
-	private val cliccListener: (Bookmark) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
+	private val bookmarks: MutableList<Track>,
+	private val cliccListener: (Track) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
 
@@ -31,9 +31,9 @@ class BookmarksAdapter(
 
 	class BookmarkHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Bookmark, clickListener: (Bookmark) -> Unit, touchHelper: ItemTouchHelper?)
+		fun bind(bookmark: Track, clickListener: (Track) -> Unit, touchHelper: ItemTouchHelper?)
 		{
-			itemView.bookmark_text.text = bookmark.label
+			itemView.bookmark_text.text = bookmark.name
 			itemView.setOnClickListener { clickListener(bookmark)}
 			if(touchHelper != null)
 			{
@@ -53,7 +53,7 @@ class BookmarksAdapter(
 		bookmarks.removeAt(position)
 	}
 
-	fun onItemAdded(bookmark: Bookmark)
+	fun onItemAdded(bookmark: Track)
 	{
 		bookmarks.add(bookmark)
 	}

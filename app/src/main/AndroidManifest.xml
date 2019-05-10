@@ -12,8 +12,13 @@
         android:supportsRtl="false"
         android:theme="@style/AppThemeBlack"
         tools:ignore="GoogleAppIndexingWarning">
+        <service
+            android:name=".MediaPlaybackService"
+            android:enabled="true"/>
+
         <activity
-            android:name=".MainActivity">
+            android:name=".MainActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
