@@ -16,6 +16,12 @@ class MediaPlaybackService : Service()
 	private lateinit var _track: Track
 	private var _initialized = false
 
+	override fun onCreate()
+	{
+		super.onCreate()
+		_notificationManager = NotificationManagerCompat.from(applicationContext)
+	}
+
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
 	{
 		when
@@ -33,8 +39,6 @@ class MediaPlaybackService : Service()
 					_player.setDataSource(_track.path)
 					_player.prepare()
 					_player.start()
-
-					_notificationManager = NotificationManagerCompat.from(applicationContext)
 
 					_initialized = true
 
@@ -90,12 +94,6 @@ class MediaPlaybackService : Service()
 
 	private fun createNotification(): Notification
 	{
-		/*val notificationIntent = Intent(this, MainActivity::class.java)
-					notificationIntent.action = ACTION_MAIN
-					notificationIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-					val pendingIntent = PendingIntent.getActivity(
-						this, 0, notificationIntent, 0
-					)*/
 		val pcontentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
 
 		val previousIntent = Intent(this, MediaPlaybackService::class.java)
