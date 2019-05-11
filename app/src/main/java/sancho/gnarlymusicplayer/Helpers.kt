@@ -13,6 +13,7 @@ const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentco
 
 const val ACTION_START_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.startplayback"
 const val ACTION_STOP_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.stopplayback"
+const val ACTION_REPLAY_TRACK = "sancho.gnarlymusicplayer.action.replaytrack"
 const val ACTION_PREV_TRACK = "sancho.gnarlymusicplayer.action.prevtrack"
 const val ACTION_PLAYPAUSE = "sancho.gnarlymusicplayer.action.playpause"
 const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
