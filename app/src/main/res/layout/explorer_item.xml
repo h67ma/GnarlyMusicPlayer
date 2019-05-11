@@ -6,4 +6,7 @@
     android:gravity="center_vertical"
     android:textSize="18sp"
     android:padding="5dp"
-    android:drawablePadding="5dp"/>
+    android:drawablePadding="5dp"
+    android:focusable="true"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"/>
