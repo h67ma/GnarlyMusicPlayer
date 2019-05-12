@@ -12,7 +12,9 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
         android:paddingTop="15dp"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
     <LinearLayout
         android:layout_width="match_parent"
