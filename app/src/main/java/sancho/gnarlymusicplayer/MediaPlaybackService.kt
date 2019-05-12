@@ -1,12 +1,12 @@
 package sancho.gnarlymusicplayer
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
 import android.media.MediaPlayer
+import android.widget.RemoteViews
 import androidx.core.app.NotificationManagerCompat
 
 class MediaPlaybackService : Service()
@@ -16,47 +16,14 @@ class MediaPlaybackService : Service()
 	private lateinit var _track: Track
 	private var _initialized = false
 	private lateinit var _notification: NotificationCompat.Builder
+	private lateinit var _remoteView: RemoteViews
 
 	override fun onCreate()
 	{
 		super.onCreate()
 		_notificationManager = NotificationManagerCompat.from(applicationContext)
 
-		val pcontentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
-
-		val replayIntent = Intent(this, MediaPlaybackService::class.java)
-		replayIntent.action = ACTION_REPLAY_TRACK
-		val preplayIntent = PendingIntent.getService(this, 0, replayIntent, 0)
-
-		val previousIntent = Intent(this, MediaPlaybackService::class.java)
-		previousIntent.action = ACTION_PREV_TRACK
-		val ppreviousIntent = PendingIntent.getService(this, 0, previousIntent, 0)
-
-		val playIntent = Intent(this, MediaPlaybackService::class.java)
-		playIntent.action = ACTION_PLAYPAUSE
-		val pplayIntent = PendingIntent.getService(this, 0, playIntent, 0)
-
-		val nextIntent = Intent(this, MediaPlaybackService::class.java)
-		nextIntent.action = ACTION_NEXT_TRACK
-		val pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0)
-
-		val closeIntent = Intent(this, MediaPlaybackService::class.java)
-		closeIntent.action = ACTION_STOP_PLAYBACK_SERVICE
-		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
-
-		_notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-			.setSmallIcon(R.drawable.play)
-			.setContentIntent(pcontentIntent)
-			.setOngoing(true)
-			.addAction(R.drawable.replay, "Replay", preplayIntent)
-			.addAction(R.drawable.prev, "Previous", ppreviousIntent)
-			.addAction(R.drawable.play, "Play/pause", pplayIntent)
-			.addAction(R.drawable.next, "Next", pnextIntent)
-			.addAction(R.drawable.close, "Close", pcloseIntent)
-			.setStyle(
-				androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(2, 3, 4)
-				// TODO .setMediaSession(mediaSession.getSessionToken())
-			)
+		prepareNotification()
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -137,12 +104,48 @@ class MediaPlaybackService : Service()
 		return START_STICKY
 	}
 
-	@SuppressLint("RestrictedApi") // is this ok?
+	private fun prepareNotification()
+	{
+		val pcontentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
+
+		val replayIntent = Intent(this, MediaPlaybackService::class.java)
+		replayIntent.action = ACTION_REPLAY_TRACK
+		val preplayIntent = PendingIntent.getService(this, 0, replayIntent, 0)
+
+		val previousIntent = Intent(this, MediaPlaybackService::class.java)
+		previousIntent.action = ACTION_PREV_TRACK
+		val ppreviousIntent = PendingIntent.getService(this, 0, previousIntent, 0)
+
+		val playIntent = Intent(this, MediaPlaybackService::class.java)
+		playIntent.action = ACTION_PLAYPAUSE
+		val pplayIntent = PendingIntent.getService(this, 0, playIntent, 0)
+
+		val nextIntent = Intent(this, MediaPlaybackService::class.java)
+		nextIntent.action = ACTION_NEXT_TRACK
+		val pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0)
+
+		val closeIntent = Intent(this, MediaPlaybackService::class.java)
+		closeIntent.action = ACTION_STOP_PLAYBACK_SERVICE
+		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
+
+		_remoteView = RemoteViews(packageName, R.layout.notification)
+		_remoteView.setOnClickPendingIntent(R.id.action_reset_btn, preplayIntent)
+		_remoteView.setOnClickPendingIntent(R.id.action_prev_btn, ppreviousIntent)
+		_remoteView.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
+		_remoteView.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
+		_remoteView.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
+
+		_notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+			.setSmallIcon(R.drawable.play)
+			.setContentIntent(pcontentIntent)
+			.setOngoing(true)
+			.setCustomContentView(_remoteView)
+	}
+
 	private fun updateNotification()
 	{
-		_notification.setContentTitle(_track.name)
-		// _notification.setContentText(_track.path)
-		_notification.mActions[2].icon = if (_player.isPlaying) R.drawable.pause else R.drawable.play
+		_remoteView.setTextViewText(R.id.track_title, _track.name)
+		_remoteView.setImageViewResource(R.id.action_playpause_btn, if (_player.isPlaying) R.drawable.pause else R.drawable.play)
 	}
 
 	override fun onBind(intent: Intent): IBinder?
