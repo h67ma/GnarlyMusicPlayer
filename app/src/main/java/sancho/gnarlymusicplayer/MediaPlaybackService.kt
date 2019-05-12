@@ -6,6 +6,7 @@ import android.os.IBinder
 import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
 import android.media.MediaPlayer
+import android.os.Binder
 import android.widget.RemoteViews
 import androidx.core.app.NotificationManagerCompat
 
@@ -17,6 +18,12 @@ class MediaPlaybackService : Service()
 	private var _initialized = false
 	private lateinit var _notification: NotificationCompat.Builder
 	private lateinit var _remoteView: RemoteViews
+	private val _binder = LocalBinder()
+
+	inner class LocalBinder : Binder()
+	{
+		fun getService(): MediaPlaybackService = this@MediaPlaybackService
+	}
 
 	override fun onCreate()
 	{
@@ -52,26 +59,13 @@ class MediaPlaybackService : Service()
 				else
 				{
 					// service already running
-
-					_player.reset()
-					_player.setDataSource(_track.path)
-					_player.prepare()
-					_player.start()
-
-					updateNotification()
-					_notificationManager?.notify(NOTIFICATION_ID, _notification.build())
+					playTrack()
 				}
 			}
 			intent.action == ACTION_REPLAY_TRACK ->
 			{
 				// seekTo(0) doesn't actually return to start of track :()
-				_player.reset()
-				_player.setDataSource(_track.path)
-				_player.prepare()
-				_player.start()
-
-				updateNotification()
-				_notificationManager?.notify(NOTIFICATION_ID, _notification.build())
+				playTrack()
 			}
 			intent.action == ACTION_PREV_TRACK ->
 			{
@@ -150,6 +144,23 @@ class MediaPlaybackService : Service()
 
 	override fun onBind(intent: Intent): IBinder?
 	{
-		return null
+		return _binder
+	}
+
+	fun setTrack(track: Track)
+	{
+		_track = track
+		playTrack()
+	}
+
+	private fun playTrack()
+	{
+		_player.reset()
+		_player.setDataSource(_track.path)
+		_player.prepare()
+		_player.start()
+
+		updateNotification()
+		_notificationManager?.notify(NOTIFICATION_ID, _notification.build())
 	}
 }

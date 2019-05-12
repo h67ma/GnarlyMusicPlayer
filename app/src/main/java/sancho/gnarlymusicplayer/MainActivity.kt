@@ -19,21 +19,44 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.util.*
+import android.content.ComponentName
+import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
+import android.os.IBinder
+import android.content.ServiceConnection
 
 class MainActivity : AppCompatActivity()
 {
+	private lateinit var _mountedDevices: MutableList<File>
+
 	private val _dirList = mutableListOf<File>()
 	private var _currentDir : File? = null
 	private var _lastDir : File? = null // from shared preferences
-	private lateinit var _explorerAdapter : ExplorerAdapter
-	private lateinit var _queueAdapter : QueueAdapter
-	private lateinit var _mountedDevices: MutableList<File>
-	private lateinit var _bookmarks: MutableList<Track>
-	private lateinit var _queue: MutableList<Track>
-	private var _bookmarksChanged = false
-	private var _queueChanged = false
+
 	private var _prevExplorerScrollPositions = Stack<Int>()
+	private lateinit var _explorerAdapter : ExplorerAdapter
+
+	private lateinit var _queueAdapter : QueueAdapter
+	private lateinit var _queue: MutableList<Track>
+	private var _queueChanged = false
+
+	private lateinit var _bookmarks: MutableList<Track>
+	private var _bookmarksChanged = false
+
 	private var _accentColorIdx: Int = 0
+
+	private var _service: MediaPlaybackService? = null
+	private val _serviceConn = object : ServiceConnection
+	{
+		override fun onServiceConnected(className: ComponentName, service: IBinder)
+		{
+			_service = (service as LocalBinder).getService()
+		}
+
+		override fun onServiceDisconnected(className: ComponentName)
+		{
+			_service = null
+		}
+	}
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -191,10 +214,19 @@ class MainActivity : AppCompatActivity()
 		queue_list_view.layoutManager = LinearLayoutManager(this)
 		_queueAdapter = QueueAdapter(this, _queue) { track ->
 			// play track
-			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
-			intent.action = ACTION_START_PLAYBACK_SERVICE
-			intent.putExtra(EXTRA_TRACK, track)
-			startService(intent)
+			if(_service == null)
+			{
+				val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
+				intent.action = ACTION_START_PLAYBACK_SERVICE
+				intent.putExtra(EXTRA_TRACK, track)
+				startService(intent)
+
+				bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+			}
+			else
+			{
+				_service?.setTrack(track)
+			}
 		}
 		queue_list_view.adapter = _queueAdapter
 
@@ -378,6 +410,11 @@ class MainActivity : AppCompatActivity()
 
 	override fun onPause()
 	{
+		// unbind service
+		if(_service != null)
+			unbindService(_serviceConn)
+
+		// save to shared prefs
 		val sharedPref = getPreferences(Context.MODE_PRIVATE)
 		with(sharedPref.edit())
 		{
