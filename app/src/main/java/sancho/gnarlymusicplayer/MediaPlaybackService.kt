@@ -15,17 +15,23 @@ var mediaPlaybackServiceStarted = false
 
 class MediaPlaybackService : Service()
 {
-	private val _player: MediaPlayer = MediaPlayer()
+	private lateinit var _player: MediaPlayer
 	private var _notificationManager: NotificationManagerCompat? = null
 	private lateinit var _track: Track
-	private var _initialized = false
 	private lateinit var _notification: NotificationCompat.Builder
 	private lateinit var _remoteView: RemoteViews
 	private val _binder = LocalBinder()
 
 	inner class LocalBinder : Binder()
 	{
-		fun getService(): MediaPlaybackService = this@MediaPlaybackService
+		lateinit var listeners: BoundServiceListeners
+			private set
+
+		fun getService(listeners: BoundServiceListeners): MediaPlaybackService
+		{
+			this.listeners = listeners
+			return this@MediaPlaybackService
+		}
 	}
 
 	override fun onCreate()
@@ -38,26 +44,25 @@ class MediaPlaybackService : Service()
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
 	{
-		mediaPlaybackServiceStarted = true
 		when
 		{
 			intent.action == ACTION_START_PLAYBACK_SERVICE ->
 			{
 				_track = intent.getParcelableExtra(EXTRA_TRACK)
 
-				if(!_initialized)
+				if(!mediaPlaybackServiceStarted)
 				{
 					// first service call
 
+					_player = MediaPlayer()
 					_player.isLooping = false
-
 					_player.setDataSource(_track.path)
 					_player.prepare()
 					_player.start()
 
-					_initialized = true
-
 					startForeground(NOTIFICATION_ID, makeNotification())
+
+					mediaPlaybackServiceStarted = true
 				}
 				else
 				{
@@ -151,12 +156,6 @@ class MediaPlaybackService : Service()
 		return _binder
 	}
 
-	fun setTrack(track: Track)
-	{
-		_track = track
-		playTrack()
-	}
-
 	private fun playTrack()
 	{
 		_player.reset()
@@ -165,5 +164,11 @@ class MediaPlaybackService : Service()
 		_player.start()
 
 		_notificationManager?.notify(NOTIFICATION_ID, makeNotification())
+	}
+
+	fun setTrack(track: Track)
+	{
+		_track = track
+		playTrack()
 	}
 }

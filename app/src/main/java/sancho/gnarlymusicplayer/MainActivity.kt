@@ -49,7 +49,12 @@ class MainActivity : AppCompatActivity()
 	{
 		override fun onServiceConnected(className: ComponentName, service: IBinder)
 		{
-			_service = (service as LocalBinder).getService()
+			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
+				override fun getNextTrack(): Track
+				{
+					return Track("TODO", "TODO") // TODO
+				}
+			})
 		}
 
 		override fun onServiceDisconnected(className: ComponentName)
@@ -221,7 +226,7 @@ class MainActivity : AppCompatActivity()
 		queue_list_view.layoutManager = LinearLayoutManager(this)
 		_queueAdapter = QueueAdapter(this, _queue) { track ->
 			// play track
-			if(_service == null)
+			if(!mediaPlaybackServiceStarted || _service == null)
 			{
 				val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
 				intent.action = ACTION_START_PLAYBACK_SERVICE
@@ -418,7 +423,7 @@ class MainActivity : AppCompatActivity()
 	override fun onPause()
 	{
 		// unbind service
-		if(mediaPlaybackServiceStarted)
+		if(_service != null)
 			unbindService(_serviceConn)
 
 		// save to shared prefs
