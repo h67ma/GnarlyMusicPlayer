@@ -1,5 +1,6 @@
 package sancho.gnarlymusicplayer
 
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -9,6 +10,8 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.widget.RemoteViews
 import androidx.core.app.NotificationManagerCompat
+
+var mediaPlaybackServiceStarted = false
 
 class MediaPlaybackService : Service()
 {
@@ -35,6 +38,7 @@ class MediaPlaybackService : Service()
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
 	{
+		mediaPlaybackServiceStarted = true
 		when
 		{
 			intent.action == ACTION_START_PLAYBACK_SERVICE ->
@@ -53,8 +57,7 @@ class MediaPlaybackService : Service()
 
 					_initialized = true
 
-					updateNotification()
-					startForeground(NOTIFICATION_ID, _notification.build())
+					startForeground(NOTIFICATION_ID, makeNotification())
 				}
 				else
 				{
@@ -78,8 +81,7 @@ class MediaPlaybackService : Service()
 				else
 					_player.start()
 
-				updateNotification()
-				_notificationManager?.notify(NOTIFICATION_ID, _notification.build())
+				_notificationManager?.notify(NOTIFICATION_ID, makeNotification())
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
@@ -90,6 +92,7 @@ class MediaPlaybackService : Service()
 				_player.stop()
 				_player.release()
 
+				mediaPlaybackServiceStarted = false
 				stopForeground(true)
 				stopSelf()
 			}
@@ -136,10 +139,11 @@ class MediaPlaybackService : Service()
 			.setCustomContentView(_remoteView)
 	}
 
-	private fun updateNotification()
+	private fun makeNotification(): Notification
 	{
 		_remoteView.setTextViewText(R.id.track_title, _track.name)
 		_remoteView.setImageViewResource(R.id.action_playpause_btn, if (_player.isPlaying) R.drawable.pause else R.drawable.play)
+		return _notification.build()
 	}
 
 	override fun onBind(intent: Intent): IBinder?
@@ -160,7 +164,6 @@ class MediaPlaybackService : Service()
 		_player.prepare()
 		_player.start()
 
-		updateNotification()
-		_notificationManager?.notify(NOTIFICATION_ID, _notification.build())
+		_notificationManager?.notify(NOTIFICATION_ID, makeNotification())
 	}
 }

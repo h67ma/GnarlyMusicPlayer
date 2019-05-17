@@ -83,6 +83,13 @@ class MainActivity : AppCompatActivity()
 		requestReadPermishon() // check for permissions and initial update of file list
 	}
 
+	override fun onResume()
+	{
+		super.onResume()
+		if(mediaPlaybackServiceStarted)
+			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+	}
+
 	private fun restoreFromPrefs()
 	{
 		val gson = Gson()
@@ -411,7 +418,7 @@ class MainActivity : AppCompatActivity()
 	override fun onPause()
 	{
 		// unbind service
-		if(_service != null)
+		if(mediaPlaybackServiceStarted)
 			unbindService(_serviceConn)
 
 		// save to shared prefs
