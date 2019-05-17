@@ -320,12 +320,12 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			// R.id.action_search ->
-			/*action_clearprev ->
-			action_clearall ->
-			action_clearafter ->
+			/* TODO
+			R.id.action_search ->
+			R.id.action_clearprev ->
+			R.id.action_clearall ->
+			R.id.action_clearafter ->
 			R.id.action_addtopbottom ->
-			R.id.action_removeplayedtrack ->
 			R.id.action_savequeuetoplaylist ->
 			R.id.action_setpos -> */
 			R.id.action_setcolor -> selectAccent()

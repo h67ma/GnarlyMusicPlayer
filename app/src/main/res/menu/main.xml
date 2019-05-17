@@ -35,12 +35,6 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_removeplayedtrack"
-        android:title="Remove from queue after played"
-        android:checkable="true"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_savequeuetoplaylist"
         android:title="Save queue to playlist"
         app:showAsAction="never"/>
