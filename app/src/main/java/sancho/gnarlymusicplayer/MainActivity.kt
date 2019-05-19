@@ -233,8 +233,6 @@ class MainActivity : AppCompatActivity()
 		_queueAdapter = QueueAdapter(this, _queue) { track, position ->
 			// play track
 
-			_currentTrack = position
-
 			if (!mediaPlaybackServiceStarted || _service == null)
 			{
 				val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
@@ -246,8 +244,13 @@ class MainActivity : AppCompatActivity()
 			}
 			else
 			{
-				_service?.setTrack(track)
+				if(_currentTrack == position)
+					_service?.playPause()
+				else
+					_service?.setTrack(track)
 			}
+
+			_currentTrack = position
 		}
 		queue_list_view.adapter = _queueAdapter
 

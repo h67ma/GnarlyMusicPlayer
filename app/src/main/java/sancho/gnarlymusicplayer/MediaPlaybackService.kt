@@ -88,14 +88,7 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_PLAYPAUSE ->
 			{
-				if(_player.isPlaying)
-					_player.pause()
-				else
-					_player.start()
-
-				with(NotificationManagerCompat.from(applicationContext)) {
-					notify(NOTIFICATION_ID, makeNotification())
-				}
+				playPause()
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
@@ -197,5 +190,17 @@ class MediaPlaybackService : Service()
 	{
 		_track = track
 		playTrack()
+	}
+
+	fun playPause()
+	{
+		if (_player.isPlaying)
+			_player.pause()
+		else
+			_player.start()
+
+		with(NotificationManagerCompat.from(applicationContext)) {
+			notify(NOTIFICATION_ID, makeNotification())
+		}
 	}
 }
