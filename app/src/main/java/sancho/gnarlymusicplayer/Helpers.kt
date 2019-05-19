@@ -21,7 +21,7 @@ const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
 const val EXTRA_TRACK = "sancho.gnarlymusicplayer.extra.track"
 
 const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
-const val NOTIFICATION_ID = 69
+const val NOTIFICATION_ID = 420
 
 // from https://developer.android.com/guide/topics/media/media-formats
 val SUPPORTED_FILE_EXTENSIONS = arrayOf(

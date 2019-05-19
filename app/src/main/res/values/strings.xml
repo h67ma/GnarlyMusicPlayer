@@ -18,4 +18,5 @@
     <string name="play_pause">Play/pause</string>
     <string name="next">Next</string>
     <string name="close">Close</string>
+    <string name="cant_play_track">Can\'t play track</string>
 </resources>

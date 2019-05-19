@@ -9,7 +9,9 @@ import androidx.core.app.NotificationCompat
 import android.media.MediaPlayer
 import android.os.Binder
 import android.widget.RemoteViews
+import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import java.io.IOException
 
 var mediaPlaybackServiceStarted = false
 
@@ -56,9 +58,16 @@ class MediaPlaybackService : Service()
 
 					_player = MediaPlayer()
 					_player.isLooping = false
-					_player.setDataSource(_track.path)
-					_player.prepare()
-					_player.start()
+					try
+					{
+						_player.setDataSource(_track.path)
+						_player.prepare()
+						_player.start()
+					}
+					catch(_: IOException)
+					{
+						Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+					}
 
 					startForeground(NOTIFICATION_ID, makeNotification())
 
@@ -167,10 +176,17 @@ class MediaPlaybackService : Service()
 
 	private fun playTrack()
 	{
-		_player.reset()
-		_player.setDataSource(_track.path)
-		_player.prepare()
-		_player.start()
+		try
+		{
+			_player.reset()
+			_player.setDataSource(_track.path)
+			_player.prepare()
+			_player.start()
+		}
+		catch(_: IOException)
+		{
+			Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+		}
 
 		_notificationManager?.notify(NOTIFICATION_ID, makeNotification())
 	}
