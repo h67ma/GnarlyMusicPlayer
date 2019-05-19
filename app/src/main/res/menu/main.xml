@@ -31,17 +31,12 @@
 
     <item
         android:id="@+id/action_addtopbottom"
-        android:title="Add at top/bottom"
+        android:title="Add to queue at top"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_savequeuetoplaylist"
         android:title="Save queue to playlist"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_setpos"
-        android:title="Set track position"
         app:showAsAction="never"/>
 
     <item

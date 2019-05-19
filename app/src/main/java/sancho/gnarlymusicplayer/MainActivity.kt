@@ -338,8 +338,7 @@ class MainActivity : AppCompatActivity()
 			R.id.action_clearall ->
 			R.id.action_clearafter ->
 			R.id.action_addtopbottom ->
-			R.id.action_savequeuetoplaylist ->
-			R.id.action_setpos -> */
+			R.id.action_savequeuetoplaylist ->*/
 			R.id.action_setcolor -> selectAccent()
 			R.id.action_about -> showAboutDialog(this)
 			else -> return super.onOptionsItemSelected(item)
