@@ -18,7 +18,6 @@ var mediaPlaybackServiceStarted = false
 class MediaPlaybackService : Service()
 {
 	private lateinit var _player: MediaPlayer
-	private var _notificationManager: NotificationManagerCompat? = null
 	private lateinit var _track: Track
 	private lateinit var _notification: NotificationCompat.Builder
 	private lateinit var _remoteView: RemoteViews
@@ -39,7 +38,6 @@ class MediaPlaybackService : Service()
 	override fun onCreate()
 	{
 		super.onCreate()
-		_notificationManager = NotificationManagerCompat.from(applicationContext)
 
 		prepareNotification()
 	}
@@ -95,7 +93,9 @@ class MediaPlaybackService : Service()
 				else
 					_player.start()
 
-				_notificationManager?.notify(NOTIFICATION_ID, makeNotification())
+				with(NotificationManagerCompat.from(applicationContext)) {
+					notify(NOTIFICATION_ID, makeNotification())
+				}
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
@@ -188,7 +188,9 @@ class MediaPlaybackService : Service()
 			Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 		}
 
-		_notificationManager?.notify(NOTIFICATION_ID, makeNotification())
+		with(NotificationManagerCompat.from(applicationContext)) {
+			notify(NOTIFICATION_ID, makeNotification())
+		}
 	}
 
 	fun setTrack(track: Track)
