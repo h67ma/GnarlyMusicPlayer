@@ -12,6 +12,7 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
         android:paddingTop="15dp"
+        android:paddingBottom="5dp"
         android:gravity="center"
         android:maxLines="1"
         android:ellipsize="end"/>
@@ -25,7 +26,7 @@
         <ImageView
             android:id="@+id/action_reset_btn"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/replay"
             android:tint="@color/notification_content"
@@ -37,7 +38,7 @@
         <ImageView
             android:id="@+id/action_prev_btn"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/prev"
             android:tint="@color/notification_content"
@@ -49,7 +50,7 @@
         <ImageView
             android:id="@+id/action_playpause_btn"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/pause"
             android:tint="@color/notification_content"
@@ -61,7 +62,7 @@
         <ImageView
             android:id="@+id/action_next_btn"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/next"
             android:tint="@color/notification_content"
@@ -73,7 +74,7 @@
         <ImageView
             android:id="@+id/action_close_btn"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/close"
             android:tint="@color/notification_content"

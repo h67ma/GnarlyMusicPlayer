@@ -138,16 +138,25 @@ class MediaPlaybackService : Service()
 		_remoteView.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
 
 		_notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-			.setSmallIcon(R.drawable.play)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
-			.setCustomContentView(_remoteView)
+			.setCustomBigContentView(_remoteView)
 	}
 
 	private fun makeNotification(): Notification
 	{
 		_remoteView.setTextViewText(R.id.track_title, _track.name)
-		_remoteView.setImageViewResource(R.id.action_playpause_btn, if (_player.isPlaying) R.drawable.pause else R.drawable.play)
+		if (_player.isPlaying)
+		{
+			_remoteView.setImageViewResource(R.id.action_playpause_btn, R.drawable.pause)
+			_notification.setSmallIcon(R.drawable.play)
+		}
+		else
+		{
+			_remoteView.setImageViewResource(R.id.action_playpause_btn, R.drawable.play)
+			_notification.setSmallIcon(R.drawable.pause)
+		}
+
 		return _notification.build()
 	}
 
