@@ -23,6 +23,9 @@ import android.content.ComponentName
 import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import android.os.IBinder
 import android.content.ServiceConnection
+import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
+import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
+import sancho.gnarlymusicplayer.adapters.QueueAdapter
 
 class MainActivity : AppCompatActivity()
 {
@@ -119,9 +122,9 @@ class MainActivity : AppCompatActivity()
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
 		_explorerAdapter = ExplorerAdapter(this, _dirList) { file, pos ->
-			if(file.exists())
+			if (file.exists())
 			{
-				if(file.isDirectory)
+				if (file.isDirectory)
 				{
 					updateDirectoryView(file, false)
 					_prevExplorerScrollPositions.push(pos)
@@ -145,14 +148,14 @@ class MainActivity : AppCompatActivity()
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
 		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 
-			if(bookmark.path == _currentDir?.absolutePath)
+			if (bookmark.path == _currentDir?.absolutePath)
 			{
 				drawer_layout.closeDrawer(GravityCompat.END)
 				return@BookmarksAdapter // already open
 			}
 
 			val dir = File(bookmark.path)
-			if(dir.exists())
+			if (dir.exists())
 			{
 				_prevExplorerScrollPositions.clear()
 				updateDirectoryView(dir, false)
@@ -226,7 +229,7 @@ class MainActivity : AppCompatActivity()
 		queue_list_view.layoutManager = LinearLayoutManager(this)
 		_queueAdapter = QueueAdapter(this, _queue) { track ->
 			// play track
-			if(!mediaPlaybackServiceStarted || _service == null)
+			if (!mediaPlaybackServiceStarted || _service == null)
 			{
 				val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
 				intent.action = ACTION_START_PLAYBACK_SERVICE

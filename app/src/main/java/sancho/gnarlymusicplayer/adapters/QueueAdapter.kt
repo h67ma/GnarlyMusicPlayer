@@ -1,4 +1,4 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.adapters
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +8,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
+import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.Track
 import java.util.Collections.swap
 
 class QueueAdapter(
