@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.Track
+import sancho.gnarlymusicplayer.currentTrack
 import java.util.Collections.swap
 
 class QueueAdapter(
@@ -18,11 +19,10 @@ class QueueAdapter(
 	private val cliccListener: (Track, Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
-	var selectedPos: Int = RecyclerView.NO_POSITION
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
-		holder.bind(tracks[position], cliccListener, touchHelper, position, selectedPos, this)
+		holder.bind(tracks[position], cliccListener, touchHelper)
 	}
 
 	override fun getItemCount() = tracks.size
@@ -34,17 +34,14 @@ class QueueAdapter(
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Track, clickListener: (Track, Int) -> Unit, touchHelper: ItemTouchHelper?, position: Int, selectedPos: Int, adapter: QueueAdapter)
+		fun bind(bookmark: Track, cliccListener: (Track, Int) -> Unit, touchHelper: ItemTouchHelper?)
 		{
-			itemView.isSelected = selectedPos == position
-
 			itemView.queue_text.text = bookmark.name
-			itemView.setOnClickListener {
-				clickListener(bookmark, position)
-				adapter.notifyItemChanged(adapter.selectedPos)
-				adapter.selectedPos = position
-				adapter.notifyItemChanged(adapter.selectedPos)
-			}
+
+			itemView.isSelected = currentTrack == adapterPosition
+
+			itemView.setOnClickListener {cliccListener(bookmark, adapterPosition)}
+
 			if(touchHelper != null)
 			{
 				itemView.queue_reorder.setOnTouchListener { _, event ->

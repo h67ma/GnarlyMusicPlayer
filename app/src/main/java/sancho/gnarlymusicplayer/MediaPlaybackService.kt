@@ -96,12 +96,7 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
 			{
-				_player.stop()
-				_player.release()
-
-				mediaPlaybackServiceStarted = false
-				stopForeground(true)
-				stopSelf()
+				end()
 			}
 		}
 
@@ -167,14 +162,14 @@ class MediaPlaybackService : Service()
 		return _binder
 	}
 
-	private fun playTrack()
+	private fun playTrack(start: Boolean = true)
 	{
 		try
 		{
 			_player.reset()
 			_player.setDataSource(_track.path)
 			_player.prepare()
-			_player.start()
+			if (start) _player.start()
 		}
 		catch(_: IOException)
 		{
@@ -186,10 +181,10 @@ class MediaPlaybackService : Service()
 		}
 	}
 
-	fun setTrack(track: Track)
+	fun setTrack(track: Track, forcePlay: Boolean)
 	{
 		_track = track
-		playTrack()
+		playTrack(forcePlay || _player.isPlaying)
 	}
 
 	fun playPause()
@@ -202,5 +197,15 @@ class MediaPlaybackService : Service()
 		with(NotificationManagerCompat.from(applicationContext)) {
 			notify(NOTIFICATION_ID, makeNotification())
 		}
+	}
+
+	fun end()
+	{
+		_player.stop()
+		_player.release()
+
+		mediaPlaybackServiceStarted = false
+		stopForeground(true)
+		stopSelf()
 	}
 }

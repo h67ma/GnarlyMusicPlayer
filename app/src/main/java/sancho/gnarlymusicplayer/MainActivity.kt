@@ -27,21 +27,22 @@ import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
 
+var currentTrack: Int = RecyclerView.NO_POSITION
+
 class MainActivity : AppCompatActivity()
 {
 	private lateinit var _mountedDevices: MutableList<File>
 
 	private val _dirList = mutableListOf<File>()
-	private var _currentDir : File? = null
-	private var _lastDir : File? = null // from shared preferences
+	private var _currentDir: File? = null
+	private var _lastDir: File? = null // from shared preferences
 
 	private var _prevExplorerScrollPositions = Stack<Int>()
-	private lateinit var _explorerAdapter : ExplorerAdapter
+	private lateinit var _explorerAdapter: ExplorerAdapter
 
-	private lateinit var _queueAdapter : QueueAdapter
+	private lateinit var _queueAdapter: QueueAdapter
 	private lateinit var _queue: MutableList<Track>
 	private var _queueChanged = false
-	private var _currentTrack: Int = 0
 
 	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity()
 		_bookmarksChanged = false
 		_queueChanged = false
 
-		if(_accentColorIdx >= COLOR_RESOURCES.size) _accentColorIdx = 0
+		if (_accentColorIdx >= COLOR_RESOURCES.size) _accentColorIdx = 0
 		setTheme(COLOR_RESOURCES[_accentColorIdx])
 
 		super.onCreate(savedInstanceState)
@@ -112,12 +113,11 @@ class MainActivity : AppCompatActivity()
 		_queue = gson.fromJson(queue, collectionType)
 
 		val lastDir = File(sharedPref.getString(PREFERENCE_LASTDIR, ""))
-		if(lastDir.exists() && lastDir.isDirectory)
-			_lastDir = lastDir
+		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
 		_accentColorIdx = sharedPref.getInt(PREFERENCE_ACCENTCOLOR, 0)
 
-		_currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
+		currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
 	}
 
 	private fun setupFileList()
@@ -199,13 +199,13 @@ class MainActivity : AppCompatActivity()
 		adapter.touchHelper = touchHelper
 		touchHelper.attachToRecyclerView(bookmark_list_view)
 
-		bookmark_add_btn.setOnClickListener{
+		bookmark_add_btn.setOnClickListener {
 			val path = _currentDir?.absolutePath
 			val label = _currentDir?.name
-			if(path != null && label != null)
+			if (path != null && label != null)
 			{
 				// check if bookmark already exists
-				if(_bookmarks.any{item -> item.path == path})
+				if (_bookmarks.any { item -> item.path == path })
 				{
 					Toast.makeText(applicationContext, getString(R.string.bookmark_exists), Toast.LENGTH_SHORT).show()
 					return@setOnClickListener
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity()
 				Toast.makeText(applicationContext, getString(R.string.cant_add_root_dir), Toast.LENGTH_SHORT).show()
 		}
 
-		bookmark_root.setOnClickListener{
+		bookmark_root.setOnClickListener {
 			_prevExplorerScrollPositions.clear()
 			updateDirectoryView(null, false)
 			drawer_layout.closeDrawer(GravityCompat.END)
@@ -244,13 +244,15 @@ class MainActivity : AppCompatActivity()
 			}
 			else
 			{
-				if(_currentTrack == position)
+				if (currentTrack == position)
 					_service?.playPause()
 				else
-					_service?.setTrack(track)
+					_service?.setTrack(track, true)
 			}
 
-			_currentTrack = position
+			_queueAdapter.notifyItemChanged(currentTrack)
+			currentTrack = position
+			_queueAdapter.notifyItemChanged(currentTrack)
 		}
 		queue_list_view.adapter = _queueAdapter
 
@@ -279,10 +281,50 @@ class MainActivity : AppCompatActivity()
 				_queue.removeAt(position)
 				_queueChanged = true
 				_queueAdapter.notifyItemRemoved(position)
+
+				if (position < currentTrack)
+				{
+					currentTrack--
+				}
+				if (position == currentTrack)
+				{
+					// we've removed currently selected track
+					// select next track and notify service (it'll know if it needs to be played)
+					when
+					{
+						position < _queue.size ->
+						{
+							// removed track wasn't last - select next track in queue
+							// no need to change currentTrack
+							if (mediaPlaybackServiceStarted && _service != null)
+								_service?.setTrack(_queue[currentTrack], false)
+
+							currentTrack = position
+							_queueAdapter.notifyItemChanged(currentTrack)
+						}
+						_queue.size > 0 ->
+						{
+							// removed track was last - select first track in queue (if any tracks exist)
+							currentTrack = 0
+
+							if (mediaPlaybackServiceStarted && _service != null)
+							_service?.setTrack(_queue[currentTrack], false)
+
+							_queueAdapter.notifyItemChanged(currentTrack)
+						}
+						else ->
+						{
+							// no other track available
+							if (mediaPlaybackServiceStarted && _service != null)
+								_service?.end()
+
+							currentTrack = RecyclerView.NO_POSITION
+						}
+					}
+				}
 			}
 		})
 		_queueAdapter.touchHelper = touchHelper
-		_queueAdapter.selectedPos = _currentTrack
 		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
@@ -453,7 +495,7 @@ class MainActivity : AppCompatActivity()
 			}
 			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
-			putInt(PREFERENCE_CURRENTTRACK, _currentTrack)
+			putInt(PREFERENCE_CURRENTTRACK, currentTrack)
 			apply()
 		}
 
