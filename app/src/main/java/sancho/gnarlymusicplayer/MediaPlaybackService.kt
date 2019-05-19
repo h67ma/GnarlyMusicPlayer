@@ -20,7 +20,8 @@ class MediaPlaybackService : Service()
 	private lateinit var _player: MediaPlayer
 	private lateinit var _track: Track
 	private lateinit var _notification: NotificationCompat.Builder
-	private lateinit var _remoteView: RemoteViews
+	private lateinit var _remoteViewSmall: RemoteViews
+	private lateinit var _remoteViewBig: RemoteViews
 	private val _binder = LocalBinder()
 
 	inner class LocalBinder : Binder()
@@ -39,7 +40,7 @@ class MediaPlaybackService : Service()
 	{
 		super.onCreate()
 
-		prepareNotification()
+		prepareNotifications()
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -103,7 +104,7 @@ class MediaPlaybackService : Service()
 		return START_STICKY
 	}
 
-	private fun prepareNotification()
+	private fun prepareNotifications()
 	{
 		val pcontentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
 
@@ -127,30 +128,41 @@ class MediaPlaybackService : Service()
 		closeIntent.action = ACTION_STOP_PLAYBACK_SERVICE
 		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
 
-		_remoteView = RemoteViews(packageName, R.layout.notification)
-		_remoteView.setOnClickPendingIntent(R.id.action_reset_btn, preplayIntent)
-		_remoteView.setOnClickPendingIntent(R.id.action_prev_btn, ppreviousIntent)
-		_remoteView.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
-		_remoteView.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
-		_remoteView.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
+		_remoteViewSmall = RemoteViews(packageName, R.layout.notification_small)
+		_remoteViewSmall.setOnClickPendingIntent(R.id.action_reset_btn, preplayIntent)
+		_remoteViewSmall.setOnClickPendingIntent(R.id.action_prev_btn, ppreviousIntent)
+		_remoteViewSmall.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
+		_remoteViewSmall.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
+		_remoteViewSmall.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
+
+		_remoteViewBig = RemoteViews(packageName, R.layout.notification_big)
+		_remoteViewBig.setOnClickPendingIntent(R.id.action_reset_btn, preplayIntent)
+		_remoteViewBig.setOnClickPendingIntent(R.id.action_prev_btn, ppreviousIntent)
+		_remoteViewBig.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
+		_remoteViewBig.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
+		_remoteViewBig.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
 
 		_notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
-			.setCustomBigContentView(_remoteView)
+			.setCustomContentView(_remoteViewSmall)
+			.setCustomBigContentView(_remoteViewBig)
 	}
 
 	private fun makeNotification(): Notification
 	{
-		_remoteView.setTextViewText(R.id.track_title, _track.name)
+		_remoteViewSmall.setTextViewText(R.id.track_title, _track.name)
+		_remoteViewBig.setTextViewText(R.id.track_title, _track.name)
 		if (_player.isPlaying)
 		{
-			_remoteView.setImageViewResource(R.id.action_playpause_btn, R.drawable.pause)
+			_remoteViewSmall.setImageViewResource(R.id.action_playpause_btn, R.drawable.pause)
+			_remoteViewBig.setImageViewResource(R.id.action_playpause_btn, R.drawable.pause)
 			_notification.setSmallIcon(R.drawable.play)
 		}
 		else
 		{
-			_remoteView.setImageViewResource(R.id.action_playpause_btn, R.drawable.play)
+			_remoteViewSmall.setImageViewResource(R.id.action_playpause_btn, R.drawable.play)
+			_remoteViewBig.setImageViewResource(R.id.action_playpause_btn, R.drawable.play)
 			_notification.setSmallIcon(R.drawable.pause)
 		}
 
