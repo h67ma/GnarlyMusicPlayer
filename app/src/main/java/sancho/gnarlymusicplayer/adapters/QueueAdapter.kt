@@ -16,7 +16,7 @@ import java.util.Collections.swap
 class QueueAdapter(
 	private val context: Context,
 	private val tracks: MutableList<Track>,
-	private val cliccListener: (Track, Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
+	private val cliccListener: (Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
 
@@ -34,13 +34,13 @@ class QueueAdapter(
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Track, cliccListener: (Track, Int) -> Unit, touchHelper: ItemTouchHelper?)
+		fun bind(bookmark: Track, cliccListener: (Int) -> Unit, touchHelper: ItemTouchHelper?)
 		{
 			itemView.queue_text.text = bookmark.name
 
 			itemView.isSelected = currentTrack == adapterPosition
 
-			itemView.setOnClickListener {cliccListener(bookmark, adapterPosition)}
+			itemView.setOnClickListener {cliccListener(adapterPosition)}
 
 			if(touchHelper != null)
 			{

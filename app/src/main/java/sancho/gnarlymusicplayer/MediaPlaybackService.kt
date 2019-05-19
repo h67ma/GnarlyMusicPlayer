@@ -1,15 +1,15 @@
 package sancho.gnarlymusicplayer
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.os.IBinder
-import android.app.PendingIntent
-import androidx.core.app.NotificationCompat
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.IBinder
 import android.widget.RemoteViews
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import java.io.IOException
 
@@ -18,11 +18,12 @@ var mediaPlaybackServiceStarted = false
 class MediaPlaybackService : Service()
 {
 	private lateinit var _player: MediaPlayer
-	private lateinit var _track: Track
 	private lateinit var _notification: NotificationCompat.Builder
 	private lateinit var _remoteViewSmall: RemoteViews
 	private lateinit var _remoteViewBig: RemoteViews
 	private val _binder = LocalBinder()
+	private val _track: Track
+		get() = if (currentTrack < queue.size) queue[currentTrack] else Track("error", "error")
 
 	inner class LocalBinder : Binder()
 	{
@@ -49,21 +50,20 @@ class MediaPlaybackService : Service()
 		{
 			intent.action == ACTION_START_PLAYBACK_SERVICE ->
 			{
-				_track = intent.getParcelableExtra(EXTRA_TRACK)
-
 				if(!mediaPlaybackServiceStarted)
 				{
 					// first service call
 
 					_player = MediaPlayer()
 					_player.isLooping = false
+
 					try
 					{
 						_player.setDataSource(_track.path)
 						_player.prepare()
 						_player.start()
 					}
-					catch(_: IOException)
+					catch (_: IOException)
 					{
 						Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 					}
@@ -75,17 +75,21 @@ class MediaPlaybackService : Service()
 				else
 				{
 					// service already running
-					playTrack()
+					playTrack(true)
 				}
 			}
 			intent.action == ACTION_REPLAY_TRACK ->
 			{
 				// seekTo(0) doesn't actually return to start of track :()
-				playTrack()
+				playTrack(true)
 			}
 			intent.action == ACTION_PREV_TRACK ->
 			{
-				// TODO
+				val oldPos = currentTrack
+				currentTrack--
+				if (currentTrack < 0) currentTrack = queue.size - 1
+				_binder.listeners.updateQueueRecycler(oldPos)
+				playTrack(false)
 			}
 			intent.action == ACTION_PLAYPAUSE ->
 			{
@@ -93,7 +97,10 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
-				// TODO
+				val oldPos = currentTrack
+				currentTrack = (currentTrack + 1) % queue.size
+				_binder.listeners.updateQueueRecycler(oldPos)
+				playTrack(false)
 			}
 			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
 			{
@@ -174,14 +181,15 @@ class MediaPlaybackService : Service()
 		return _binder
 	}
 
-	private fun playTrack(start: Boolean = true)
+	fun playTrack(forcePlay: Boolean)
 	{
 		try
 		{
+			val wasPlaying = _player.isPlaying
 			_player.reset()
 			_player.setDataSource(_track.path)
 			_player.prepare()
-			if (start) _player.start()
+			if (forcePlay || wasPlaying) _player.start()
 		}
 		catch(_: IOException)
 		{
@@ -191,12 +199,6 @@ class MediaPlaybackService : Service()
 		with(NotificationManagerCompat.from(applicationContext)) {
 			notify(NOTIFICATION_ID, makeNotification())
 		}
-	}
-
-	fun setTrack(track: Track, forcePlay: Boolean)
-	{
-		_track = track
-		playTrack(forcePlay || _player.isPlaying)
 	}
 
 	fun playPause()

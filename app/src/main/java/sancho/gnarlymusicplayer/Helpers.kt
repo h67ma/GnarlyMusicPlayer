@@ -12,14 +12,14 @@ const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
 const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
 const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
 
+const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
+
 const val ACTION_START_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.startplayback"
 const val ACTION_STOP_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.stopplayback"
 const val ACTION_REPLAY_TRACK = "sancho.gnarlymusicplayer.action.replaytrack"
 const val ACTION_PREV_TRACK = "sancho.gnarlymusicplayer.action.prevtrack"
 const val ACTION_PLAYPAUSE = "sancho.gnarlymusicplayer.action.playpause"
 const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
-
-const val EXTRA_TRACK = "sancho.gnarlymusicplayer.extra.track"
 
 const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
 const val NOTIFICATION_ID = 420
