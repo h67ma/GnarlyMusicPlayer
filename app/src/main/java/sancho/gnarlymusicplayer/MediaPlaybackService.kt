@@ -56,6 +56,7 @@ class MediaPlaybackService : Service()
 
 					_player = MediaPlayer()
 					_player.isLooping = false
+					_player.setOnCompletionListener { nextTrack(true) }
 
 					try
 					{
@@ -97,10 +98,7 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
-				val oldPos = currentTrack
-				currentTrack = (currentTrack + 1) % queue.size
-				_binder.listeners.updateQueueRecycler(oldPos)
-				playTrack(false)
+				nextTrack(false)
 			}
 			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
 			{
@@ -179,6 +177,14 @@ class MediaPlaybackService : Service()
 	override fun onBind(intent: Intent): IBinder?
 	{
 		return _binder
+	}
+
+	private fun nextTrack(forcePlay: Boolean)
+	{
+		val oldPos = currentTrack
+		currentTrack = (currentTrack + 1) % queue.size
+		_binder.listeners.updateQueueRecycler(oldPos)
+		playTrack(forcePlay)
 	}
 
 	fun playTrack(forcePlay: Boolean)
