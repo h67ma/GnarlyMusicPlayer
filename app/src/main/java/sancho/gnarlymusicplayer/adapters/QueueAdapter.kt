@@ -15,13 +15,14 @@ import java.util.Collections.swap
 class QueueAdapter(
 	private val context: Context,
 	private val tracks: MutableList<Track>,
-	private val cliccListener: (Track) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
+	private val cliccListener: (Track, Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
+	var selectedPos: Int = RecyclerView.NO_POSITION
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
-		holder.bind(tracks[position], cliccListener, touchHelper)
+		holder.bind(tracks[position], cliccListener, touchHelper, position, selectedPos, this)
 	}
 
 	override fun getItemCount() = tracks.size
@@ -33,10 +34,17 @@ class QueueAdapter(
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Track, clickListener: (Track) -> Unit, touchHelper: ItemTouchHelper?)
+		fun bind(bookmark: Track, clickListener: (Track, Int) -> Unit, touchHelper: ItemTouchHelper?, position: Int, selectedPos: Int, adapter: QueueAdapter)
 		{
+			itemView.isSelected = selectedPos == position
+
 			itemView.queue_text.text = bookmark.name
-			itemView.setOnClickListener { clickListener(bookmark)}
+			itemView.setOnClickListener {
+				clickListener(bookmark, position)
+				adapter.notifyItemChanged(adapter.selectedPos)
+				adapter.selectedPos = position
+				adapter.notifyItemChanged(adapter.selectedPos)
+			}
 			if(touchHelper != null)
 			{
 				itemView.queue_reorder.setOnTouchListener { _, event ->

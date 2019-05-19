@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _queueAdapter : QueueAdapter
 	private lateinit var _queue: MutableList<Track>
 	private var _queueChanged = false
+	private var _currentTrack: Int = 0
 
 	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
@@ -115,6 +116,8 @@ class MainActivity : AppCompatActivity()
 			_lastDir = lastDir
 
 		_accentColorIdx = sharedPref.getInt(PREFERENCE_ACCENTCOLOR, 0)
+
+		_currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
 	}
 
 	private fun setupFileList()
@@ -227,8 +230,11 @@ class MainActivity : AppCompatActivity()
 	private fun setupQueue()
 	{
 		queue_list_view.layoutManager = LinearLayoutManager(this)
-		_queueAdapter = QueueAdapter(this, _queue) { track ->
+		_queueAdapter = QueueAdapter(this, _queue) { track, position ->
 			// play track
+
+			_currentTrack = position
+
 			if (!mediaPlaybackServiceStarted || _service == null)
 			{
 				val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
@@ -273,6 +279,7 @@ class MainActivity : AppCompatActivity()
 			}
 		})
 		_queueAdapter.touchHelper = touchHelper
+		_queueAdapter.selectedPos = _currentTrack
 		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
@@ -443,6 +450,7 @@ class MainActivity : AppCompatActivity()
 			}
 			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
+			putInt(PREFERENCE_CURRENTTRACK, _currentTrack)
 			apply()
 		}
 
