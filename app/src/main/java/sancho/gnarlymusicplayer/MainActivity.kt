@@ -133,8 +133,8 @@ class MainActivity : AppCompatActivity()
 
 	override fun onSaveInstanceState(outState: Bundle?)
 	{
-		outState?.putInt(BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
 		super.onSaveInstanceState(outState)
+		outState?.putInt(BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
 	}
 
 	private fun setupFileList()
