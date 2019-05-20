@@ -79,7 +79,8 @@ class MainActivity : AppCompatActivity()
 		if (_accentColorIdx >= COLOR_RESOURCES.size) _accentColorIdx = 0
 		setTheme(COLOR_RESOURCES[_accentColorIdx])
 
-		_lastSelectedTrack = savedInstanceState?.getInt(BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION) ?: RecyclerView.NO_POSITION
+		if(savedInstanceState != null)
+			_lastSelectedTrack = savedInstanceState.getInt(BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
 
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
@@ -128,7 +129,8 @@ class MainActivity : AppCompatActivity()
 
 		_accentColorIdx = sharedPref.getInt(PREFERENCE_ACCENTCOLOR, 0)
 
-		currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
+		if (currentTrack == RecyclerView.NO_POSITION) // only on first time
+			currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
 	}
 
 	override fun onSaveInstanceState(outState: Bundle?)
