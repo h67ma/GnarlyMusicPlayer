@@ -289,8 +289,20 @@ class MainActivity : AppCompatActivity()
 
 			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
 			{
-				_queueAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+				val fromPosition = viewHolder.adapterPosition
+				val toPosition = target.adapterPosition
+				_queueAdapter.onItemMoved(fromPosition, toPosition)
+
 				_queueChanged = true
+
+				if (toPosition == currentTrack)
+				{
+					if (fromPosition < currentTrack)
+						currentTrack--
+					else if (fromPosition > currentTrack)
+						currentTrack++
+				}
+
 				return true
 			}
 
