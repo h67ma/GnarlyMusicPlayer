@@ -305,7 +305,7 @@ class MainActivity : AppCompatActivity()
 				{
 					currentTrack--
 				}
-				if (position == currentTrack)
+				else if (position == currentTrack)
 				{
 					// we've removed currently selected track
 					// select next track and notify service (it'll know if it needs to be played)
