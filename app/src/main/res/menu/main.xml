@@ -10,6 +10,12 @@
         app:showAsAction="ifRoom|collapseActionView"/>
 
     <item
+        android:id="@+id/action_addtopbottom"
+        android:title="Add to queue at top"
+        android:icon="@drawable/to_bottom"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/menu_clearqueue"
         android:title="Clear queue"
         app:showAsAction="never">
@@ -28,11 +34,6 @@
                 app:showAsAction="never"/>
         </menu>
     </item>
-
-    <item
-        android:id="@+id/action_addtopbottom"
-        android:title="Add to queue at top"
-        app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_savequeuetoplaylist"
