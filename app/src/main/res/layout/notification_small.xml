@@ -60,7 +60,7 @@
 
         <ImageView
             android:id="@+id/action_next_btn"
-            android:layout_width="30dp"
+            android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_weight="1"
             android:src="@drawable/next"
