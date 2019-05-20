@@ -13,6 +13,7 @@
     <string name="ok">Affirmative!</string>
     <string name="select_accent">Select accent color</string>
     <string name="added_to_queue">\"%1$s\" added to queue</string>
+    <string name="cleared_n_tracks">Cleared %1$d tracks</string>
     <string name="reset">Reset</string>
     <string name="previous">Previous</string>
     <string name="play_pause">Play/pause</string>

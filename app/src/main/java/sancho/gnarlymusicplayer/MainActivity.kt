@@ -423,12 +423,55 @@ class MainActivity : AppCompatActivity()
 		when (item.itemId)
 		{
 			/* TODO
-			R.id.action_search ->
-			R.id.action_clearprev ->
-			R.id.action_clearall ->
-			R.id.action_clearafter ->
 			R.id.action_addtopbottom ->
 			R.id.action_savequeuetoplaylist ->*/
+			R.id.action_clearprev ->
+			{
+				if (currentTrack != RecyclerView.NO_POSITION && currentTrack > 0)
+				{
+					// there are items to clear at the start
+
+					Toast.makeText(this, getString(R.string.cleared_n_tracks, currentTrack), Toast.LENGTH_SHORT).show()
+
+					for (i in 0 until currentTrack)
+						queue.removeAt(0)
+
+					currentTrack = 0
+					_queueAdapter.notifyDataSetChanged()
+					_queueChanged = true
+				}
+			}
+			R.id.action_clearall ->
+			{
+				if (queue.size > 0)
+				{
+					Toast.makeText(this, getString(R.string.cleared_n_tracks, queue.size), Toast.LENGTH_SHORT).show()
+
+					if (mediaPlaybackServiceStarted && _service != null)
+						_service?.end()
+
+					queue.clear()
+					currentTrack = RecyclerView.NO_POSITION
+					_queueAdapter.notifyDataSetChanged()
+					_queueChanged = true
+				}
+			}
+			R.id.action_clearafter ->
+			{
+				if (currentTrack != RecyclerView.NO_POSITION && currentTrack < queue.size - 1)
+				{
+					// there are items to clear at the end
+
+					Toast.makeText(this, getString(R.string.cleared_n_tracks, queue.size - 1 - currentTrack), Toast.LENGTH_SHORT).show()
+
+					for (i in queue.size - 1 downTo currentTrack + 1)
+						queue.removeAt(i)
+
+					currentTrack = queue.size - 1
+					_queueAdapter.notifyDataSetChanged()
+					_queueChanged = true
+				}
+			}
 			R.id.action_setcolor -> selectAccent()
 			R.id.action_about -> showAboutDialog(this)
 			else -> return super.onOptionsItemSelected(item)
