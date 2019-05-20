@@ -50,6 +50,8 @@ class MainActivity : AppCompatActivity()
 
 	private var _accentColorIdx: Int = 0
 
+	private var _spamToast: Toast? = null
+
 	private var _service: MediaPlaybackService? = null
 	private val _serviceConn = object : ServiceConnection
 	{
@@ -156,7 +158,10 @@ class MainActivity : AppCompatActivity()
 					queue.add(Track(file.absolutePath, file.name))
 					_queueChanged = true
 					_queueAdapter.notifyItemInserted(queue.size - 1)
-					Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT).show()
+
+					_spamToast?.cancel()
+					_spamToast = Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT)
+					_spamToast?.show()
 				}
 			}
 			else
