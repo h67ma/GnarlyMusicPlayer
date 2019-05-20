@@ -47,7 +47,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/library_list_view"
                 android:layout_height="match_parent"
-                android:layout_width="match_parent"/>
+                android:layout_width="match_parent"
+                android:scrollbars="vertical"/>
 
         </LinearLayout>
 
@@ -63,7 +64,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/queue_list_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
 
     </com.google.android.material.navigation.NavigationView>
 
@@ -90,7 +92,8 @@
                 android:id="@+id/bookmark_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:scrollbars="vertical"/>
 
             <Button
                 android:id="@+id/bookmark_add_btn"
