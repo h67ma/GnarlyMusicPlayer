@@ -134,8 +134,6 @@ class MediaPlaybackService : Service()
 		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
 
 		_remoteViewSmall = RemoteViews(packageName, R.layout.notification_small)
-		_remoteViewSmall.setOnClickPendingIntent(R.id.action_reset_btn, preplayIntent)
-		_remoteViewSmall.setOnClickPendingIntent(R.id.action_prev_btn, ppreviousIntent)
 		_remoteViewSmall.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
 		_remoteViewSmall.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
 		_remoteViewSmall.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)

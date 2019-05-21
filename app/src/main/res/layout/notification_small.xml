@@ -2,86 +2,55 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <TextView
         android:id="@+id/track_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_weight="2"
         android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        android:paddingStart="15dp"
-        android:paddingTop="15dp"
-        android:paddingEnd="15dp"
-        android:textColor="@color/notification_content" />
+        android:gravity="center_vertical"
+        android:maxLines="2"
+        android:paddingLeft="15dp"
+        android:textColor="@color/notification_content"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="15dp">
+    <ImageView
+        android:id="@+id/action_playpause_btn"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_weight="1"
+        android:src="@drawable/pause"
+        android:tint="@color/notification_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/play_pause"/>
 
-        <ImageView
-            android:id="@+id/action_reset_btn"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:src="@drawable/replay"
-            android:tint="@color/notification_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/reset"/>
+    <ImageView
+        android:id="@+id/action_next_btn"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_weight="1"
+        android:src="@drawable/next"
+        android:tint="@color/notification_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/next"/>
 
-        <ImageView
-            android:id="@+id/action_prev_btn"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:src="@drawable/prev"
-            android:tint="@color/notification_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/previous"/>
-
-        <ImageView
-            android:id="@+id/action_playpause_btn"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:src="@drawable/pause"
-            android:tint="@color/notification_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/play_pause"/>
-
-        <ImageView
-            android:id="@+id/action_next_btn"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:src="@drawable/next"
-            android:tint="@color/notification_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/next"/>
-
-        <ImageView
-            android:id="@+id/action_close_btn"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:src="@drawable/close"
-            android:tint="@color/notification_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/close"/>
-
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/action_close_btn"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_weight="1"
+        android:src="@drawable/close"
+        android:tint="@color/notification_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/close"/>
 
 </LinearLayout>
