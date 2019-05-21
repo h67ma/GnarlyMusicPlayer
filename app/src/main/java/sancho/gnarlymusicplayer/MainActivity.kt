@@ -52,6 +52,9 @@ class MainActivity : AppCompatActivity()
 
 	private var _spamToast: Toast? = null
 
+	private var _optionsMenu: Menu? = null
+	private var _addToTop: Boolean = false
+
 	private var _service: MediaPlaybackService? = null
 	private val _serviceConn = object : ServiceConnection
 	{
@@ -155,9 +158,18 @@ class MainActivity : AppCompatActivity()
 				}
 				else
 				{
-					queue.add(Track(file.absolutePath, file.name))
+					if (!_addToTop)
+					{
+						queue.add(Track(file.absolutePath, file.name))
+						_queueAdapter.notifyItemInserted(queue.size - 1)
+					}
+					else
+					{
+						queue.add(0, Track(file.absolutePath, file.name))
+						_queueAdapter.notifyItemInserted(0)
+						if (currentTrack >= 0) currentTrack++
+					}
 					_queueChanged = true
-					_queueAdapter.notifyItemInserted(queue.size - 1)
 
 					_spamToast?.cancel()
 					_spamToast = Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT)
@@ -389,6 +401,7 @@ class MainActivity : AppCompatActivity()
 	// adds items to toolbar
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
 	{
+		_optionsMenu = menu
 		menuInflater.inflate(R.menu.main, menu)
 
 		// don't show "clear queue" header
@@ -422,9 +435,15 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			/* TODO
+			// TODO R.id.action_savequeuetoplaylist ->
 			R.id.action_addtopbottom ->
-			R.id.action_savequeuetoplaylist ->*/
+			{
+				_addToTop = !_addToTop
+				_optionsMenu?.getItem(1)?.run{
+					setIcon(if (_addToTop) R.drawable.to_top else R.drawable.to_bottom)
+					setChecked(_addToTop)
+				}
+			}
 			R.id.action_clearprev ->
 			{
 				if (currentTrack != RecyclerView.NO_POSITION && currentTrack > 0)

@@ -13,6 +13,8 @@
         android:id="@+id/action_addtopbottom"
         android:title="Add to queue at top"
         android:icon="@drawable/to_bottom"
+        android:checkable="true"
+        android:checked="false"
         app:showAsAction="ifRoom"/>
 
     <item
