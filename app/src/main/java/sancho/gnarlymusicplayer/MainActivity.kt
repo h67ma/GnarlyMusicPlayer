@@ -578,7 +578,7 @@ class MainActivity : AppCompatActivity()
 	override fun onPause()
 	{
 		// unbind service
-		if(_service != null)
+		if(mediaPlaybackServiceStarted && _service != null)
 			unbindService(_serviceConn)
 
 		_lastSelectedTrack = currentTrack
