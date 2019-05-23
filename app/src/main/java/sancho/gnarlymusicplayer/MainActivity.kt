@@ -312,7 +312,11 @@ class MainActivity : AppCompatActivity()
 
 				_queueChanged = true
 
-				if (toPosition == currentTrack)
+				if (fromPosition == currentTrack)
+				{
+					currentTrack = toPosition
+				}
+				else if (toPosition == currentTrack)
 				{
 					if (fromPosition < currentTrack)
 						currentTrack--
