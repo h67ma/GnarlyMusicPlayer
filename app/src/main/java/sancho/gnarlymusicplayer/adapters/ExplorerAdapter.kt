@@ -14,11 +14,12 @@ import java.io.File
 class ExplorerAdapter(
 	private val context: Context,
 	private val files: MutableList<File>,
-	private val cliccListener: (File, Int) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
+	private val cliccListener: (File, Int) -> Unit,
+	private val longCliccListener: (File) -> Boolean) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	override fun onBindViewHolder(holder: FileHolder, position: Int)
 	{
-		holder.bind(files[position], cliccListener, position)
+		holder.bind(files[position], cliccListener, longCliccListener, position)
 	}
 
 	override fun getItemCount() = files.size
@@ -30,7 +31,7 @@ class ExplorerAdapter(
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(file: File, clickListener: (File, Int) -> Unit, position: Int)
+		fun bind(file: File, clickListener: (File, Int) -> Unit, longClickListener: (File) -> Boolean, position: Int)
 		{
 			itemView.explorer_text.text = file.name
 
@@ -43,6 +44,7 @@ class ExplorerAdapter(
 			itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
 
 			itemView.setOnClickListener { clickListener(file, position)}
+			itemView.setOnLongClickListener { longClickListener(file) }
 		}
 	}
 }

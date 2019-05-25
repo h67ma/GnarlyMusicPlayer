@@ -148,37 +148,46 @@ class MainActivity : AppCompatActivity()
 	{
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
-		_explorerAdapter = ExplorerAdapter(this, _dirList) { file, pos ->
-			if (file.exists())
-			{
-				if (file.isDirectory)
+		_explorerAdapter = ExplorerAdapter(this, _dirList,
+			{ file, pos ->
+				if (file.exists())
 				{
-					updateDirectoryView(file, false)
-					_prevExplorerScrollPositions.push(pos)
-				}
-				else
-				{
-					if (!_addToTop)
+					if (file.isDirectory)
 					{
-						queue.add(Track(file.absolutePath, file.name))
-						_queueAdapter.notifyItemInserted(queue.size - 1)
+						// navigate to directory
+
+						updateDirectoryView(file, false)
+						_prevExplorerScrollPositions.push(pos)
 					}
 					else
 					{
-						queue.add(0, Track(file.absolutePath, file.name))
-						_queueAdapter.notifyItemInserted(0)
-						if (currentTrack >= 0) currentTrack++
+						addToQueue(file)
 					}
-					_queueChanged = true
-
-					_spamToast?.cancel()
-					_spamToast = Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT)
-					_spamToast?.show()
 				}
+				else
+					Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
+			},
+			{ file ->
+				if (file.exists())
+				{
+					if (file.isDirectory)
+					{
+						// add all tracks in dir
+						// TODO
+						// TODO add recursiveness?
+					}
+					else
+					{
+						addToQueue(file)
+						playTrack(if (_addToTop) 0 else queue.size - 1)
+					}
+				}
+				else
+					Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
+
+				true
 			}
-			else
-				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
-		}
+		)
 		library_list_view.adapter = _explorerAdapter
 	}
 
@@ -267,28 +276,7 @@ class MainActivity : AppCompatActivity()
 	{
 		queue_list_view.layoutManager = LinearLayoutManager(this)
 		_queueAdapter = QueueAdapter(this, queue) { position ->
-			// play track
-
-			val oldPos = currentTrack
-			_queueAdapter.notifyItemChanged(oldPos)
-			currentTrack = position
-			_queueAdapter.notifyItemChanged(currentTrack)
-
-			if (!mediaPlaybackServiceStarted || _service == null)
-			{
-				val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
-				intent.action = ACTION_START_PLAYBACK_SERVICE
-				startService(intent)
-
-				bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
-			}
-			else
-			{
-				if (oldPos == position)
-					_service?.playPause()
-				else
-					_service?.playTrack(true)
-			}
+			playTrack(position)
 		}
 		queue_list_view.adapter = _queueAdapter
 
@@ -377,6 +365,50 @@ class MainActivity : AppCompatActivity()
 		})
 		_queueAdapter.touchHelper = touchHelper
 		touchHelper.attachToRecyclerView(queue_list_view)
+	}
+
+	private fun addToQueue(file: File)
+	{
+		if (!_addToTop)
+		{
+			queue.add(Track(file.absolutePath, file.name))
+			_queueAdapter.notifyItemInserted(queue.size - 1)
+		}
+		else
+		{
+			queue.add(0, Track(file.absolutePath, file.name))
+			_queueAdapter.notifyItemInserted(0)
+			if (currentTrack >= 0) currentTrack++
+		}
+		_queueChanged = true
+
+		_spamToast?.cancel()
+		_spamToast = Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT)
+		_spamToast?.show()
+	}
+
+	private fun playTrack(newPosition: Int)
+	{
+		val oldPos = currentTrack
+		_queueAdapter.notifyItemChanged(oldPos)
+		currentTrack = newPosition
+		_queueAdapter.notifyItemChanged(currentTrack)
+
+		if (!mediaPlaybackServiceStarted || _service == null)
+		{
+			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
+			intent.action = ACTION_START_PLAYBACK_SERVICE
+			startService(intent)
+
+			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+		}
+		else
+		{
+			if (oldPos == newPosition)
+				_service?.playPause()
+			else
+				_service?.playTrack(true)
+		}
 	}
 
 	private fun getStorageDevices()
