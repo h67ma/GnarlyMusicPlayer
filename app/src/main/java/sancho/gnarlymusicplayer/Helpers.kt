@@ -66,9 +66,9 @@ val COLOR_NAMES = arrayOf(
 	"Purpl",
 	"Pink")
 
-fun isFileExtensionInArray(file : File, extensions : Array<String>): Boolean
+fun String.isFileExtensionInArray(extensions : Array<String>): Boolean
 {
-	return file.name.lastIndexOf('.') > 0 && file.name.substring(file.name.lastIndexOf('.') + 1) in extensions
+	return this.lastIndexOf('.') > 0 && this.substring(this.lastIndexOf('.') + 1) in extensions
 }
 
 fun showAboutDialog(context: Context)

@@ -161,7 +161,8 @@ class MainActivity : AppCompatActivity()
 					}
 					else
 					{
-						addToQueue(file)
+						addToQueue(Track(file.absolutePath, file.name))
+						showSpamNotification(getString(R.string.added_to_queue, file.name))
 					}
 				}
 				else
@@ -172,14 +173,26 @@ class MainActivity : AppCompatActivity()
 				{
 					if (file.isDirectory)
 					{
-						// add all tracks in dir
-						// TODO
-						// TODO add recursiveness?
+						// add all tracks in dir (not recursive)
+						val files = file.listFiles{fileFromDir ->
+							fileFromDir.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS)
+						}
+						if (files != null)
+						{
+							Arrays.sort(files) { a, b -> a.name.compareTo(b.name, true) }
+							addToQueue(files.map { track ->
+								Track(track.absolutePath, track.name)
+							})
+							showSpamNotification(getString(R.string.n_tracks_added_to_queue, files.size))
+						}
+						else
+							Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 					}
 					else
 					{
-						addToQueue(file)
+						addToQueue(Track(file.absolutePath, file.name))
 						playTrack(if (_addToTop) 0 else queue.size - 1)
+						showSpamNotification(getString(R.string.added_to_queue_played, file.name))
 					}
 				}
 				else
@@ -189,6 +202,13 @@ class MainActivity : AppCompatActivity()
 			}
 		)
 		library_list_view.adapter = _explorerAdapter
+	}
+
+	private fun showSpamNotification(text: String)
+	{
+		_spamToast?.cancel()
+		_spamToast = Toast.makeText(this, text, Toast.LENGTH_SHORT)
+		_spamToast?.show()
 	}
 
 	private fun setupBookmarks()
@@ -367,24 +387,36 @@ class MainActivity : AppCompatActivity()
 		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
-	private fun addToQueue(file: File)
+	private fun addToQueue(track: Track)
 	{
 		if (!_addToTop)
 		{
-			queue.add(Track(file.absolutePath, file.name))
+			queue.add(track)
 			_queueAdapter.notifyItemInserted(queue.size - 1)
 		}
 		else
 		{
-			queue.add(0, Track(file.absolutePath, file.name))
-			_queueAdapter.notifyItemInserted(0)
+			queue.add(0, track)
 			if (currentTrack >= 0) currentTrack++
+			_queueAdapter.notifyItemInserted(0)
 		}
 		_queueChanged = true
+	}
 
-		_spamToast?.cancel()
-		_spamToast = Toast.makeText(this, getString(R.string.added_to_queue, file.name), Toast.LENGTH_SHORT)
-		_spamToast?.show()
+	private fun addToQueue(trackList: List<Track>)
+	{
+		if (!_addToTop)
+		{
+			queue.addAll(trackList)
+			_queueAdapter.notifyItemRangeInserted(queue.size - trackList.size, trackList.size)
+		}
+		else
+		{
+			queue.addAll(0, trackList)
+			if (currentTrack >= 0) currentTrack += trackList.size
+			_queueAdapter.notifyItemRangeInserted(0, trackList.size)
+		}
+		_queueChanged = true
 	}
 
 	private fun playTrack(newPosition: Int)
@@ -565,7 +597,7 @@ class MainActivity : AppCompatActivity()
 			// list current dir
 			toolbar_title.text = newDir.absolutePath
 			val list = newDir.listFiles{file ->
-				file.isDirectory || isFileExtensionInArray(file, SUPPORTED_FILE_EXTENSIONS)
+				file.isDirectory || file.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS)
 			}
 
 			if (list != null)
