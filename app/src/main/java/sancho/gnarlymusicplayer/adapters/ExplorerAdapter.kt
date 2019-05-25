@@ -7,8 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.explorer_item.view.*
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.SUPPORTED_PLAYLIST_EXTENSIONS
-import sancho.gnarlymusicplayer.isFileExtensionInArray
 import java.io.File
 
 class ExplorerAdapter(
@@ -35,13 +33,9 @@ class ExplorerAdapter(
 		{
 			itemView.explorer_text.text = file.name
 
-			val drawable : Int = when
-			{
-				file.isDirectory -> R.drawable.folder
-				isFileExtensionInArray(file, SUPPORTED_PLAYLIST_EXTENSIONS) -> R.drawable.playlist
-				else -> R.drawable.note
-			}
-			itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
+			itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(
+				if (file.isDirectory) R.drawable.folder else R.drawable.note, 0, 0, 0
+			)
 
 			itemView.setOnClickListener { clickListener(file, position)}
 			itemView.setOnLongClickListener { longClickListener(file) }

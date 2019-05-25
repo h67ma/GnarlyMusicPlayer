@@ -43,13 +43,7 @@ val SUPPORTED_FILE_EXTENSIONS = arrayOf(
 	"mp3",
 	"mkv",
 	"wav",
-	"ogg",
-	"m3u",
-	"m3u8"
-)
-
-val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
-	"m3u", "m3u8"
+	"ogg"
 )
 
 val COLOR_RESOURCES = arrayOf(

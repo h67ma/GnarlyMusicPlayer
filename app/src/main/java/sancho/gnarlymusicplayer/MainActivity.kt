@@ -471,7 +471,6 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			// TODO R.id.action_savequeuetoplaylist ->
 			R.id.action_addtopbottom ->
 			{
 				_addToTop = !_addToTop

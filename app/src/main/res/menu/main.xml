@@ -38,11 +38,6 @@
     </item>
 
     <item
-        android:id="@+id/action_savequeuetoplaylist"
-        android:title="Save queue to playlist"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_setcolor"
         android:title="Set accent color"
         app:showAsAction="never"/>
