@@ -522,8 +522,9 @@ class MainActivity : AppCompatActivity()
 					for (i in 0 until currentTrack)
 						queue.removeAt(0)
 
+					val removedCnt = currentTrack
 					currentTrack = 0
-					_queueAdapter.notifyDataSetChanged()
+					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
 					_queueChanged = true
 				}
 			}
@@ -536,9 +537,11 @@ class MainActivity : AppCompatActivity()
 					if (mediaPlaybackServiceStarted && _service != null)
 						_service?.end()
 
+					val removedCnt = queue.size
 					queue.clear()
+
 					currentTrack = RecyclerView.NO_POSITION
-					_queueAdapter.notifyDataSetChanged()
+					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
 					_queueChanged = true
 				}
 			}
@@ -550,11 +553,13 @@ class MainActivity : AppCompatActivity()
 
 					Toast.makeText(this, getString(R.string.cleared_n_tracks, queue.size - 1 - currentTrack), Toast.LENGTH_SHORT).show()
 
+					val removedCnt = queue.size - currentTrack
+					val removedFromIdx = currentTrack + 1
 					for (i in queue.size - 1 downTo currentTrack + 1)
 						queue.removeAt(i)
 
 					currentTrack = queue.size - 1
-					_queueAdapter.notifyDataSetChanged()
+					_queueAdapter.notifyItemRangeRemoved(removedFromIdx, removedCnt)
 					_queueChanged = true
 				}
 			}
