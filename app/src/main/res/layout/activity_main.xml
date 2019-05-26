@@ -30,7 +30,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?android:textColorPrimary"
                     android:singleLine="true"
                     android:ellipsize="start"/>
 
@@ -86,7 +86,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/storage_devices"
-                android:drawableStart="@drawable/sd_card"/>
+                android:drawableStart="@drawable/sd_card"
+                android:drawableTint="?android:textColor"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/bookmark_list_view"
@@ -100,7 +101,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_current_dir"
-                android:drawableStart="@drawable/plus"/>
+                android:drawableStart="@drawable/plus"
+                android:drawableTint="?android:textColor"/>
 
         </LinearLayout>
 

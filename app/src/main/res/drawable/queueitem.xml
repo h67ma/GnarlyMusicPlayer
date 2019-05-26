@@ -7,7 +7,7 @@
     </item>
     <item>
         <shape>
-            <solid android:color="?android:attr/colorBackground"/>
+            <solid android:color="?android:colorBackground"/>
         </shape>
     </item>
 </selector>

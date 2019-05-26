@@ -21,6 +21,7 @@
         android:layout_width="30dp"
         android:layout_height="match_parent"
         android:src="@drawable/reorder"
-        android:translationX="-35dp"/>
+        android:translationX="-35dp"
+        android:tint="?android:textColor"/>
 
 </LinearLayout>

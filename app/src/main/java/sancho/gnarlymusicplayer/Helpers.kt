@@ -54,17 +54,19 @@ val COLOR_RESOURCES = arrayOf(
 	R.style.AppThemeRed,
 	R.style.AppThemeOrang,
 	R.style.AppThemePurpl,
-	R.style.AppThemePink)
+	R.style.AppThemePink,
+	R.style.AppThemeMacintoshPlus)
 
 val COLOR_NAMES = arrayOf(
-	"Black",
-	"Green",
+	"Blacc",
+	"Poison",
 	"Blu",
-	"Cyan",
+	"Ice cold",
 	"Red",
 	"Orang",
 	"Purpl",
-	"Pink")
+	"Pink",
+	"Macintosh Plus")
 
 fun String.isFileExtensionInArray(extensions : Array<String>): Boolean
 {

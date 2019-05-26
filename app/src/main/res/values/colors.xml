@@ -2,4 +2,5 @@
 <resources>
     <color name="notification_bg">#fff</color>
     <color name="notification_content">#000</color>
+    <color name="why_cant_i_define_some_colors_inline">#FF8199</color>
 </resources>

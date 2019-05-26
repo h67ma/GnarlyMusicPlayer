@@ -9,4 +9,5 @@
     android:drawablePadding="5dp"
     android:focusable="true"
     android:clickable="true"
-    android:foreground="?android:attr/selectableItemBackground"/>
+    android:foreground="?android:selectableItemBackground"
+    android:drawableTint="?android:textColor"/>

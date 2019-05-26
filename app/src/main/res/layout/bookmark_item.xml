@@ -3,14 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="?android:attr/colorBackground">
+    android:background="?android:colorBackground">
 
     <ImageView
         android:id="@+id/bookmark_reorder"
         android:layout_width="30dp"
         android:layout_height="match_parent"
         android:src="@drawable/reorder"
-        android:layout_marginLeft="5dp"/>
+        android:layout_marginLeft="5dp"
+        android:tint="?android:textColor"/>
 
     <TextView
         android:id="@+id/bookmark_text"
