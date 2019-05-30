@@ -55,6 +55,8 @@ class MainActivity : AppCompatActivity()
 	private var _optionsMenu: Menu? = null
 	private var _addToTop: Boolean = false
 
+	private var _searchResultsOpen = false
+
 	private var _service: MediaPlaybackService? = null
 	private val _serviceConn = object : ServiceConnection
 	{
@@ -158,6 +160,7 @@ class MainActivity : AppCompatActivity()
 
 						updateDirectoryView(file, false)
 						_prevExplorerScrollPositions.push(pos)
+						_searchResultsOpen = false // in case the dir was from search results
 					}
 					else
 					{
@@ -179,7 +182,7 @@ class MainActivity : AppCompatActivity()
 						}
 						if (files != null)
 						{
-							Arrays.sort(files) { a, b -> a.name.compareTo(b.name, true) }
+							files.sortFiles()
 							addToQueue(files.map { track ->
 								Track(track.absolutePath, track.name)
 							})
@@ -494,6 +497,8 @@ class MainActivity : AppCompatActivity()
 				actionClear.isVisible = true
 				actionSetColor.isVisible = true
 				actionAbout.isVisible = true
+				updateDirectoryView(_currentDir, true)
+				_searchResultsOpen = false
 				return true
 			}
 
@@ -511,6 +516,28 @@ class MainActivity : AppCompatActivity()
 		{
 			override fun onQueryTextSubmit(query: String): Boolean
 			{
+				if (_currentDir != null)
+				{
+					val queryButLower = query.toLowerCase()
+					val list = _currentDir?.listFiles{file ->
+						(file.isDirectory || file.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS))
+						&& file.name.toLowerCase().contains(queryButLower)
+					}
+
+					if (list != null)
+					{
+						list.sortFilesAndDirs()
+						_dirList.clear()
+						_dirList.addAll(list)
+						_explorerAdapter.notifyDataSetChanged()
+						_searchResultsOpen = true
+					}
+					else
+						Toast.makeText(applicationContext, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+				}
+				else
+					Toast.makeText(applicationContext, getString(R.string.please_dont_do_this), Toast.LENGTH_SHORT).show()
+
 				return false // do "default action" (dunno what it is but it hides keyboard)
 			}
 
@@ -589,7 +616,15 @@ class MainActivity : AppCompatActivity()
 				}
 			}
 			R.id.action_setcolor -> selectAccent()
-			R.id.action_about -> showAboutDialog(this)
+			R.id.action_about ->
+			{
+				AlertDialog.Builder(this)
+					.setTitle(getString(R.string.about))
+					.setMessage(getString(R.string.about_message))
+					.setPositiveButton(getString(R.string.ok), null)
+					.create()
+					.show()
+			}
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
@@ -632,14 +667,7 @@ class MainActivity : AppCompatActivity()
 
 			if (list != null)
 			{
-				Arrays.sort(list) { a, b ->
-					when
-					{
-						a.isFile && b.isDirectory -> 1
-						a.isDirectory && b.isFile -> -1
-						else -> a.name.compareTo(b.name, true)
-					}
-				}
+				list.sortFilesAndDirs()
 				_dirList.clear()
 				_dirList.addAll(list)
 				_explorerAdapter.notifyDataSetChanged()
@@ -704,10 +732,12 @@ class MainActivity : AppCompatActivity()
 		{
 			drawer_layout.isDrawerOpen(GravityCompat.START) -> drawer_layout.closeDrawer(GravityCompat.START)
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
-			_currentDir != null ->
+			_searchResultsOpen ->
 			{
-				updateDirectoryView(_currentDir?.parentFile, true)
+				updateDirectoryView(_currentDir, true)
+				_searchResultsOpen = false
 			}
+			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, false)
 			else -> super.onBackPressed() // exit app
 		}
 	}

@@ -1,8 +1,7 @@
 package sancho.gnarlymusicplayer
 
-import android.app.AlertDialog
-import android.content.Context
 import java.io.File
+import java.util.Arrays
 
 const val REQUEST_READ_STORAGE = 42
 
@@ -73,12 +72,19 @@ fun String.isFileExtensionInArray(extensions : Array<String>): Boolean
 	return this.lastIndexOf('.') > 0 && this.substring(this.lastIndexOf('.') + 1) in extensions
 }
 
-fun showAboutDialog(context: Context)
+fun Array<File>.sortFiles()
 {
-	AlertDialog.Builder(context)
-		.setTitle(context.getString(R.string.about))
-		.setMessage(context.getString(R.string.about_message))
-		.setPositiveButton(context.getString(R.string.ok), null)
-		.create()
-		.show()
+	Arrays.sort(this) { a, b -> a.name.compareTo(b.name, true) }
+}
+
+fun Array<File>.sortFilesAndDirs()
+{
+	Arrays.sort(this) { a, b ->
+		when
+		{
+			a.isFile && b.isDirectory -> 1
+			a.isDirectory && b.isFile -> -1
+			else -> a.name.compareTo(b.name, true)
+		}
+	}
 }
