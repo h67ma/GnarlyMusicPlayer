@@ -36,6 +36,7 @@ import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_QUEUE
 import sancho.gnarlymusicplayer.App.Companion.REQUEST_READ_STORAGE
 import sancho.gnarlymusicplayer.App.Companion.SUPPORTED_FILE_EXTENSIONS
 import sancho.gnarlymusicplayer.App.Companion.currentTrack
+import sancho.gnarlymusicplayer.App.Companion.mediaPlaybackServiceStarted
 import sancho.gnarlymusicplayer.App.Companion.queue
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter

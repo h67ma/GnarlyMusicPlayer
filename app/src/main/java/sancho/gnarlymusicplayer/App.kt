@@ -9,6 +9,7 @@ class App: Application()
 	{
 		var currentTrack: Int = RecyclerView.NO_POSITION
 		lateinit var queue: MutableList<Track>
+		var mediaPlaybackServiceStarted = false
 
 		const val REQUEST_READ_STORAGE = 42
 

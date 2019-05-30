@@ -22,10 +22,9 @@ import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_CHANNEL_ID
 import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_ID
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
 import sancho.gnarlymusicplayer.App.Companion.currentTrack
+import sancho.gnarlymusicplayer.App.Companion.mediaPlaybackServiceStarted
 import sancho.gnarlymusicplayer.App.Companion.queue
 import java.io.IOException
-
-var mediaPlaybackServiceStarted = false
 
 class MediaPlaybackService : Service()
 {
