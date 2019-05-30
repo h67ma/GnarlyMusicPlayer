@@ -530,21 +530,15 @@ class MainActivity : AppCompatActivity()
 				if (_currentDir != null)
 				{
 					val queryButLower = query.toLowerCase()
-					val list = _currentDir?.listFiles{file ->
-						(file.isDirectory || file.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS))
-						&& file.name.toLowerCase().contains(queryButLower)
-					}
+					val list = _dirList.filter{file ->
+						file.name.toLowerCase().contains(queryButLower)
+					}.toTypedArray()
 
-					if (list != null)
-					{
-						list.sortFilesAndDirs()
-						_dirList.clear()
-						_dirList.addAll(list)
-						_explorerAdapter.notifyDataSetChanged()
-						_searchResultsOpen = true
-					}
-					else
-						Toast.makeText(applicationContext, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+					list.sortFilesAndDirs()
+					_dirList.clear()
+					_dirList.addAll(list)
+					_explorerAdapter.notifyDataSetChanged()
+					_searchResultsOpen = true
 				}
 				else
 					Toast.makeText(applicationContext, getString(R.string.please_dont_do_this), Toast.LENGTH_SHORT).show()
