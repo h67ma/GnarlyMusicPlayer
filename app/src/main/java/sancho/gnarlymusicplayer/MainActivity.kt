@@ -734,10 +734,10 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
 			_searchResultsOpen ->
 			{
-				updateDirectoryView(_currentDir, true)
+				updateDirectoryView(_currentDir, false)
 				_searchResultsOpen = false
 			}
-			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, false)
+			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, true)
 			else -> super.onBackPressed() // exit app
 		}
 	}
