@@ -23,6 +23,7 @@ import android.content.ComponentName
 import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import android.os.IBinder
 import android.content.ServiceConnection
+import android.preference.PreferenceManager
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity()
 	private fun restoreFromPrefs()
 	{
 		val gson = Gson()
-		val sharedPref = getPreferences(Context.MODE_PRIVATE)
+		val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
 		val bookmarksPref = sharedPref.getString(PREFERENCE_BOOKMARKS, "[]")
 		val collectionType = object : TypeToken<Collection<Track>>() {}.type
@@ -705,8 +706,7 @@ class MainActivity : AppCompatActivity()
 		_lastSelectedTrack = currentTrack
 
 		// save to shared prefs
-		val sharedPref = getPreferences(Context.MODE_PRIVATE)
-		with(sharedPref.edit())
+		with(PreferenceManager.getDefaultSharedPreferences(this).edit())
 		{
 			if(_bookmarksChanged || _queueChanged)
 			{

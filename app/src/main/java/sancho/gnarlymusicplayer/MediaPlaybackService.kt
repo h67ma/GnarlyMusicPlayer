@@ -7,6 +7,7 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
+import android.preference.PreferenceManager
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -105,6 +106,14 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
 			{
+				// save current track
+				// SAVE MEEEEEEE (can't wake up)
+				with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit())
+				{
+					putInt(PREFERENCE_CURRENTTRACK, currentTrack)
+					apply()
+				}
+
 				end()
 			}
 		}
