@@ -476,17 +476,42 @@ class MainActivity : AppCompatActivity()
 		menu.findItem(R.id.menu_clearqueue)?.subMenu?.clearHeader()
 
 		// search thing
-		val mSearch = menu.findItem(R.id.action_search)
+		val actionSearch = menu.findItem(R.id.action_search)
+		val actionAddTopBottom = menu.findItem(R.id.action_addtopbottom)
+		val actionClear = menu.findItem(R.id.menu_clearqueue)
+		val actionSetColor = menu.findItem(R.id.action_setcolor)
+		val actionAbout = menu.findItem(R.id.action_about)
 
-		val mSearchView = mSearch.actionView as SearchView
-		mSearchView.queryHint = getString(R.string.search_bar_hint)
+		val searchThing = actionSearch.actionView as SearchView
+		searchThing.queryHint = getString(R.string.search_bar_hint)
 
-		mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener
+		actionSearch.setOnActionExpandListener(object: MenuItem.OnActionExpandListener
+		{
+			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
+			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
+			{
+				actionAddTopBottom.isVisible = true
+				actionClear.isVisible = true
+				actionSetColor.isVisible = true
+				actionAbout.isVisible = true
+				return true
+			}
+
+			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
+			{
+				actionAddTopBottom.isVisible = false
+				actionClear.isVisible = false
+				actionSetColor.isVisible = false
+				actionAbout.isVisible = false
+				return true
+			}
+		})
+
+		searchThing.setOnQueryTextListener(object : SearchView.OnQueryTextListener
 		{
 			override fun onQueryTextSubmit(query: String): Boolean
 			{
-				// TODO filter
-				return true // don't do default action
+				return false // do "default action" (dunno what it is but it hides keyboard)
 			}
 
 			override fun onQueryTextChange(newText: String): Boolean
