@@ -89,7 +89,10 @@ class MediaPlaybackService : Service()
 				val oldPos = currentTrack
 				currentTrack--
 				if (currentTrack < 0) currentTrack = queue.size - 1
-				_binder.listeners.updateQueueRecycler(oldPos)
+
+				if(_binder.isBinderAlive)
+					_binder.listeners.updateQueueRecycler(oldPos)
+
 				playTrack(false)
 			}
 			intent.action == ACTION_PLAYPAUSE ->
@@ -181,7 +184,10 @@ class MediaPlaybackService : Service()
 	{
 		val oldPos = currentTrack
 		currentTrack = (currentTrack + 1) % queue.size
-		_binder.listeners.updateQueueRecycler(oldPos)
+
+		if(_binder.isBinderAlive)
+			_binder.listeners.updateQueueRecycler(oldPos)
+
 		playTrack(forcePlay)
 	}
 
