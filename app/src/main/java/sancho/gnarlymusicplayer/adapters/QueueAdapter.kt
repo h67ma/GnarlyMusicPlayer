@@ -8,9 +8,9 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
+import sancho.gnarlymusicplayer.App.Companion.currentTrack
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.Track
-import sancho.gnarlymusicplayer.currentTrack
 import java.util.Collections.swap
 
 class QueueAdapter(

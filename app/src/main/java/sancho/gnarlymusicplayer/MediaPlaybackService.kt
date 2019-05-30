@@ -12,6 +12,17 @@ import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import sancho.gnarlymusicplayer.App.Companion.ACTION_NEXT_TRACK
+import sancho.gnarlymusicplayer.App.Companion.ACTION_PLAYPAUSE
+import sancho.gnarlymusicplayer.App.Companion.ACTION_PREV_TRACK
+import sancho.gnarlymusicplayer.App.Companion.ACTION_REPLAY_TRACK
+import sancho.gnarlymusicplayer.App.Companion.ACTION_START_PLAYBACK_SERVICE
+import sancho.gnarlymusicplayer.App.Companion.ACTION_STOP_PLAYBACK_SERVICE
+import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_CHANNEL_ID
+import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_ID
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
+import sancho.gnarlymusicplayer.App.Companion.currentTrack
+import sancho.gnarlymusicplayer.App.Companion.queue
 import java.io.IOException
 
 var mediaPlaybackServiceStarted = false

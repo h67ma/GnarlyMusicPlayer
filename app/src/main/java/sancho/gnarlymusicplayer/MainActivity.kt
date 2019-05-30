@@ -24,12 +24,22 @@ import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import android.os.IBinder
 import android.content.ServiceConnection
 import android.preference.PreferenceManager
+import sancho.gnarlymusicplayer.App.Companion.ACTION_START_PLAYBACK_SERVICE
+import sancho.gnarlymusicplayer.App.Companion.BUNDLE_LASTSELECTEDTRACK
+import sancho.gnarlymusicplayer.App.Companion.COLOR_NAMES
+import sancho.gnarlymusicplayer.App.Companion.COLOR_RESOURCES
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_ACCENTCOLOR
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_BOOKMARKS
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_LASTDIR
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_QUEUE
+import sancho.gnarlymusicplayer.App.Companion.REQUEST_READ_STORAGE
+import sancho.gnarlymusicplayer.App.Companion.SUPPORTED_FILE_EXTENSIONS
+import sancho.gnarlymusicplayer.App.Companion.currentTrack
+import sancho.gnarlymusicplayer.App.Companion.queue
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
-
-var currentTrack: Int = RecyclerView.NO_POSITION
-lateinit var queue: MutableList<Track>
 
 class MainActivity : AppCompatActivity()
 {
