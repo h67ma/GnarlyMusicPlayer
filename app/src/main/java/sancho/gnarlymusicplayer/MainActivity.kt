@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _mountedDevices: MutableList<File>
 
 	private val _dirList = mutableListOf<File>()
+	private var _prevDirList = mutableListOf<File>()
 	private var _currentDir: File? = null
 	private var _lastDir: File? = null // from shared preferences
 
@@ -516,21 +517,22 @@ class MainActivity : AppCompatActivity()
 		{
 			override fun onQueryTextSubmit(query: String): Boolean
 			{
-				if (_currentDir != null)
+				if (!_searchResultsOpen)
 				{
-					val queryButLower = query.toLowerCase()
-					val list = _dirList.filter{file ->
-						file.name.toLowerCase().contains(queryButLower)
-					}.toTypedArray()
-
-					list.sortFilesAndDirs()
-					_dirList.clear()
-					_dirList.addAll(list)
-					_explorerAdapter.notifyDataSetChanged()
-					_searchResultsOpen = true
+					_prevDirList.clear()
+					_prevDirList.addAll(_dirList)
 				}
-				else
-					Toast.makeText(applicationContext, getString(R.string.please_dont_do_this), Toast.LENGTH_SHORT).show()
+
+				val queryButLower = query.toLowerCase()
+				val list = _prevDirList.filter { file ->
+					file.name.toLowerCase().contains(queryButLower)
+				}.toTypedArray()
+
+				list.sortFilesAndDirs()
+				_dirList.clear()
+				_dirList.addAll(list)
+				_explorerAdapter.notifyDataSetChanged()
+				_searchResultsOpen = true
 
 				return false // do "default action" (dunno what it is but it hides keyboard)
 			}
