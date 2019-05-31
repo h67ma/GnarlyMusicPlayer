@@ -10,4 +10,6 @@
     android:focusable="true"
     android:clickable="true"
     android:foreground="?android:selectableItemBackground"
-    android:drawableTint="?android:textColor"/>
+    android:drawableTint="?android:textColor"
+    android:maxLines="1"
+    android:ellipsize="end"/>
