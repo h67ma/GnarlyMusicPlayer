@@ -62,8 +62,6 @@ class MainActivity : AppCompatActivity()
 
 	private var _accentColorIdx: Int = 0
 
-	private var _spamToast: Toast? = null
-
 	private var _optionsMenu: Menu? = null
 	private var _addToTop: Boolean = false
 
@@ -177,7 +175,6 @@ class MainActivity : AppCompatActivity()
 					else
 					{
 						addToQueue(Track(file.absolutePath, file.name))
-						showSpamNotification(getString(R.string.added_to_queue, file.name))
 					}
 				}
 				else
@@ -198,7 +195,6 @@ class MainActivity : AppCompatActivity()
 							addToQueue(files.map { track ->
 								Track(track.absolutePath, track.name)
 							})
-							showSpamNotification(getString(R.string.n_tracks_added_to_queue, files.size))
 						}
 						else
 							Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
@@ -207,7 +203,6 @@ class MainActivity : AppCompatActivity()
 					{
 						addToQueue(Track(file.absolutePath, file.name))
 						playTrack(if (_addToTop) 0 else queue.size - 1)
-						showSpamNotification(getString(R.string.added_to_queue_played, file.name))
 					}
 				}
 				else
@@ -217,13 +212,6 @@ class MainActivity : AppCompatActivity()
 			}
 		)
 		library_list_view.adapter = _explorerAdapter
-	}
-
-	private fun showSpamNotification(text: String)
-	{
-		_spamToast?.cancel()
-		_spamToast = Toast.makeText(this, text, Toast.LENGTH_SHORT)
-		_spamToast?.show()
 	}
 
 	private fun setupBookmarks()
