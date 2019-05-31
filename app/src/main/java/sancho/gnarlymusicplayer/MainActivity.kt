@@ -35,7 +35,9 @@ import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_LASTDIR
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_QUEUE
 import sancho.gnarlymusicplayer.App.Companion.REQUEST_READ_STORAGE
 import sancho.gnarlymusicplayer.App.Companion.SUPPORTED_FILE_EXTENSIONS
+import sancho.gnarlymusicplayer.App.Companion.filesAndDirsComparator
 import sancho.gnarlymusicplayer.App.Companion.currentTrack
+import sancho.gnarlymusicplayer.App.Companion.filesComparator
 import sancho.gnarlymusicplayer.App.Companion.mediaPlaybackServiceStarted
 import sancho.gnarlymusicplayer.App.Companion.queue
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
@@ -192,7 +194,7 @@ class MainActivity : AppCompatActivity()
 						}
 						if (files != null)
 						{
-							files.sortFiles()
+							Arrays.sort(files, filesComparator)
 							addToQueue(files.map { track ->
 								Track(track.absolutePath, track.name)
 							})
@@ -526,9 +528,19 @@ class MainActivity : AppCompatActivity()
 				val queryButLower = query.toLowerCase()
 				val list = _prevDirList.filter { file ->
 					file.name.toLowerCase().contains(queryButLower)
-				}.toTypedArray()
+				}.toMutableList()
 
-				list.sortFilesAndDirs()
+				for (dir in _prevDirList.filter{file -> file.isDirectory})
+				{
+					list.addAll(
+						dir.listFiles{file ->
+							(file.isDirectory || file.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS))
+							&& file.name.toLowerCase().contains(queryButLower)
+						}
+					)
+				}
+
+				list.sortWith(filesAndDirsComparator)
 				_dirList.clear()
 				_dirList.addAll(list)
 				_explorerAdapter.notifyDataSetChanged()
@@ -663,7 +675,7 @@ class MainActivity : AppCompatActivity()
 
 			if (list != null)
 			{
-				list.sortFilesAndDirs()
+				Arrays.sort(list, filesAndDirsComparator)
 				_dirList.clear()
 				_dirList.addAll(list)
 				_explorerAdapter.notifyDataSetChanged()
