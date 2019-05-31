@@ -35,11 +35,11 @@ import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_LASTDIR
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_QUEUE
 import sancho.gnarlymusicplayer.App.Companion.REQUEST_READ_STORAGE
 import sancho.gnarlymusicplayer.App.Companion.SUPPORTED_FILE_EXTENSIONS
-import sancho.gnarlymusicplayer.App.Companion.filesAndDirsComparator
-import sancho.gnarlymusicplayer.App.Companion.currentTrack
-import sancho.gnarlymusicplayer.App.Companion.filesComparator
-import sancho.gnarlymusicplayer.App.Companion.mediaPlaybackServiceStarted
-import sancho.gnarlymusicplayer.App.Companion.queue
+import sancho.gnarlymusicplayer.App.Companion.app_filesAndDirsComparator
+import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
+import sancho.gnarlymusicplayer.App.Companion.app_filesComparator
+import sancho.gnarlymusicplayer.App.Companion.app_mediaPlaybackServiceStarted
+import sancho.gnarlymusicplayer.App.Companion.app_queue
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity()
 				override fun updateQueueRecycler(oldPos: Int)
 				{
 					_queueAdapter.notifyItemChanged(oldPos)
-					_queueAdapter.notifyItemChanged(currentTrack)
+					_queueAdapter.notifyItemChanged(app_currentTrack)
 				}
 			})
 		}
@@ -122,13 +122,13 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onResume()
 
-		if(mediaPlaybackServiceStarted)
+		if(app_mediaPlaybackServiceStarted)
 			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
 
-		if (currentTrack != _lastSelectedTrack)
+		if (app_currentTrack != _lastSelectedTrack)
 		{
 			_queueAdapter.notifyItemChanged(_lastSelectedTrack)
-			_queueAdapter.notifyItemChanged(currentTrack)
+			_queueAdapter.notifyItemChanged(app_currentTrack)
 		}
 	}
 
@@ -142,15 +142,15 @@ class MainActivity : AppCompatActivity()
 		_bookmarks = gson.fromJson(bookmarksPref, collectionType)
 
 		val queuePref = sharedPref.getString(PREFERENCE_QUEUE, "[]")
-		queue = gson.fromJson(queuePref, collectionType)
+		app_queue = gson.fromJson(queuePref, collectionType)
 
 		val lastDir = File(sharedPref.getString(PREFERENCE_LASTDIR, ""))
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
 		_accentColorIdx = sharedPref.getInt(PREFERENCE_ACCENTCOLOR, 0)
 
-		if (currentTrack == RecyclerView.NO_POSITION) // only on first time
-			currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
+		if (app_currentTrack == RecyclerView.NO_POSITION) // only on first time
+			app_currentTrack = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
 	}
 
 	override fun onSaveInstanceState(outState: Bundle?)
@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity()
 						}
 						if (files != null)
 						{
-							Arrays.sort(files, filesComparator)
+							Arrays.sort(files, app_filesComparator)
 							addToQueue(files.map { track ->
 								Track(track.absolutePath, track.name)
 							})
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity()
 					else
 					{
 						addToQueue(Track(file.absolutePath, file.name))
-						playTrack(if (_addToTop) 0 else queue.size - 1)
+						playTrack(if (_addToTop) 0 else app_queue.size - 1)
 					}
 				}
 				else
@@ -301,7 +301,7 @@ class MainActivity : AppCompatActivity()
 	private fun setupQueue()
 	{
 		queue_list_view.layoutManager = LinearLayoutManager(this)
-		_queueAdapter = QueueAdapter(this, queue) { position ->
+		_queueAdapter = QueueAdapter(this, app_queue) { position ->
 			playTrack(position)
 		}
 		queue_list_view.adapter = _queueAdapter
@@ -326,16 +326,16 @@ class MainActivity : AppCompatActivity()
 
 				_queueChanged = true
 
-				if (fromPosition == currentTrack)
+				if (fromPosition == app_currentTrack)
 				{
-					currentTrack = toPosition
+					app_currentTrack = toPosition
 				}
-				else if (toPosition == currentTrack)
+				else if (toPosition == app_currentTrack)
 				{
-					if (fromPosition < currentTrack)
-						currentTrack--
-					else if (fromPosition > currentTrack)
-						currentTrack++
+					if (fromPosition < app_currentTrack)
+						app_currentTrack--
+					else if (fromPosition > app_currentTrack)
+						app_currentTrack++
 				}
 
 				return true
@@ -344,46 +344,46 @@ class MainActivity : AppCompatActivity()
 			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
 			{
 				val position = viewHolder.adapterPosition
-				queue.removeAt(position)
+				app_queue.removeAt(position)
 				_queueChanged = true
 				_queueAdapter.notifyItemRemoved(position)
 
-				if (position < currentTrack)
+				if (position < app_currentTrack)
 				{
-					currentTrack--
+					app_currentTrack--
 				}
-				else if (position == currentTrack)
+				else if (position == app_currentTrack)
 				{
 					// we've removed currently selected track
 					// select next track and notify service (it'll know if it needs to be played)
 					when
 					{
-						position < queue.size ->
+						position < app_queue.size ->
 						{
 							// removed track wasn't last - select next track in queue
 							// no need to change currentTrack
-							if (mediaPlaybackServiceStarted && _service != null)
+							if (app_mediaPlaybackServiceStarted && _service != null)
 								_service?.playTrack(false)
 
-							_queueAdapter.notifyItemChanged(currentTrack)
+							_queueAdapter.notifyItemChanged(app_currentTrack)
 						}
-						queue.size > 0 ->
+						app_queue.size > 0 ->
 						{
 							// removed track was last - select first track in queue (if any tracks exist)
-							currentTrack = 0
+							app_currentTrack = 0
 
-							if (mediaPlaybackServiceStarted && _service != null)
+							if (app_mediaPlaybackServiceStarted && _service != null)
 							_service?.playTrack(false)
 
-							_queueAdapter.notifyItemChanged(currentTrack)
+							_queueAdapter.notifyItemChanged(app_currentTrack)
 						}
 						else ->
 						{
 							// no other track available
-							if (mediaPlaybackServiceStarted && _service != null)
+							if (app_mediaPlaybackServiceStarted && _service != null)
 								_service?.end()
 
-							currentTrack = RecyclerView.NO_POSITION
+							app_currentTrack = RecyclerView.NO_POSITION
 						}
 					}
 				}
@@ -397,13 +397,13 @@ class MainActivity : AppCompatActivity()
 	{
 		if (!_addToTop)
 		{
-			queue.add(track)
-			_queueAdapter.notifyItemInserted(queue.size - 1)
+			app_queue.add(track)
+			_queueAdapter.notifyItemInserted(app_queue.size - 1)
 		}
 		else
 		{
-			queue.add(0, track)
-			if (currentTrack >= 0) currentTrack++
+			app_queue.add(0, track)
+			if (app_currentTrack >= 0) app_currentTrack++
 			_queueAdapter.notifyItemInserted(0)
 		}
 		_queueChanged = true
@@ -413,13 +413,13 @@ class MainActivity : AppCompatActivity()
 	{
 		if (!_addToTop)
 		{
-			queue.addAll(trackList)
-			_queueAdapter.notifyItemRangeInserted(queue.size - trackList.size, trackList.size)
+			app_queue.addAll(trackList)
+			_queueAdapter.notifyItemRangeInserted(app_queue.size - trackList.size, trackList.size)
 		}
 		else
 		{
-			queue.addAll(0, trackList)
-			if (currentTrack >= 0) currentTrack += trackList.size
+			app_queue.addAll(0, trackList)
+			if (app_currentTrack >= 0) app_currentTrack += trackList.size
 			_queueAdapter.notifyItemRangeInserted(0, trackList.size)
 		}
 		_queueChanged = true
@@ -427,12 +427,12 @@ class MainActivity : AppCompatActivity()
 
 	private fun playTrack(newPosition: Int)
 	{
-		val oldPos = currentTrack
+		val oldPos = app_currentTrack
 		_queueAdapter.notifyItemChanged(oldPos)
-		currentTrack = newPosition
-		_queueAdapter.notifyItemChanged(currentTrack)
+		app_currentTrack = newPosition
+		_queueAdapter.notifyItemChanged(app_currentTrack)
 
-		if (!mediaPlaybackServiceStarted || _service == null)
+		if (!app_mediaPlaybackServiceStarted || _service == null)
 		{
 			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
 			intent.action = ACTION_START_PLAYBACK_SERVICE
@@ -540,7 +540,7 @@ class MainActivity : AppCompatActivity()
 					)
 				}
 
-				list.sortWith(filesAndDirsComparator)
+				list.sortWith(app_filesAndDirsComparator)
 				_dirList.clear()
 				_dirList.addAll(list)
 				_explorerAdapter.notifyDataSetChanged()
@@ -573,52 +573,52 @@ class MainActivity : AppCompatActivity()
 			}
 			R.id.action_clearprev ->
 			{
-				if (currentTrack != RecyclerView.NO_POSITION && currentTrack > 0)
+				if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack > 0)
 				{
 					// there are items to clear at the start
 
-					Toast.makeText(this, getString(R.string.cleared_n_tracks, currentTrack), Toast.LENGTH_SHORT).show()
+					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_currentTrack), Toast.LENGTH_SHORT).show()
 
-					for (i in 0 until currentTrack)
-						queue.removeAt(0)
+					for (i in 0 until app_currentTrack)
+						app_queue.removeAt(0)
 
-					val removedCnt = currentTrack
-					currentTrack = 0
+					val removedCnt = app_currentTrack
+					app_currentTrack = 0
 					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
 					_queueChanged = true
 				}
 			}
 			R.id.action_clearall ->
 			{
-				if (queue.size > 0)
+				if (app_queue.size > 0)
 				{
-					Toast.makeText(this, getString(R.string.cleared_n_tracks, queue.size), Toast.LENGTH_SHORT).show()
+					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size), Toast.LENGTH_SHORT).show()
 
-					if (mediaPlaybackServiceStarted && _service != null)
+					if (app_mediaPlaybackServiceStarted && _service != null)
 						_service?.end()
 
-					val removedCnt = queue.size
-					queue.clear()
+					val removedCnt = app_queue.size
+					app_queue.clear()
 
-					currentTrack = RecyclerView.NO_POSITION
+					app_currentTrack = RecyclerView.NO_POSITION
 					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
 					_queueChanged = true
 				}
 			}
 			R.id.action_clearafter ->
 			{
-				if (currentTrack != RecyclerView.NO_POSITION && currentTrack < queue.size - 1)
+				if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack < app_queue.size - 1)
 				{
 					// there are items to clear at the end
 
-					Toast.makeText(this, getString(R.string.cleared_n_tracks, queue.size - 1 - currentTrack), Toast.LENGTH_SHORT).show()
+					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size - 1 - app_currentTrack), Toast.LENGTH_SHORT).show()
 
-					val removedCnt = queue.size - currentTrack
-					val removedFromIdx = currentTrack + 1
-					for (i in queue.size - 1 downTo currentTrack + 1)
-						queue.removeAt(i)
+					val removedCnt = app_queue.size - app_currentTrack
+					val removedFromIdx = app_currentTrack + 1
+					for (i in app_queue.size - 1 downTo app_currentTrack + 1)
+						app_queue.removeAt(i)
 
-					currentTrack = queue.size - 1
+					app_currentTrack = app_queue.size - 1
 					_queueAdapter.notifyItemRangeRemoved(removedFromIdx, removedCnt)
 					_queueChanged = true
 				}
@@ -675,7 +675,7 @@ class MainActivity : AppCompatActivity()
 
 			if (list != null)
 			{
-				Arrays.sort(list, filesAndDirsComparator)
+				Arrays.sort(list, app_filesAndDirsComparator)
 				_dirList.clear()
 				_dirList.addAll(list)
 				_explorerAdapter.notifyDataSetChanged()
@@ -707,10 +707,10 @@ class MainActivity : AppCompatActivity()
 	override fun onPause()
 	{
 		// unbind service
-		if(mediaPlaybackServiceStarted && _service != null)
+		if(app_mediaPlaybackServiceStarted && _service != null)
 			unbindService(_serviceConn)
 
-		_lastSelectedTrack = currentTrack
+		_lastSelectedTrack = app_currentTrack
 
 		// save to shared prefs
 		with(PreferenceManager.getDefaultSharedPreferences(this).edit())
@@ -722,11 +722,11 @@ class MainActivity : AppCompatActivity()
 					putString(PREFERENCE_BOOKMARKS, gson.toJson(_bookmarks))
 
 				if(_queueChanged)
-					putString(PREFERENCE_QUEUE, gson.toJson(queue))
+					putString(PREFERENCE_QUEUE, gson.toJson(app_queue))
 			}
 			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
-			putInt(PREFERENCE_CURRENTTRACK, currentTrack)
+			putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
 			apply()
 		}
 

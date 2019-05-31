@@ -8,9 +8,9 @@ class App: Application()
 {
 	companion object
 	{
-		var currentTrack: Int = RecyclerView.NO_POSITION
-		lateinit var queue: MutableList<Track>
-		var mediaPlaybackServiceStarted = false
+		var app_currentTrack: Int = RecyclerView.NO_POSITION
+		lateinit var app_queue: MutableList<Track>
+		var app_mediaPlaybackServiceStarted = false
 
 		const val REQUEST_READ_STORAGE = 42
 
@@ -76,7 +76,7 @@ class App: Application()
 			"Pink",
 			"Macintosh Plus")
 
-		val filesAndDirsComparator = Comparator<File>{ a, b ->
+		val app_filesAndDirsComparator = Comparator<File>{ a, b ->
 			when
 			{
 				a.isFile && b.isDirectory -> 1
@@ -85,7 +85,7 @@ class App: Application()
 			}
 		}
 
-		val filesComparator = Comparator<File>{ a, b ->
+		val app_filesComparator = Comparator<File>{ a, b ->
 			a.name.compareTo(b.name, true)
 		}
 	}

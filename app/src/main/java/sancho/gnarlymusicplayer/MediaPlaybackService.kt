@@ -21,9 +21,9 @@ import sancho.gnarlymusicplayer.App.Companion.ACTION_STOP_PLAYBACK_SERVICE
 import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_CHANNEL_ID
 import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_ID
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
-import sancho.gnarlymusicplayer.App.Companion.currentTrack
-import sancho.gnarlymusicplayer.App.Companion.mediaPlaybackServiceStarted
-import sancho.gnarlymusicplayer.App.Companion.queue
+import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
+import sancho.gnarlymusicplayer.App.Companion.app_mediaPlaybackServiceStarted
+import sancho.gnarlymusicplayer.App.Companion.app_queue
 import java.io.IOException
 
 class MediaPlaybackService : Service()
@@ -34,7 +34,7 @@ class MediaPlaybackService : Service()
 	private lateinit var _remoteViewBig: RemoteViews
 	private val _binder = LocalBinder()
 	private val _track: Track
-		get() = if (currentTrack < queue.size) queue[currentTrack] else Track("error", "error")
+		get() = if (app_currentTrack < app_queue.size) app_queue[app_currentTrack] else Track("error", "error")
 
 	inner class LocalBinder : Binder()
 	{
@@ -61,7 +61,7 @@ class MediaPlaybackService : Service()
 		{
 			intent.action == ACTION_START_PLAYBACK_SERVICE ->
 			{
-				if(!mediaPlaybackServiceStarted)
+				if(!app_mediaPlaybackServiceStarted)
 				{
 					// first service call
 
@@ -82,7 +82,7 @@ class MediaPlaybackService : Service()
 
 					startForeground(NOTIFICATION_ID, makeNotification())
 
-					mediaPlaybackServiceStarted = true
+					app_mediaPlaybackServiceStarted = true
 				}
 				else
 				{
@@ -97,9 +97,9 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_PREV_TRACK ->
 			{
-				val oldPos = currentTrack
-				currentTrack--
-				if (currentTrack < 0) currentTrack = queue.size - 1
+				val oldPos = app_currentTrack
+				app_currentTrack--
+				if (app_currentTrack < 0) app_currentTrack = app_queue.size - 1
 
 				if(_binder.isBinderAlive)
 					_binder.listeners.updateQueueRecycler(oldPos)
@@ -120,7 +120,7 @@ class MediaPlaybackService : Service()
 				// SAVE MEEEEEEE (can't wake up)
 				with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit())
 				{
-					putInt(PREFERENCE_CURRENTTRACK, currentTrack)
+					putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
 					apply()
 				}
 
@@ -201,8 +201,8 @@ class MediaPlaybackService : Service()
 
 	private fun nextTrack(forcePlay: Boolean)
 	{
-		val oldPos = currentTrack
-		currentTrack = (currentTrack + 1) % queue.size
+		val oldPos = app_currentTrack
+		app_currentTrack = (app_currentTrack + 1) % app_queue.size
 
 		if(_binder.isBinderAlive)
 			_binder.listeners.updateQueueRecycler(oldPos)
@@ -247,7 +247,7 @@ class MediaPlaybackService : Service()
 		_player.stop()
 		_player.release()
 
-		mediaPlaybackServiceStarted = false
+		app_mediaPlaybackServiceStarted = false
 		stopForeground(true)
 		stopSelf()
 	}

@@ -8,7 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
-import sancho.gnarlymusicplayer.App.Companion.currentTrack
+import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.Track
 import java.util.Collections.swap
@@ -38,7 +38,7 @@ class QueueAdapter(
 		{
 			itemView.queue_text.text = bookmark.name
 
-			itemView.isSelected = currentTrack == adapterPosition
+			itemView.isSelected = app_currentTrack == adapterPosition
 
 			itemView.setOnClickListener {cliccListener(adapterPosition)}
 
