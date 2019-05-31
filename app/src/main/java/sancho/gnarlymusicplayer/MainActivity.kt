@@ -198,6 +198,8 @@ class MainActivity : AppCompatActivity()
 							addToQueue(files.map { track ->
 								Track(track.absolutePath, track.name)
 							})
+
+							Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
 						}
 						else
 							Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
