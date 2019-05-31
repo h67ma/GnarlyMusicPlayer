@@ -492,6 +492,7 @@ class MainActivity : AppCompatActivity()
 
 		val searchThing = actionSearch.actionView as SearchView
 		searchThing.queryHint = getString(R.string.search_bar_hint)
+		searchThing.maxWidth = Int.MAX_VALUE
 
 		actionSearch.setOnActionExpandListener(object: MenuItem.OnActionExpandListener
 		{
