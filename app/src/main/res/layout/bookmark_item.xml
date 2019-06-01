@@ -19,6 +19,8 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:textSize="18sp"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
 </LinearLayout>
