@@ -7,6 +7,7 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
+import android.os.PowerManager
 import android.preference.PreferenceManager
 import android.widget.RemoteViews
 import android.widget.Toast
@@ -68,6 +69,7 @@ class MediaPlaybackService : Service()
 					_player = MediaPlayer()
 					_player.isLooping = false
 					_player.setOnCompletionListener { nextTrack(true) }
+					_player.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
 
 					try
 					{
