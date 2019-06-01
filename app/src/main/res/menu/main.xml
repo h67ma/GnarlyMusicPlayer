@@ -39,7 +39,7 @@
 
     <item
         android:id="@+id/action_setcolor"
-        android:title="Set accent color"
+        android:title="Set theme"
         app:showAsAction="never"/>
 
     <item
