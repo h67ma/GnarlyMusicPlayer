@@ -65,9 +65,7 @@ class MainActivity : AppCompatActivity()
 
 	private var _accentColorIdx: Int = 0
 
-	private var _optionsMenu: Menu? = null
 	private lateinit var _actionSearch: MenuItem
-	private var _addToTop: Boolean = false
 
 	private var _searchResultsOpen = false
 
@@ -208,7 +206,7 @@ class MainActivity : AppCompatActivity()
 					else
 					{
 						addToQueue(Track(file.absolutePath, file.name))
-						playTrack(if (_addToTop) 0 else app_queue.size - 1)
+						playTrack(app_queue.size - 1)
 					}
 				}
 				else
@@ -398,33 +396,15 @@ class MainActivity : AppCompatActivity()
 
 	private fun addToQueue(track: Track)
 	{
-		if (!_addToTop)
-		{
-			app_queue.add(track)
-			_queueAdapter.notifyItemInserted(app_queue.size - 1)
-		}
-		else
-		{
-			app_queue.add(0, track)
-			if (app_currentTrack >= 0) app_currentTrack++
-			_queueAdapter.notifyItemInserted(0)
-		}
+		app_queue.add(track)
+		_queueAdapter.notifyItemInserted(app_queue.size - 1)
 		_queueChanged = true
 	}
 
 	private fun addToQueue(trackList: List<Track>)
 	{
-		if (!_addToTop)
-		{
-			app_queue.addAll(trackList)
-			_queueAdapter.notifyItemRangeInserted(app_queue.size - trackList.size, trackList.size)
-		}
-		else
-		{
-			app_queue.addAll(0, trackList)
-			if (app_currentTrack >= 0) app_currentTrack += trackList.size
-			_queueAdapter.notifyItemRangeInserted(0, trackList.size)
-		}
+		app_queue.addAll(trackList)
+		_queueAdapter.notifyItemRangeInserted(app_queue.size - trackList.size, trackList.size)
 		_queueChanged = true
 	}
 
@@ -478,16 +458,13 @@ class MainActivity : AppCompatActivity()
 	// adds items to toolbar
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
 	{
-		_optionsMenu = menu
 		menuInflater.inflate(R.menu.main, menu)
-
-		// don't show "clear queue" header
-		menu.findItem(R.id.menu_clearqueue)?.subMenu?.clearHeader()
 
 		// search thing
 		_actionSearch = menu.findItem(R.id.action_search)
-		val actionAddTopBottom = menu.findItem(R.id.action_addtopbottom)
-		val actionClear = menu.findItem(R.id.menu_clearqueue)
+		val actionClearPrev = menu.findItem(R.id.action_clearprev)
+		val actionClearAll = menu.findItem(R.id.action_clearall)
+		val actionClearAfter = menu.findItem(R.id.action_clearafter)
 		val actionSetColor = menu.findItem(R.id.action_setcolor)
 		val actionAbout = menu.findItem(R.id.action_about)
 
@@ -500,8 +477,9 @@ class MainActivity : AppCompatActivity()
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
 			{
-				actionAddTopBottom.isVisible = true
-				actionClear.isVisible = true
+				actionClearPrev.isVisible = true
+				actionClearAll.isVisible = true
+				actionClearAfter.isVisible = true
 				actionSetColor.isVisible = true
 				actionAbout.isVisible = true
 				updateDirectoryView(_currentDir, true)
@@ -511,8 +489,9 @@ class MainActivity : AppCompatActivity()
 
 			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
 			{
-				actionAddTopBottom.isVisible = false
-				actionClear.isVisible = false
+				actionClearPrev.isVisible = false
+				actionClearAll.isVisible = false
+				actionClearAfter.isVisible = false
 				actionSetColor.isVisible = false
 				actionAbout.isVisible = false
 				return true
@@ -567,14 +546,6 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			R.id.action_addtopbottom ->
-			{
-				_addToTop = !_addToTop
-				_optionsMenu?.getItem(1)?.run{
-					setIcon(if (_addToTop) R.drawable.to_top else R.drawable.to_bottom)
-					setChecked(_addToTop)
-				}
-			}
 			R.id.action_clearprev ->
 			{
 				if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack > 0)
