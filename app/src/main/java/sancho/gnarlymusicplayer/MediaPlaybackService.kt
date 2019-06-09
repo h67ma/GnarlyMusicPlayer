@@ -9,6 +9,9 @@ import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
 import android.preference.PreferenceManager
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -37,6 +40,10 @@ class MediaPlaybackService : Service()
 	private val _track: Track
 		get() = if (app_currentTrack < app_queue.size) app_queue[app_currentTrack] else Track("error", "error")
 
+	private lateinit var _mediaSession: MediaSessionCompat
+	private lateinit var _playbackStateBuilder: PlaybackStateCompat.Builder
+	private lateinit var _sessionCallback: MediaSessionCompat.Callback
+
 	inner class LocalBinder : Binder()
 	{
 		lateinit var listeners: BoundServiceListeners
@@ -54,6 +61,31 @@ class MediaPlaybackService : Service()
 		super.onCreate()
 
 		prepareNotifications()
+
+		_mediaSession = MediaSessionCompat(applicationContext, "shirley")
+
+		_sessionCallback = object: MediaSessionCompat.Callback()
+		{
+			override fun onSkipToNext()
+			{
+				nextTrack(false)
+				super.onSkipToNext()
+			}
+
+			override fun onSkipToPrevious()
+			{
+				prevTrack()
+				super.onSkipToPrevious()
+			}
+		}
+		_mediaSession.setCallback(_sessionCallback)
+
+		_mediaSession.isActive = true
+
+		_playbackStateBuilder = PlaybackStateCompat.Builder()
+			.setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me???????
+			.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
+		_mediaSession.setPlaybackState(_playbackStateBuilder.build())
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -99,14 +131,7 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_PREV_TRACK ->
 			{
-				val oldPos = app_currentTrack
-				app_currentTrack--
-				if (app_currentTrack < 0) app_currentTrack = app_queue.size - 1
-
-				if(_binder.isBinderAlive)
-					_binder.listeners.updateQueueRecycler(oldPos)
-
-				playTrack(false)
+				_sessionCallback.onSkipToPrevious()
 			}
 			intent.action == ACTION_PLAYPAUSE ->
 			{
@@ -114,7 +139,7 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_NEXT_TRACK ->
 			{
-				nextTrack(false)
+				_sessionCallback.onSkipToNext()
 			}
 			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
 			{
@@ -199,6 +224,18 @@ class MediaPlaybackService : Service()
 	override fun onBind(intent: Intent): IBinder?
 	{
 		return _binder
+	}
+
+	private fun prevTrack()
+	{
+		val oldPos = app_currentTrack
+		app_currentTrack--
+		if (app_currentTrack < 0) app_currentTrack = app_queue.size - 1
+
+		if(_binder.isBinderAlive)
+			_binder.listeners.updateQueueRecycler(oldPos)
+
+		playTrack(false)
 	}
 
 	private fun nextTrack(forcePlay: Boolean)
