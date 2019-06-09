@@ -3,7 +3,9 @@ package sancho.gnarlymusicplayer
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
@@ -32,16 +34,36 @@ import java.io.IOException
 class MediaPlaybackService : Service()
 {
 	private lateinit var _player: MediaPlayer
+
 	private lateinit var _notification: NotificationCompat.Builder
 	private lateinit var _remoteViewSmall: RemoteViews
 	private lateinit var _remoteViewBig: RemoteViews
-	private val _binder = LocalBinder()
+
 	private val _track: Track
 		get() = if (app_currentTrack < app_queue.size) app_queue[app_currentTrack] else Track("error", "error")
 
 	private lateinit var _mediaSession: MediaSessionCompat
-	private lateinit var _playbackStateBuilder: PlaybackStateCompat.Builder
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
+	private lateinit var _audioManager: AudioManager
+	private val _afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+		when (focusChange) {
+			AudioManager.AUDIOFOCUS_LOSS -> {
+				_sessionCallback.onPause()
+			}
+			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+				_sessionCallback.onPause()
+			}
+			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+				_audioManager.adjustVolume(AudioManager.ADJUST_LOWER, 0) // does this work?
+			}
+			AudioManager.AUDIOFOCUS_GAIN -> {
+				_audioManager.adjustVolume(AudioManager.ADJUST_RAISE, 0) // does this work?
+				_sessionCallback.onPlay()
+			}
+		}
+	}
+
+	private val _binder = LocalBinder()
 
 	inner class LocalBinder : Binder()
 	{
@@ -55,57 +77,20 @@ class MediaPlaybackService : Service()
 		}
 	}
 
+	override fun onBind(intent: Intent): IBinder?
+	{
+		return _binder
+	}
+
 	override fun onCreate()
 	{
 		super.onCreate()
 
+		_audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
 		prepareNotifications()
 
-		_mediaSession = MediaSessionCompat(applicationContext, "shirley")
-
-		_sessionCallback = object: MediaSessionCompat.Callback()
-		{
-			override fun onSkipToNext()
-			{
-				nextTrack(false)
-			}
-
-			override fun onSkipToPrevious()
-			{
-				prevTrack()
-			}
-
-			override fun onPause()
-			{
-				_player.pause()
-				updateNotification()
-			}
-
-			override fun onPlay()
-			{
-				_player.start()
-				updateNotification()
-			}
-
-			override fun onStop()
-			{
-				end(true)
-				_mediaSession.isActive = false
-			}
-		}
-		_mediaSession.setCallback(_sessionCallback)
-
-		_mediaSession.isActive = true
-
-		_playbackStateBuilder = PlaybackStateCompat.Builder()
-			.setActions(
-				PlaybackStateCompat.ACTION_PLAY or
-				PlaybackStateCompat.ACTION_PAUSE or
-				PlaybackStateCompat.ACTION_STOP or
-				PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-				PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me kotlin???????
-			.setState(PlaybackStateCompat.STATE_STOPPED, 0L, 1f)
-		_mediaSession.setPlaybackState(_playbackStateBuilder.build())
+		prepareMediaSession()
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -127,7 +112,7 @@ class MediaPlaybackService : Service()
 					{
 						_player.setDataSource(_track.path)
 						_player.prepare()
-						_player.start()
+						_sessionCallback.onPlay()
 					}
 					catch (_: IOException)
 					{
@@ -240,9 +225,70 @@ class MediaPlaybackService : Service()
 		}
 	}
 
-	override fun onBind(intent: Intent): IBinder?
+	private fun prepareMediaSession()
 	{
-		return _binder
+		val playbackStateBuilder = PlaybackStateCompat.Builder()
+			.setActions(
+				PlaybackStateCompat.ACTION_PLAY or
+						PlaybackStateCompat.ACTION_PAUSE or
+						PlaybackStateCompat.ACTION_STOP or
+						PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+						PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me kotlin???????
+			.setState(PlaybackStateCompat.STATE_STOPPED, 0L, 0f)
+
+		_mediaSession = MediaSessionCompat(applicationContext, "shirley")
+
+		_sessionCallback = object: MediaSessionCompat.Callback()
+		{
+			override fun onSkipToNext()
+			{
+				nextTrack(false)
+			}
+
+			override fun onSkipToPrevious()
+			{
+				prevTrack()
+			}
+
+			override fun onPause()
+			{
+				_player.pause()
+				updateNotification()
+				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
+				_mediaSession.setPlaybackState(playbackStateBuilder.build())
+				_audioManager.abandonAudioFocus(_afChangeListener)
+			}
+
+			override fun onPlay()
+			{
+				val result: Int = _audioManager.requestAudioFocus(
+					_afChangeListener,
+					AudioManager.STREAM_MUSIC,
+					AudioManager.AUDIOFOCUS_GAIN
+				)
+
+				if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+					_player.start()
+
+					if (app_mediaPlaybackServiceStarted) updateNotification() // don't update if it's first service call
+
+					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
+					_mediaSession.setPlaybackState(playbackStateBuilder.build())
+				}
+			}
+
+			override fun onStop()
+			{
+				_audioManager.abandonAudioFocus(_afChangeListener)
+				_mediaSession.isActive = false
+				end(true)
+			}
+		}
+		_mediaSession.setCallback(_sessionCallback)
+
+		_mediaSession.isActive = true
+
+		_mediaSession.setPlaybackState(playbackStateBuilder.build())
 	}
 
 	private fun nextTrack(forcePlay: Boolean)
@@ -276,14 +322,12 @@ class MediaPlaybackService : Service()
 			_player.reset()
 			_player.setDataSource(_track.path)
 			_player.prepare()
-			if (forcePlay || wasPlaying) _player.start()
+			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
 		}
 		catch(_: IOException)
 		{
 			Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 		}
-
-		updateNotification()
 	}
 
 	fun playPause()
