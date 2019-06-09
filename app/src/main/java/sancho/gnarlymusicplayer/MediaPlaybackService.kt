@@ -246,7 +246,7 @@ class MediaPlaybackService : Service()
 
 	fun end()
 	{
-		_player.stop()
+		_player.reset()
 		_player.release()
 
 		app_mediaPlaybackServiceStarted = false
