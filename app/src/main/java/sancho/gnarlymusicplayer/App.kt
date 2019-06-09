@@ -55,7 +55,6 @@ class App: Application()
 		)
 
 		val COLOR_RESOURCES = arrayOf(
-			R.style.AppThemeBlack,
 			R.style.AppThemeGreen,
 			R.style.AppThemeBlu,
 			R.style.AppThemeCyan,
@@ -66,7 +65,6 @@ class App: Application()
 			R.style.AppThemeMacintoshPlus)
 
 		val COLOR_NAMES = arrayOf(
-			"Blacc",
 			"Poison",
 			"Blu",
 			"Ice cold",
