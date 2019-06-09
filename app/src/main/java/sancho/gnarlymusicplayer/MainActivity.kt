@@ -364,7 +364,7 @@ class MainActivity : AppCompatActivity()
 							// removed track wasn't last - select next track in queue
 							// no need to change currentTrack
 							if (app_mediaPlaybackServiceStarted && _service != null)
-								_service?.playTrack(false)
+								_service?.setTrack(false)
 
 							_queueAdapter.notifyItemChanged(app_currentTrack)
 						}
@@ -374,7 +374,7 @@ class MainActivity : AppCompatActivity()
 							app_currentTrack = 0
 
 							if (app_mediaPlaybackServiceStarted && _service != null)
-							_service?.playTrack(false)
+							_service?.setTrack(false)
 
 							_queueAdapter.notifyItemChanged(app_currentTrack)
 						}
@@ -382,7 +382,7 @@ class MainActivity : AppCompatActivity()
 						{
 							// no other track available
 							if (app_mediaPlaybackServiceStarted && _service != null)
-								_service?.end()
+								_service?.end(false)
 
 							app_currentTrack = RecyclerView.NO_POSITION
 						}
@@ -428,7 +428,7 @@ class MainActivity : AppCompatActivity()
 			if (oldPos == newPosition)
 				_service?.playPause()
 			else
-				_service?.playTrack(true)
+				_service?.setTrack(true)
 		}
 	}
 
@@ -570,7 +570,7 @@ class MainActivity : AppCompatActivity()
 					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size), Toast.LENGTH_SHORT).show()
 
 					if (app_mediaPlaybackServiceStarted && _service != null)
-						_service?.end()
+						_service?.end(false)
 
 					val removedCnt = app_queue.size
 					app_queue.clear()

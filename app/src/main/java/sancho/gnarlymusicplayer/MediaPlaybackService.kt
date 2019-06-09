@@ -11,7 +11,6 @@ import android.os.PowerManager
 import android.preference.PreferenceManager
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -69,13 +68,29 @@ class MediaPlaybackService : Service()
 			override fun onSkipToNext()
 			{
 				nextTrack(false)
-				super.onSkipToNext()
 			}
 
 			override fun onSkipToPrevious()
 			{
 				prevTrack()
-				super.onSkipToPrevious()
+			}
+
+			override fun onPause()
+			{
+				_player.pause()
+				updateNotification()
+			}
+
+			override fun onPlay()
+			{
+				_player.start()
+				updateNotification()
+			}
+
+			override fun onStop()
+			{
+				end(true)
+				_mediaSession.isActive = false
 			}
 		}
 		_mediaSession.setCallback(_sessionCallback)
@@ -83,8 +98,13 @@ class MediaPlaybackService : Service()
 		_mediaSession.isActive = true
 
 		_playbackStateBuilder = PlaybackStateCompat.Builder()
-			.setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me???????
-			.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
+			.setActions(
+				PlaybackStateCompat.ACTION_PLAY or
+				PlaybackStateCompat.ACTION_PAUSE or
+				PlaybackStateCompat.ACTION_STOP or
+				PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+				PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me kotlin???????
+			.setState(PlaybackStateCompat.STATE_STOPPED, 0L, 1f)
 		_mediaSession.setPlaybackState(_playbackStateBuilder.build())
 	}
 
@@ -121,13 +141,13 @@ class MediaPlaybackService : Service()
 				else
 				{
 					// service already running
-					playTrack(true)
+					_sessionCallback.onPlay()
 				}
 			}
 			intent.action == ACTION_REPLAY_TRACK ->
 			{
 				// seekTo(0) doesn't actually return to start of track :()
-				playTrack(true)
+				setTrack(true)
 			}
 			intent.action == ACTION_PREV_TRACK ->
 			{
@@ -143,15 +163,7 @@ class MediaPlaybackService : Service()
 			}
 			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
 			{
-				// save current track
-				// SAVE MEEEEEEE (can't wake up)
-				with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit())
-				{
-					putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
-					apply()
-				}
-
-				end()
+				_sessionCallback.onStop()
 			}
 		}
 
@@ -221,9 +233,27 @@ class MediaPlaybackService : Service()
 		return _notification.build()
 	}
 
+	private fun updateNotification()
+	{
+		with(NotificationManagerCompat.from(applicationContext)) {
+			notify(NOTIFICATION_ID, makeNotification())
+		}
+	}
+
 	override fun onBind(intent: Intent): IBinder?
 	{
 		return _binder
+	}
+
+	private fun nextTrack(forcePlay: Boolean)
+	{
+		val oldPos = app_currentTrack
+		app_currentTrack = (app_currentTrack + 1) % app_queue.size
+
+		if(_binder.isBinderAlive)
+			_binder.listeners.updateQueueRecycler(oldPos)
+
+		setTrack(forcePlay)
 	}
 
 	private fun prevTrack()
@@ -235,21 +265,10 @@ class MediaPlaybackService : Service()
 		if(_binder.isBinderAlive)
 			_binder.listeners.updateQueueRecycler(oldPos)
 
-		playTrack(false)
+		setTrack(false)
 	}
 
-	private fun nextTrack(forcePlay: Boolean)
-	{
-		val oldPos = app_currentTrack
-		app_currentTrack = (app_currentTrack + 1) % app_queue.size
-
-		if(_binder.isBinderAlive)
-			_binder.listeners.updateQueueRecycler(oldPos)
-
-		playTrack(forcePlay)
-	}
-
-	fun playTrack(forcePlay: Boolean)
+	fun setTrack(forcePlay: Boolean)
 	{
 		try
 		{
@@ -264,25 +283,28 @@ class MediaPlaybackService : Service()
 			Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 		}
 
-		with(NotificationManagerCompat.from(applicationContext)) {
-			notify(NOTIFICATION_ID, makeNotification())
-		}
+		updateNotification()
 	}
 
 	fun playPause()
 	{
 		if (_player.isPlaying)
-			_player.pause()
+			_sessionCallback.onPause()
 		else
-			_player.start()
-
-		with(NotificationManagerCompat.from(applicationContext)) {
-			notify(NOTIFICATION_ID, makeNotification())
-		}
+			_sessionCallback.onPlay()
 	}
 
-	fun end()
+	fun end(saveTrack: Boolean)
 	{
+		if (saveTrack)
+		{
+			// SAVE MEEEEEEE (can't wake up)
+			with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()) {
+				putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
+				apply()
+			}
+		}
+
 		_player.reset()
 		_player.release()
 
