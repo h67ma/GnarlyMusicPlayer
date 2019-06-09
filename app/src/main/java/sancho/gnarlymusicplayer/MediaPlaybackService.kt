@@ -18,6 +18,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.media.AudioAttributesCompat
+import androidx.media.AudioFocusRequestCompat
+import androidx.media.AudioManagerCompat
 import sancho.gnarlymusicplayer.App.Companion.ACTION_NEXT_TRACK
 import sancho.gnarlymusicplayer.App.Companion.ACTION_PLAYPAUSE
 import sancho.gnarlymusicplayer.App.Companion.ACTION_PREV_TRACK
@@ -62,6 +65,15 @@ class MediaPlaybackService : Service()
 				_sessionCallback.onPlay()
 			}
 		}
+	}
+	private val _focusRequest = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).run {
+		setOnAudioFocusChangeListener(_afChangeListener)
+		setAudioAttributes(AudioAttributesCompat.Builder().run {
+			setUsage(AudioAttributesCompat.USAGE_MEDIA)
+			setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+			build()
+		})
+		build()
 	}
 
 	private val _binder = LocalBinder()
@@ -263,16 +275,12 @@ class MediaPlaybackService : Service()
 				updateNotification()
 				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
 				_mediaSession.setPlaybackState(playbackStateBuilder.build())
-				_audioManager.abandonAudioFocus(_afChangeListener)
+				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
 			}
 
 			override fun onPlay()
 			{
-				val result: Int = _audioManager.requestAudioFocus(
-					_afChangeListener,
-					AudioManager.STREAM_MUSIC,
-					AudioManager.AUDIOFOCUS_GAIN
-				)
+				val result = AudioManagerCompat.requestAudioFocus(_audioManager, _focusRequest)
 
 				if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 					_player.start()
@@ -286,7 +294,8 @@ class MediaPlaybackService : Service()
 
 			override fun onStop()
 			{
-				_audioManager.abandonAudioFocus(_afChangeListener)
+				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
+
 				_mediaSession.isActive = false
 				end(true)
 			}
