@@ -1,13 +1,13 @@
 package sancho.gnarlymusicplayer
 
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.preference.PreferenceManager
@@ -15,6 +15,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.RemoteViews
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import sancho.gnarlymusicplayer.App.Companion.ACTION_NEXT_TRACK
@@ -191,7 +192,13 @@ class MediaPlaybackService : Service()
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
 
-		_notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+		val channelId =	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				createNotificationChannel("gnarly_playback", "Gnarly Player Playback Service")
+			} else {
+				NOTIFICATION_CHANNEL_ID
+			}
+
+		_notification = NotificationCompat.Builder(this, channelId)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
 			.setCustomContentView(_remoteViewSmall)
@@ -355,5 +362,16 @@ class MediaPlaybackService : Service()
 		app_mediaPlaybackServiceStarted = false
 		stopForeground(true)
 		stopSelf()
+	}
+
+	@RequiresApi(Build.VERSION_CODES.O)
+	private fun createNotificationChannel(channelId: String, channelName: String): String{
+		val chan = NotificationChannel(channelId,
+			channelName, NotificationManager.IMPORTANCE_NONE)
+		chan.lightColor = Color.GREEN
+		chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+		val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		service.createNotificationChannel(chan)
+		return channelId
 	}
 }
