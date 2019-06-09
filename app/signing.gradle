@@ -1,0 +1,13 @@
+def singingProperties = new Properties()
+singingProperties.load(new FileInputStream(file("release.properties")))
+
+android {
+    signingConfigs {
+        release {
+            keyAlias singingProperties.keyAlias
+            keyPassword singingProperties.keyPass
+            storeFile file(singingProperties.keystorePath)
+            storePassword singingProperties.keystorePass
+        }
+    }
+}
