@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity()
 
 	private var _accentColorIdx: Int = 0
 
-	private lateinit var _actionSearch: MenuItem
+	private var _actionSearch: MenuItem? = null
 
 	private var _searchResultsOpen = false
 
@@ -468,11 +468,11 @@ class MainActivity : AppCompatActivity()
 		val actionSetColor = menu.findItem(R.id.action_setcolor)
 		val actionAbout = menu.findItem(R.id.action_about)
 
-		val searchThing = _actionSearch.actionView as SearchView
+		val searchThing = _actionSearch?.actionView as SearchView
 		searchThing.queryHint = getString(R.string.search_bar_hint)
 		searchThing.maxWidth = Int.MAX_VALUE
 
-		_actionSearch.setOnActionExpandListener(object: MenuItem.OnActionExpandListener
+		_actionSearch?.setOnActionExpandListener(object: MenuItem.OnActionExpandListener
 		{
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
@@ -688,7 +688,7 @@ class MainActivity : AppCompatActivity()
 		_lastSelectedTrack = app_currentTrack
 
 		// collapse searchbar thing
-		_actionSearch.collapseActionView()
+		_actionSearch?.collapseActionView()
 
 		// save to shared prefs
 		with(PreferenceManager.getDefaultSharedPreferences(this).edit())
