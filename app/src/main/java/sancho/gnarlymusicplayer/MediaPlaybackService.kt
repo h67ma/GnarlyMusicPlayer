@@ -1,8 +1,10 @@
 package sancho.gnarlymusicplayer
 
 import android.app.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -49,6 +51,15 @@ class MediaPlaybackService : Service()
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
 	private lateinit var _audioManager: AudioManager
+	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+	private val _noisyAudioReceiver = object : BroadcastReceiver()
+	{
+		override fun onReceive(context: Context?, intent: Intent?)
+		{
+			_sessionCallback.onPause()
+		}
+	}
+	private var _receiverRegistered = false
 	private val _afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
 		when (focusChange) {
 			AudioManager.AUDIOFOCUS_LOSS -> {
@@ -269,15 +280,6 @@ class MediaPlaybackService : Service()
 				prevTrack()
 			}
 
-			override fun onPause()
-			{
-				_player.pause()
-				updateNotification()
-				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
-				_mediaSession.setPlaybackState(playbackStateBuilder.build())
-				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
-			}
-
 			override fun onPlay()
 			{
 				val result = AudioManagerCompat.requestAudioFocus(_audioManager, _focusRequest)
@@ -289,14 +291,28 @@ class MediaPlaybackService : Service()
 
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
 					_mediaSession.setPlaybackState(playbackStateBuilder.build())
+					registerReceiver(_noisyAudioReceiver, _intentFilter)
+					_receiverRegistered = true
 				}
+			}
+
+			override fun onPause()
+			{
+				_player.pause()
+				updateNotification()
+				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
+				_mediaSession.setPlaybackState(playbackStateBuilder.build())
+				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
+				unregisterReceiver(_noisyAudioReceiver)
+				_receiverRegistered = false
 			}
 
 			override fun onStop()
 			{
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
-
+				if (_receiverRegistered) unregisterReceiver(_noisyAudioReceiver)
 				_mediaSession.isActive = false
+
 				end(true)
 			}
 		}
