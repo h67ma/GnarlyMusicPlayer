@@ -11,6 +11,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Easly editable playing queue
 * Simple search
 * Simple bookmarks
+* Media buttons support
 * Designed for convenience and simplicity
 * Customizable accent colour
 * Open source
@@ -27,6 +28,10 @@ This music player is highly inspired by [Folder Music Player](https://play.googl
 In my opinion mobile music player needs just few features, and anything more than that just makes it harder to use - I want to be able to quickly change my playing queue, not watch album art, lyrics, tags, or animations. Most music players on the Play Store are very feature-rich.
 
 This was my first Kotlin project. I'm positively surprised by Kotlin - it has some quirks, like the absence of static keyword, but overall I had much better time working with it than with Java.
+
+# Possible future improvements #
+* Seek bar
+* Fully recursive search && dir add
 
 # Very short Q&A #
 
@@ -56,3 +61,6 @@ Also I'm lazy.
 **A:** Let's just say I don't like that "media layout". Buttons are too small and there's a timer showing how long ago the notification appeared for some reason.
 
 I regret nothing.
+
+# Tested on #
+* wt88047/7.1.2/LineageOS 14.1
