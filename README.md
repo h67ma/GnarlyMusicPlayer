@@ -11,6 +11,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Easly editable playing queue
 * Simple search
 * Simple bookmarks
+* Media buttons support
 * Designed for convenience and simplicity
 * Customizable accent colour
 * Open source
@@ -19,7 +20,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 TODO
 
 # Download #
-[Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/tag/1.0)
+[Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
 
 # Description #
 This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked a few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position of previous dir. I used it for a few years, because I couldn't find any music player that was even half as convenient to use. Finally I made my own music player and I'm very happy with the result.
@@ -27,6 +28,12 @@ This music player is highly inspired by [Folder Music Player](https://play.googl
 In my opinion mobile music player needs just few features, and anything more than that just makes it harder to use - I want to be able to quickly change my playing queue, not watch album art, lyrics, tags, or animations. Most music players on the Play Store are very feature-rich.
 
 This was my first Kotlin project. I'm positively surprised by Kotlin - it has some quirks, like the absence of static keyword, but overall I had much better time working with it than with Java.
+
+I regret nothing.
+
+# Possible future improvements #
+* Seek bar
+* Fully recursive search && dir add
 
 # Very short Q&A #
 
@@ -55,4 +62,5 @@ Also I'm lazy.
 **Q:** Why does the notification use custom layout instead of the standard media one?  
 **A:** Let's just say I don't like that "media layout". Buttons are too small and there's a timer showing how long ago the notification appeared for some reason.
 
-I regret nothing.
+# Tested on #
+* wt88047/7.1.2/LineageOS 14.1
