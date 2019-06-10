@@ -29,6 +29,8 @@ In my opinion mobile music player needs just few features, and anything more tha
 
 This was my first Kotlin project. I'm positively surprised by Kotlin - it has some quirks, like the absence of static keyword, but overall I had much better time working with it than with Java.
 
+I regret nothing.
+
 # Possible future improvements #
 * Seek bar
 * Fully recursive search && dir add
@@ -59,8 +61,6 @@ Also I'm lazy.
 
 **Q:** Why does the notification use custom layout instead of the standard media one?  
 **A:** Let's just say I don't like that "media layout". Buttons are too small and there's a timer showing how long ago the notification appeared for some reason.
-
-I regret nothing.
 
 # Tested on #
 * wt88047/7.1.2/LineageOS 14.1
