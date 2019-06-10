@@ -20,7 +20,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 TODO
 
 # Download #
-[Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/tag/1.0)
+[Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
 
 # Description #
 This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked a few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position of previous dir. I used it for a few years, because I couldn't find any music player that was even half as convenient to use. Finally I made my own music player and I'm very happy with the result.
