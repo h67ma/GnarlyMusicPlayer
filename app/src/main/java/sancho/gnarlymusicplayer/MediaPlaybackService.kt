@@ -73,7 +73,7 @@ class MediaPlaybackService : Service()
 			}
 			AudioManager.AUDIOFOCUS_GAIN -> {
 				_audioManager.adjustVolume(AudioManager.ADJUST_RAISE, 0) // does this work?
-				_sessionCallback.onPlay()
+				playAndUpdateNotification()
 			}
 		}
 	}
@@ -150,7 +150,7 @@ class MediaPlaybackService : Service()
 				else
 				{
 					// service already running
-					_sessionCallback.onPlay()
+					playAndUpdateNotification()
 				}
 			}
 			intent.action == ACTION_REPLAY_TRACK ->
@@ -287,8 +287,6 @@ class MediaPlaybackService : Service()
 				if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 					_player.start()
 
-					if (app_mediaPlaybackServiceStarted) updateNotification() // don't update if it's first service call
-
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
 					_mediaSession.setPlaybackState(playbackStateBuilder.build())
 					registerReceiver(_noisyAudioReceiver, _intentFilter)
@@ -355,6 +353,7 @@ class MediaPlaybackService : Service()
 			_player.setDataSource(_track.path)
 			_player.prepare()
 			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
+			updateNotification()
 		}
 		catch(_: IOException)
 		{
@@ -362,12 +361,18 @@ class MediaPlaybackService : Service()
 		}
 	}
 
+	private fun playAndUpdateNotification()
+	{
+		_sessionCallback.onPlay()
+		updateNotification()
+	}
+
 	fun playPause()
 	{
 		if (_player.isPlaying)
 			_sessionCallback.onPause()
 		else
-			_sessionCallback.onPlay()
+			playAndUpdateNotification()
 	}
 
 	fun end(saveTrack: Boolean)
