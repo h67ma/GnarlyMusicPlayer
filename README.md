@@ -17,7 +17,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Open source
 
 # Demo #
-TODO
+[![video demo](http://img.youtube.com/vi/GRRC5_NENRY/0.jpg)](https://www.youtube.com/watch?v=GRRC5_NENRY)
 
 # Download #
 [Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
