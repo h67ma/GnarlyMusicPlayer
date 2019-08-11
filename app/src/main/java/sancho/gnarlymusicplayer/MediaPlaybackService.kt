@@ -48,6 +48,9 @@ class MediaPlaybackService : Service()
 	private val _track: Track
 		get() = if (app_currentTrack < app_queue.size) app_queue[app_currentTrack] else Track("error", "error")
 
+	val currentPosition: Int
+		get() = _player.currentPosition/1000
+
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
 	private lateinit var _audioManager: AudioManager
@@ -293,6 +296,9 @@ class MediaPlaybackService : Service()
 					registerReceiver(_noisyAudioReceiver, _intentFilter)
 					_receiverRegistered = true
 				}
+
+				if(_binder.isBinderAlive)
+					_binder.listeners.playbackStarted()
 			}
 
 			override fun onPause()
@@ -304,6 +310,9 @@ class MediaPlaybackService : Service()
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
 				unregisterReceiver(_noisyAudioReceiver)
 				_receiverRegistered = false
+
+				if(_binder.isBinderAlive)
+					_binder.listeners.playbackStopped()
 			}
 
 			override fun onStop()
@@ -311,6 +320,9 @@ class MediaPlaybackService : Service()
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
 				if (_receiverRegistered) unregisterReceiver(_noisyAudioReceiver)
 				_mediaSession.isActive = false
+
+				if(_binder.isBinderAlive)
+					_binder.listeners.playbackStopped()
 
 				end(true)
 			}

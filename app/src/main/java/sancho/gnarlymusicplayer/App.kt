@@ -31,6 +31,7 @@ class App: Application()
 
 		const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
 		const val NOTIFICATION_ID = 420
+		const val SEEKBAR_UPDATE_MS = 1000L
 
 		// from https://developer.android.com/guide/topics/media/media-formats
 		val SUPPORTED_FILE_EXTENSIONS = arrayOf(

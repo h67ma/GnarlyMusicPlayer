@@ -23,6 +23,7 @@ import android.content.ComponentName
 import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import android.os.IBinder
 import android.content.ServiceConnection
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.widget.SeekBar
 import sancho.gnarlymusicplayer.App.Companion.ACTION_START_PLAYBACK_SERVICE
@@ -35,6 +36,7 @@ import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_LASTDIR
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_QUEUE
 import sancho.gnarlymusicplayer.App.Companion.REQUEST_READ_STORAGE
+import sancho.gnarlymusicplayer.App.Companion.SEEKBAR_UPDATE_MS
 import sancho.gnarlymusicplayer.App.Companion.SUPPORTED_FILE_EXTENSIONS
 import sancho.gnarlymusicplayer.App.Companion.app_filesAndDirsComparator
 import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
@@ -70,28 +72,36 @@ class MainActivity : AppCompatActivity()
 
 	private var _searchResultsOpen = false
 
+	private val _delayedHandler = Handler()
+	private lateinit var _seekBarUpdater: Runnable
+	private var _holdingSeekBar = false
+
 	private var _service: MediaPlaybackService? = null
 	private val _serviceConn = object : ServiceConnection
 	{
 		override fun onServiceConnected(className: ComponentName, service: IBinder)
 		{
 			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
+				override fun updateQueueRecycler(oldPos: Int)
+				{
+					_queueAdapter.notifyItemChanged(oldPos)
+					_queueAdapter.notifyItemChanged(app_currentTrack)
+				}
+
 				override fun initSeekBar(max: Int)
 				{
 					seek_bar.max = max
 					seek_total_time.text = max.toMinuteSecondString()
 				}
 
-				override fun updateSeekbar(pos: Int)
+				override fun playbackStarted()
 				{
-					seek_bar.progress = pos
-					seek_curr_time.text = pos.toString()
+					_seekBarUpdater.run()
 				}
 
-				override fun updateQueueRecycler(oldPos: Int)
+				override fun playbackStopped()
 				{
-					_queueAdapter.notifyItemChanged(oldPos)
-					_queueAdapter.notifyItemChanged(app_currentTrack)
+					_delayedHandler.removeCallbacks(_seekBarUpdater)
 				}
 			})
 		}
@@ -410,19 +420,38 @@ class MainActivity : AppCompatActivity()
 
 	private fun setupSeekBar()
 	{
+		_seekBarUpdater = Runnable {
+			try
+			{
+				if (!_holdingSeekBar)
+				{
+					val pos = _service?.currentPosition
+					if (pos != null)
+					{
+						seek_bar.progress = pos
+						seek_curr_time.text = pos.toMinuteSecondString()
+					}
+				}
+			}
+			finally
+			{
+				_delayedHandler.postDelayed(_seekBarUpdater, SEEKBAR_UPDATE_MS)
+			}
+		}
+
 		seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener
 		{
 			override fun onStartTrackingTouch(seekbar: SeekBar?)
 			{
-				// TODO disallow programatically changing progress
+				_holdingSeekBar = true
 			}
 
 			override fun onStopTrackingTouch(seekbar: SeekBar)
 			{
-				// TODO allow programatically changing progress
-
 				if (app_mediaPlaybackServiceStarted)
 					_service?.seekTo(seekbar.progress)
+
+				_holdingSeekBar = false
 			}
 
 			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
