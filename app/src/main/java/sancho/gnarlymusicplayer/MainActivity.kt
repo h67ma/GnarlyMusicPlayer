@@ -78,7 +78,8 @@ class MainActivity : AppCompatActivity()
 			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
 				override fun initSeekBar(max: Int)
 				{
-					initSeekBarAndLbl(max)
+					seek_bar.max = max
+					seek_total_time.text = max.toMinuteSecondString()
 				}
 
 				override fun updateSeekbar(pos: Int)
@@ -135,8 +136,7 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onResume()
 
-		if(app_mediaPlaybackServiceStarted)
-			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+		bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
 
 		if (app_currentTrack != _lastSelectedTrack)
 		{
@@ -455,10 +455,6 @@ class MainActivity : AppCompatActivity()
 			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
 			intent.action = ACTION_START_PLAYBACK_SERVICE
 			startService(intent)
-
-			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
-
-			initSeekBarAndLbl(_service?.getTotalDuration() ?: 0)
 		}
 		else
 		{
@@ -467,12 +463,6 @@ class MainActivity : AppCompatActivity()
 			else
 				_service?.setTrack(true)
 		}
-	}
-
-	private fun initSeekBarAndLbl(max: Int)
-	{
-		seek_bar.max = max
-		seek_total_time.text = max.toMinuteSecondString()
 	}
 
 	private fun getStorageDevices()

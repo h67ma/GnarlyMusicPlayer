@@ -136,6 +136,7 @@ class MediaPlaybackService : Service()
 					{
 						_player.setDataSource(_track.path)
 						_player.prepare()
+						initSeekBar()
 						_sessionCallback.onPlay()
 					}
 					catch (_: IOException)
@@ -352,9 +353,7 @@ class MediaPlaybackService : Service()
 			_player.reset()
 			_player.setDataSource(_track.path)
 			_player.prepare()
-
-			if(_binder.isBinderAlive)
-				_binder.listeners.initSeekBar(getTotalDuration())
+			initSeekBar()
 
 			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
 			updateNotification()
@@ -379,10 +378,10 @@ class MediaPlaybackService : Service()
 			playAndUpdateNotification()
 	}
 
-	// returns current song total length in seconds
-	fun getTotalDuration(): Int
+	private fun initSeekBar()
 	{
-		return _player.duration/1000
+		if(_binder.isBinderAlive)
+			_binder.listeners.initSeekBar(_player.duration/1000)
 	}
 
 	fun end(saveTrack: Boolean)
