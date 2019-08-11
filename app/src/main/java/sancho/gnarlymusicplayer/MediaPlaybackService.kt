@@ -384,6 +384,11 @@ class MediaPlaybackService : Service()
 			_binder.listeners.initSeekBar(_player.duration/1000)
 	}
 
+	fun seekTo(sec: Int)
+	{
+		_player.seekTo(sec * 1000)
+	}
+
 	fun end(saveTrack: Boolean)
 	{
 		if (saveTrack)

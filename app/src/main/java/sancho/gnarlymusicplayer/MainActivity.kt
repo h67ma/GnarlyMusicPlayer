@@ -417,9 +417,12 @@ class MainActivity : AppCompatActivity()
 				// TODO disallow programatically changing progress
 			}
 
-			override fun onStopTrackingTouch(seekbar: SeekBar?)
+			override fun onStopTrackingTouch(seekbar: SeekBar)
 			{
 				// TODO allow programatically changing progress
+
+				if (app_mediaPlaybackServiceStarted)
+					_service?.seekTo(seekbar.progress)
 			}
 
 			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
