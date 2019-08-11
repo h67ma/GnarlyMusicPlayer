@@ -42,13 +42,45 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:context=".MainActivity">
+            tools:context=".MainActivity"
+            android:orientation="vertical">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/library_list_view"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:layout_width="match_parent"
-                android:scrollbars="vertical"/>
+                android:scrollbars="vertical"
+                android:layout_weight="1"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/seek_curr_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/no_time"
+                    android:gravity="center"/>
+
+                <SeekBar
+                    android:id="@+id/seek_bar"
+                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:max="0"
+                    android:progressTint="?android:colorPrimary"
+                    android:thumbTint="?android:colorPrimary"/>
+
+                <TextView
+                    android:id="@+id/seek_total_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/no_time"
+                    android:gravity="center"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -24,6 +24,7 @@ import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import android.os.IBinder
 import android.content.ServiceConnection
 import android.preference.PreferenceManager
+import android.widget.SeekBar
 import sancho.gnarlymusicplayer.App.Companion.ACTION_START_PLAYBACK_SERVICE
 import sancho.gnarlymusicplayer.App.Companion.BUNDLE_LASTSELECTEDTRACK
 import sancho.gnarlymusicplayer.App.Companion.COLOR_NAMES
@@ -75,6 +76,17 @@ class MainActivity : AppCompatActivity()
 		override fun onServiceConnected(className: ComponentName, service: IBinder)
 		{
 			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
+				override fun initSeekBar(max: Int)
+				{
+					initSeekBarAndLbl(max)
+				}
+
+				override fun updateSeekbar(pos: Int)
+				{
+					seek_bar.progress = pos
+					seek_curr_time.text = pos.toString()
+				}
+
 				override fun updateQueueRecycler(oldPos: Int)
 				{
 					_queueAdapter.notifyItemChanged(oldPos)
@@ -113,6 +125,8 @@ class MainActivity : AppCompatActivity()
 		setupQueue()
 
 		setupFileList()
+
+		setupSeekBar()
 
 		requestReadPermishon() // check for permissions and initial update of file list
 	}
@@ -394,6 +408,27 @@ class MainActivity : AppCompatActivity()
 		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
+	private fun setupSeekBar()
+	{
+		seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener
+		{
+			override fun onStartTrackingTouch(seekbar: SeekBar?)
+			{
+				// TODO disallow programatically changing progress
+			}
+
+			override fun onStopTrackingTouch(seekbar: SeekBar?)
+			{
+				// TODO allow programatically changing progress
+			}
+
+			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
+			{
+				seek_curr_time.text = progress.toMinuteSecondString()
+			}
+		})
+	}
+
 	private fun addToQueue(track: Track)
 	{
 		app_queue.add(track)
@@ -422,6 +457,8 @@ class MainActivity : AppCompatActivity()
 			startService(intent)
 
 			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+
+			initSeekBarAndLbl(_service?.getTotalDuration() ?: 0)
 		}
 		else
 		{
@@ -430,6 +467,12 @@ class MainActivity : AppCompatActivity()
 			else
 				_service?.setTrack(true)
 		}
+	}
+
+	private fun initSeekBarAndLbl(max: Int)
+	{
+		seek_bar.max = max
+		seek_total_time.text = max.toMinuteSecondString()
 	}
 
 	private fun getStorageDevices()
