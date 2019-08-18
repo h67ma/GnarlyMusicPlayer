@@ -7,5 +7,5 @@ fun String.isFileExtensionInArray(extensions : Array<String>): Boolean
 
 fun Int.toMinuteSecondString(): String
 {
-	return "%2d:%02d".format(this / 60, this % 60) // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/format.html - thanks kotlin documentation for NOT EXISTING
+	return "%d:%02d".format(this / 60, this % 60) // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/format.html - thanks kotlin documentation for NOT EXISTING
 }
