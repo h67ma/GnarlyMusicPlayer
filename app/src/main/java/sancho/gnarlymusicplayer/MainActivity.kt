@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity()
 					}
 					else
 					{
-						addToQueue(Track(file.absolutePath, file.name))
+						addToQueue(Track(file.absolutePath, file.nameWithoutExtension))
 					}
 				}
 				else
@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity()
 						{
 							Arrays.sort(files, app_filesComparator)
 							addToQueue(files.map { track ->
-								Track(track.absolutePath, track.name)
+								Track(track.absolutePath, track.nameWithoutExtension)
 							})
 
 							Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity()
 					}
 					else
 					{
-						addToQueue(Track(file.absolutePath, file.name))
+						addToQueue(Track(file.absolutePath, file.nameWithoutExtension))
 						playTrack(app_queue.size - 1)
 					}
 				}
