@@ -9,31 +9,33 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * No ads
 * Based on folder structure
 * Easly editable playing queue
-* Simple search
+* Simple context search
 * Simple bookmarks
+* Simple time seek bar
 * Media buttons support
 * Designed for convenience and simplicity
 * Customizable accent colour
 * Open source
 
-# Demo #
+# Demo (click for video) #
 [![video demo](http://img.youtube.com/vi/GRRC5_NENRY/0.jpg)](https://www.youtube.com/watch?v=GRRC5_NENRY)
 
 # Download #
-[Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
+[Signed latest version .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
 
 # Description #
-This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked a few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position of previous dir. I used it for a few years, because I couldn't find any music player that was even half as convenient to use. Finally I made my own music player and I'm very happy with the result.
+This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position when navigating dirs. I used it for a few years, because I couldn't find any music player that was even half as convenient to use. Finally I made my own music player and I'm very happy with the result.
 
-In my opinion mobile music player needs just few features, and anything more than that just makes it harder to use - I want to be able to quickly change my playing queue, not watch album art, lyrics, tags, or animations. Most music players on the Play Store are very feature-rich.
+In my opinion adding too many features to a mobile music player makes it harder to use. I just want to be able to quickly change my playing queue, not watch album art, lyrics, tags, or animations. Also, why bundle equalizer with music player - there are apps just for DSP. Unfortunately, most music players on the Play Store are very feature-rich.
 
 This was my first Kotlin project. I'm positively surprised by Kotlin - it has some quirks, like the absence of static keyword, but overall I had much better time working with it than with Java.
 
 I regret nothing.
 
 # Possible future improvements #
-* Seek bar
+* ~Seek bar~
 * Fully recursive search && dir add
+* Folder art on lockscreen
 
 # Very short Q&A #
 
@@ -60,7 +62,7 @@ Also I'm lazy.
 **A:** All buttons are in the notification, so you can access them everywhere in the system. There's no reason to have a copy of them taking space from the main app interface.
 
 **Q:** Why does the notification use custom layout instead of the standard media one?  
-**A:** Let's just say I don't like that "media layout". Buttons are too small and there's a timer showing how long ago the notification appeared for some reason.
+**A:** Let's just say I don't like that "media layout". Buttons are too small and there's a timer showing how long ago the notification appeared, for reasons unknown to me.
 
 # Tested on #
 * wt88047/7.1.2/LineageOS 14.1
