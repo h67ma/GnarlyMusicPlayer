@@ -405,6 +405,11 @@ class MainActivity : AppCompatActivity()
 							// no need to change currentTrack
 							if (app_mediaPlaybackServiceStarted && _service != null)
 								_service?.setTrack(false)
+							else
+							{
+								app_currentTrackLength = 0
+								initSeekBarAndMaxLbl()
+							}
 
 							_queueAdapter.notifyItemChanged(app_currentTrack)
 						}
@@ -414,7 +419,12 @@ class MainActivity : AppCompatActivity()
 							app_currentTrack = 0
 
 							if (app_mediaPlaybackServiceStarted && _service != null)
-							_service?.setTrack(false)
+								_service?.setTrack(false)
+							else
+							{
+								app_currentTrackLength = 0
+								initSeekBarAndMaxLbl()
+							}
 
 							_queueAdapter.notifyItemChanged(app_currentTrack)
 						}
@@ -425,8 +435,13 @@ class MainActivity : AppCompatActivity()
 								_service?.end(false)
 
 							app_currentTrack = RecyclerView.NO_POSITION
+							app_currentlyPlaying = false
+							app_currentTrackLength = 0
+							initSeekBarAndMaxLbl()
 						}
 					}
+					app_currentTrackPosition = 0
+					updateSeekBarAndMaxLbl(app_currentTrackPosition)
 				}
 			}
 		})
@@ -676,6 +691,11 @@ class MainActivity : AppCompatActivity()
 					app_queue.clear()
 
 					app_currentTrack = RecyclerView.NO_POSITION
+					app_currentlyPlaying = false
+					app_currentTrackPosition = 0
+					app_currentTrackLength = 0
+					initSeekBarAndMaxLbl()
+					updateSeekBarAndMaxLbl(app_currentTrackPosition)
 					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
 					_queueChanged = true
 				}
@@ -822,6 +842,8 @@ class MainActivity : AppCompatActivity()
 			putString(PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(PREFERENCE_ACCENTCOLOR, _accentColorIdx)
 			putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
+			putInt(PREFERENCE_CURRENTTRACKLENGTH, app_currentTrackLength)
+			putInt(PREFERENCE_CURRENTTRACKPOSITION, app_currentTrackPosition)
 			apply()
 		}
 
