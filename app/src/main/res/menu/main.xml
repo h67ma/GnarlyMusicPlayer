@@ -28,6 +28,11 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/action_currenttrack_info"
+        android:title="Current track info"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_about"
         android:title="@string/about"
         app:showAsAction="never"/>
