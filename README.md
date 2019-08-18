@@ -37,6 +37,10 @@ I regret nothing.
 * Fully recursive search && dir add
 * Folder art on lockscreen
 
+# Version log #
+* 1.0 - initial release
+* 1.0.1 - fixed minor notification bug
+
 # Very short Q&A #
 
 **Q:** Why??  
