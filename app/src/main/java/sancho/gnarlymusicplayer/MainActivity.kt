@@ -531,6 +531,7 @@ class MainActivity : AppCompatActivity()
 		val actionClearAll = menu.findItem(R.id.action_clearall)
 		val actionClearAfter = menu.findItem(R.id.action_clearafter)
 		val actionSetColor = menu.findItem(R.id.action_setcolor)
+		val actionCurrTrackInfo = menu.findItem(R.id.action_currenttrack_info)
 		val actionAbout = menu.findItem(R.id.action_about)
 
 		val searchThing = _actionSearch?.actionView as SearchView
@@ -546,6 +547,7 @@ class MainActivity : AppCompatActivity()
 				actionClearAll.isVisible = true
 				actionClearAfter.isVisible = true
 				actionSetColor.isVisible = true
+				actionCurrTrackInfo.isVisible = true
 				actionAbout.isVisible = true
 				updateDirectoryView(_currentDir, true)
 				_searchResultsOpen = false
@@ -558,6 +560,7 @@ class MainActivity : AppCompatActivity()
 				actionClearAll.isVisible = false
 				actionClearAfter.isVisible = false
 				actionSetColor.isVisible = false
+				actionCurrTrackInfo.isVisible = false
 				actionAbout.isVisible = false
 				return true
 			}
@@ -664,15 +667,8 @@ class MainActivity : AppCompatActivity()
 				}
 			}
 			R.id.action_setcolor -> selectAccent()
-			R.id.action_about ->
-			{
-				AlertDialog.Builder(this)
-					.setTitle(getString(R.string.about))
-					.setMessage(getString(R.string.about_message))
-					.setPositiveButton(getString(R.string.ok), null)
-					.create()
-					.show()
-			}
+			R.id.action_currenttrack_info -> showCurrTrackInfo()
+			R.id.action_about -> showAboutDialog()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
@@ -740,6 +736,28 @@ class MainActivity : AppCompatActivity()
 				recreate()
 			}
 			.setNegativeButton(android.R.string.cancel, null)
+			.create()
+			.show()
+	}
+
+	private fun showCurrTrackInfo()
+	{
+		if (app_queue.size < 1 || app_currentTrack == RecyclerView.NO_POSITION) return
+
+		AlertDialog.Builder(this)
+			.setTitle(app_queue[app_currentTrack].name)
+			.setMessage(app_queue[app_currentTrack].path)
+			.setPositiveButton(getString(R.string.ok), null)
+			.create()
+			.show()
+	}
+
+	private fun showAboutDialog()
+	{
+		AlertDialog.Builder(this)
+			.setTitle(getString(R.string.about))
+			.setMessage(getString(R.string.about_message))
+			.setPositiveButton(getString(R.string.ok), null)
 			.create()
 			.show()
 	}
