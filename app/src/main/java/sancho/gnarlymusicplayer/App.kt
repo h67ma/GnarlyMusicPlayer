@@ -9,6 +9,9 @@ class App: Application()
 	companion object
 	{
 		var app_currentTrack: Int = RecyclerView.NO_POSITION
+		var app_currentTrackPosition: Int = 0
+		var app_currentTrackLength: Int = 0
+		var app_currentlyPlaying: Boolean = false
 		lateinit var app_queue: MutableList<Track>
 		var app_mediaPlaybackServiceStarted = false
 
@@ -19,6 +22,8 @@ class App: Application()
 		const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
 		const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
 		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
+		const val PREFERENCE_CURRENTTRACKLENGTH = "sancho.gnarlymusicplayer.preference.currenttracklength"
+		const val PREFERENCE_CURRENTTRACKPOSITION = "sancho.gnarlymusicplayer.preference.currenttrackposition"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 

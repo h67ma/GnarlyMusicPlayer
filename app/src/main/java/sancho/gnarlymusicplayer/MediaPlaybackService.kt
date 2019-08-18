@@ -32,7 +32,12 @@ import sancho.gnarlymusicplayer.App.Companion.ACTION_STOP_PLAYBACK_SERVICE
 import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_CHANNEL_ID
 import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_ID
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACKLENGTH
+import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACKPOSITION
 import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
+import sancho.gnarlymusicplayer.App.Companion.app_currentTrackLength
+import sancho.gnarlymusicplayer.App.Companion.app_currentTrackPosition
+import sancho.gnarlymusicplayer.App.Companion.app_currentlyPlaying
 import sancho.gnarlymusicplayer.App.Companion.app_mediaPlaybackServiceStarted
 import sancho.gnarlymusicplayer.App.Companion.app_queue
 import java.io.IOException
@@ -141,6 +146,10 @@ class MediaPlaybackService : Service()
 						_player.prepare()
 						initSeekBar()
 						_sessionCallback.onPlay()
+						if (app_currentTrackPosition != 0)
+						{
+							seekTo(app_currentTrackPosition)
+						}
 					}
 					catch (_: IOException)
 					{
@@ -297,8 +306,10 @@ class MediaPlaybackService : Service()
 					_receiverRegistered = true
 				}
 
+				app_currentlyPlaying = true
+
 				if(_binder.isBinderAlive)
-					_binder.listeners.playbackStarted()
+					_binder.listeners.playbackStateChanged()
 			}
 
 			override fun onPause()
@@ -311,19 +322,14 @@ class MediaPlaybackService : Service()
 				unregisterReceiver(_noisyAudioReceiver)
 				_receiverRegistered = false
 
+				app_currentlyPlaying = false
+
 				if(_binder.isBinderAlive)
-					_binder.listeners.playbackStopped()
+					_binder.listeners.playbackStateChanged()
 			}
 
 			override fun onStop()
 			{
-				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
-				if (_receiverRegistered) unregisterReceiver(_noisyAudioReceiver)
-				_mediaSession.isActive = false
-
-				if(_binder.isBinderAlive)
-					_binder.listeners.playbackStopped()
-
 				end(true)
 			}
 		}
@@ -392,8 +398,11 @@ class MediaPlaybackService : Service()
 
 	private fun initSeekBar()
 	{
+		app_currentTrackLength = _player.duration / 1000
 		if(_binder.isBinderAlive)
-			_binder.listeners.initSeekBar(_player.duration/1000)
+		{
+			_binder.listeners.initSeekBar()
+		}
 	}
 
 	fun seekTo(sec: Int)
@@ -403,11 +412,24 @@ class MediaPlaybackService : Service()
 
 	fun end(saveTrack: Boolean)
 	{
+		app_currentTrackPosition = currentPosition
+
+		AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
+		if (_receiverRegistered) unregisterReceiver(_noisyAudioReceiver)
+		_mediaSession.isActive = false
+
+		app_currentlyPlaying = false
+
+		if(_binder.isBinderAlive)
+			_binder.listeners.playbackStateChanged()
+
 		if (saveTrack)
 		{
 			// SAVE MEEEEEEE (can't wake up)
 			with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()) {
 				putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
+				putInt(PREFERENCE_CURRENTTRACKLENGTH, app_currentTrackLength)
+				putInt(PREFERENCE_CURRENTTRACKPOSITION, app_currentTrackPosition)
 				apply()
 			}
 		}
