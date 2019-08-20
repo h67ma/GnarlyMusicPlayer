@@ -10,26 +10,40 @@
         app:showAsAction="always|collapseActionView"/>
 
     <item
-        android:id="@+id/action_clearprev"
-        android:title="Clear before current track"
+        android:id="@+id/action_currenttrack_info"
+        android:title="Current track info"
         app:showAsAction="never"/>
+
     <item
-        android:id="@+id/action_clearall"
-        android:title="Clear all"
+        android:id="@+id/action_seek"
+        android:title="@string/seek_restore_position"
         app:showAsAction="never"/>
+
     <item
-        android:id="@+id/action_clearafter"
-        android:title="Clear after current track"
-        app:showAsAction="never"/>
+        android:id="@+id/action_menu_clear"
+        android:title="Clear"
+        app:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/action_clearprev"
+                android:title="Clear before current track"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/action_clearall"
+                android:title="Clear all"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/action_clearafter"
+                android:title="Clear after current track"
+                app:showAsAction="never"/>
+        </menu>
+
+    </item>
 
     <item
         android:id="@+id/action_setcolor"
         android:title="Set theme"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_currenttrack_info"
-        android:title="Current track info"
         app:showAsAction="never"/>
 
     <item

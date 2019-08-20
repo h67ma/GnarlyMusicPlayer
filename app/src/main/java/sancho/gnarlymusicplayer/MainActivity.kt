@@ -462,12 +462,16 @@ class MainActivity : AppCompatActivity()
 
 		// search thing
 		_actionSearch = menu.findItem(R.id.action_search)
+		val actionCurrTrackInfo = menu.findItem(R.id.action_currenttrack_info)
+		val actionSeek = menu.findItem(R.id.action_seek)
+		val actionClearMenu = menu.findItem(R.id.action_menu_clear)
 		val actionClearPrev = menu.findItem(R.id.action_clearprev)
 		val actionClearAll = menu.findItem(R.id.action_clearall)
 		val actionClearAfter = menu.findItem(R.id.action_clearafter)
 		val actionSetColor = menu.findItem(R.id.action_setcolor)
-		val actionCurrTrackInfo = menu.findItem(R.id.action_currenttrack_info)
 		val actionAbout = menu.findItem(R.id.action_about)
+
+		actionClearMenu.subMenu.clearHeader() // don't show header
 
 		val searchThing = _actionSearch?.actionView as SearchView
 		searchThing.queryHint = getString(R.string.search_bar_hint)
@@ -478,11 +482,13 @@ class MainActivity : AppCompatActivity()
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
 			{
+				actionCurrTrackInfo.isVisible = true
+				actionSeek.isVisible = true
+				actionClearMenu.isVisible = true
 				actionClearPrev.isVisible = true
 				actionClearAll.isVisible = true
 				actionClearAfter.isVisible = true
 				actionSetColor.isVisible = true
-				actionCurrTrackInfo.isVisible = true
 				actionAbout.isVisible = true
 				updateDirectoryView(_currentDir, true)
 				_searchResultsOpen = false
@@ -491,11 +497,13 @@ class MainActivity : AppCompatActivity()
 
 			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
 			{
+				actionCurrTrackInfo.isVisible = false
+				actionSeek.isVisible = false
+				actionClearMenu.isVisible = false
 				actionClearPrev.isVisible = false
 				actionClearAll.isVisible = false
 				actionClearAfter.isVisible = false
 				actionSetColor.isVisible = false
-				actionCurrTrackInfo.isVisible = false
 				actionAbout.isVisible = false
 				return true
 			}
@@ -549,6 +557,8 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
+			R.id.action_currenttrack_info -> showCurrTrackInfo()
+			R.id.action_seek -> showSeekDialog()
 			R.id.action_clearprev ->
 			{
 				if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack > 0)
@@ -602,7 +612,6 @@ class MainActivity : AppCompatActivity()
 				}
 			}
 			R.id.action_setcolor -> selectAccent()
-			R.id.action_currenttrack_info -> showCurrTrackInfo()
 			R.id.action_about -> showAboutDialog()
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -677,12 +686,33 @@ class MainActivity : AppCompatActivity()
 
 	private fun showCurrTrackInfo()
 	{
-		if (app_queue.size < 1 || app_currentTrack == RecyclerView.NO_POSITION) return
+		if (app_queue.size < 1 || app_currentTrack == RecyclerView.NO_POSITION)
+		{
+			Toast.makeText(this, getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
+			return
+		}
 
 		AlertDialog.Builder(this)
 			.setTitle(app_queue[app_currentTrack].name)
 			.setMessage(app_queue[app_currentTrack].path)
 			.setPositiveButton(getString(R.string.ok), null)
+			.create()
+			.show()
+	}
+
+	private fun showSeekDialog()
+	{
+		if (!app_mediaPlaybackServiceStarted || _service == null)
+		{
+			Toast.makeText(this, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
+			return
+		}
+
+		AlertDialog.Builder(this)
+			.setTitle(getString(R.string.seek_restore_position))
+			.setView(R.layout.dialog_seek)
+			.setPositiveButton(getString(R.string.seek), null)
+			.setNegativeButton(android.R.string.cancel, null)
 			.create()
 			.show()
 	}
