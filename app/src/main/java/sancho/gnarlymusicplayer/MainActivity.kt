@@ -455,6 +455,61 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
+	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
+	{
+		if(requestCode == REQUEST_READ_STORAGE)
+		{
+			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
+			{
+				updateDirectoryView(_lastDir, false)
+			}
+			else
+			{
+				requestReadPermishon()
+			}
+		}
+	}
+
+	// assuming the read permission is granted
+	private fun updateDirectoryView(newDir: File?, restoreScroll: Boolean)
+	{
+		_currentDir = newDir
+		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
+		{
+			// list storage devices
+			toolbar_title.text = getString(R.string.root_dir_name)
+			_dirList.clear()
+			_dirList.addAll(_mountedDevices)
+			_explorerAdapter.notifyDataSetChanged()
+		}
+		else
+		{
+			// list current dir
+			toolbar_title.text = newDir.absolutePath
+			val list = newDir.listFiles{file ->
+				file.isDirectory || file.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS)
+			}
+
+			if (list != null)
+			{
+				Arrays.sort(list, app_filesAndDirsComparator)
+				_dirList.clear()
+				_dirList.addAll(list)
+				_explorerAdapter.notifyDataSetChanged()
+			}
+			else
+				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+		}
+		if (restoreScroll && !_prevExplorerScrollPositions.empty())
+		{
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(_prevExplorerScrollPositions.pop(), 200)
+		}
+		else
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+	}
+
+	//region MENU
+
 	// adds items to toolbar
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
 	{
@@ -469,6 +524,7 @@ class MainActivity : AppCompatActivity()
 		val actionClearAll = menu.findItem(R.id.action_clearall)
 		val actionClearAfter = menu.findItem(R.id.action_clearafter)
 		val actionSetColor = menu.findItem(R.id.action_setcolor)
+		val actionExportImport = menu.findItem(R.id.action_exportimport)
 		val actionAbout = menu.findItem(R.id.action_about)
 
 		actionClearMenu.subMenu.clearHeader() // don't show header
@@ -489,6 +545,7 @@ class MainActivity : AppCompatActivity()
 				actionClearAll.isVisible = true
 				actionClearAfter.isVisible = true
 				actionSetColor.isVisible = true
+				actionExportImport.isVisible = true
 				actionAbout.isVisible = true
 				updateDirectoryView(_currentDir, true)
 				_searchResultsOpen = false
@@ -504,6 +561,7 @@ class MainActivity : AppCompatActivity()
 				actionClearAll.isVisible = false
 				actionClearAfter.isVisible = false
 				actionSetColor.isVisible = false
+				actionExportImport.isVisible = false
 				actionAbout.isVisible = false
 				return true
 			}
@@ -559,130 +617,20 @@ class MainActivity : AppCompatActivity()
 		{
 			R.id.action_currenttrack_info -> showCurrTrackInfo()
 			R.id.action_seek -> showSeekDialog()
-			R.id.action_clearprev ->
-			{
-				if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack > 0)
-				{
-					// there are items to clear at the start
-
-					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_currentTrack), Toast.LENGTH_SHORT).show()
-
-					for (i in 0 until app_currentTrack)
-						app_queue.removeAt(0)
-
-					val removedCnt = app_currentTrack
-					app_currentTrack = 0
-					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
-					_queueChanged = true
-				}
-			}
-			R.id.action_clearall ->
-			{
-				if (app_queue.size > 0)
-				{
-					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size), Toast.LENGTH_SHORT).show()
-
-					if (app_mediaPlaybackServiceStarted && _service != null)
-						_service?.end(false)
-
-					val removedCnt = app_queue.size
-					app_queue.clear()
-
-					app_currentTrack = RecyclerView.NO_POSITION
-					_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
-					_queueChanged = true
-				}
-			}
-			R.id.action_clearafter ->
-			{
-				if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack < app_queue.size - 1)
-				{
-					// there are items to clear at the end
-
-					Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size - 1 - app_currentTrack), Toast.LENGTH_SHORT).show()
-
-					val removedCnt = app_queue.size - app_currentTrack
-					val removedFromIdx = app_currentTrack + 1
-					for (i in app_queue.size - 1 downTo app_currentTrack + 1)
-						app_queue.removeAt(i)
-
-					app_currentTrack = app_queue.size - 1
-					_queueAdapter.notifyItemRangeRemoved(removedFromIdx, removedCnt)
-					_queueChanged = true
-				}
-			}
+			R.id.action_clearprev -> clearPrev()
+			R.id.action_clearall -> clearAll()
+			R.id.action_clearafter -> clearAfter()
 			R.id.action_setcolor -> selectAccent()
+			R.id.action_exportimport -> showExportImportDialog()
 			R.id.action_about -> showAboutDialog()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
 	}
 
-	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
-	{
-		if(requestCode == REQUEST_READ_STORAGE)
-		{
-			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
-			{
-				updateDirectoryView(_lastDir, false)
-			}
-			else
-			{
-				requestReadPermishon()
-			}
-		}
-	}
+	//endregion
 
-	// assuming the read permission is granted
-	private fun updateDirectoryView(newDir: File?, restoreScroll: Boolean)
-	{
-		_currentDir = newDir
-		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
-		{
-			// list storage devices
-			toolbar_title.text = getString(R.string.root_dir_name)
-			_dirList.clear()
-			_dirList.addAll(_mountedDevices)
-			_explorerAdapter.notifyDataSetChanged()
-		}
-		else
-		{
-			// list current dir
-			toolbar_title.text = newDir.absolutePath
-			val list = newDir.listFiles{file ->
-				file.isDirectory || file.name.isFileExtensionInArray(SUPPORTED_FILE_EXTENSIONS)
-			}
-
-			if (list != null)
-			{
-				Arrays.sort(list, app_filesAndDirsComparator)
-				_dirList.clear()
-				_dirList.addAll(list)
-				_explorerAdapter.notifyDataSetChanged()
-			}
-			else
-				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
-		}
-		if (restoreScroll && !_prevExplorerScrollPositions.empty())
-		{
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(_prevExplorerScrollPositions.pop(), 200)
-		}
-		else
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
-	}
-
-	private fun selectAccent()
-	{
-		AlertDialog.Builder(this)
-			.setTitle(getString(R.string.select_accent))
-			.setItems(COLOR_NAMES){_, which ->
-				_accentColorIdx = which
-				recreate()
-			}
-			.setNegativeButton(android.R.string.cancel, null)
-			.create()
-			.show()
-	}
+	//region MENU ACTIONS
 
 	private fun showCurrTrackInfo()
 	{
@@ -717,6 +665,84 @@ class MainActivity : AppCompatActivity()
 			.show()
 	}
 
+	private fun clearPrev()
+	{
+		if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack > 0)
+		{
+			// there are items to clear at the start
+
+			Toast.makeText(this, getString(R.string.cleared_n_tracks, app_currentTrack), Toast.LENGTH_SHORT).show()
+
+			for (i in 0 until app_currentTrack)
+				app_queue.removeAt(0)
+
+			val removedCnt = app_currentTrack
+			app_currentTrack = 0
+			_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
+			_queueChanged = true
+		}
+	}
+
+	private fun clearAll()
+	{
+		if (app_queue.size > 0)
+		{
+			Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size), Toast.LENGTH_SHORT).show()
+
+			if (app_mediaPlaybackServiceStarted && _service != null)
+				_service?.end(false)
+
+			val removedCnt = app_queue.size
+			app_queue.clear()
+
+			app_currentTrack = RecyclerView.NO_POSITION
+			_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
+			_queueChanged = true
+		}
+	}
+
+	private fun clearAfter()
+	{
+		if (app_currentTrack != RecyclerView.NO_POSITION && app_currentTrack < app_queue.size - 1)
+		{
+			// there are items to clear at the end
+
+			Toast.makeText(this, getString(R.string.cleared_n_tracks, app_queue.size - 1 - app_currentTrack), Toast.LENGTH_SHORT).show()
+
+			val removedCnt = app_queue.size - app_currentTrack
+			val removedFromIdx = app_currentTrack + 1
+			for (i in app_queue.size - 1 downTo app_currentTrack + 1)
+				app_queue.removeAt(i)
+
+			app_currentTrack = app_queue.size - 1
+			_queueAdapter.notifyItemRangeRemoved(removedFromIdx, removedCnt)
+			_queueChanged = true
+		}
+	}
+
+	private fun selectAccent()
+	{
+		AlertDialog.Builder(this)
+			.setTitle(getString(R.string.select_accent))
+			.setItems(COLOR_NAMES){_, which ->
+				_accentColorIdx = which
+				recreate()
+			}
+			.setNegativeButton(android.R.string.cancel, null)
+			.create()
+			.show()
+	}
+
+	private fun showExportImportDialog()
+	{
+		/*AlertDialog.Builder(this)
+			.setTitle(getString(R.string.export_import))
+			.setMessage()
+			.setNegativeButton(android.R.string.cancel, null)
+			.create()
+			.show()*/
+	}
+
 	private fun showAboutDialog()
 	{
 		AlertDialog.Builder(this)
@@ -726,6 +752,8 @@ class MainActivity : AppCompatActivity()
 			.create()
 			.show()
 	}
+
+	//endregion
 
 	override fun onPause()
 	{
