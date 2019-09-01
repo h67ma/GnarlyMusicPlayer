@@ -22,6 +22,7 @@
     <string name="cant_play_track">Can\'t play track</string>
     <string name="seek">Seek</string>
     <string name="playback_service_not_running">Playback service not running</string>
-    <string name="seek_restore_position">Seek/restore position</string>
+    <string name="seek_restore_position">Seek/Restore position</string>
     <string name="no_track_selected">No track selected</string>
+    <string name="export_import">Export/Import</string>
 </resources>

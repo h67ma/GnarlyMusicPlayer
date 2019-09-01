@@ -21,7 +21,7 @@
 
     <item
         android:id="@+id/action_menu_clear"
-        android:title="Clear"
+        android:title="Clear queue"
         app:showAsAction="never">
 
         <menu>
@@ -44,6 +44,11 @@
     <item
         android:id="@+id/action_setcolor"
         android:title="Set theme"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_exportimport"
+        android:title="@string/export_import"
         app:showAsAction="never"/>
 
     <item
