@@ -666,8 +666,8 @@ class MainActivity : AppCompatActivity()
 		val totalTime = _service?.getTotalTime() ?: 0
 		val totalTimeMinutes = totalTime / 60
 		val totalTimeSeconds = totalTime % 60
-		seekView.seek_seekbar.progress = currentTime
 		seekView.seek_seekbar.max = totalTime
+		seekView.seek_seekbar.progress = currentTime
 		seekView.seek_currenttotaltime.text = getString(
 			R.string.seek_total_time,
 			currentTime / 60,
