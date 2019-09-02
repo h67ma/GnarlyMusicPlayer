@@ -10,13 +10,14 @@
         app:showAsAction="always|collapseActionView"/>
 
     <item
-        android:id="@+id/action_currenttrack_info"
-        android:title="Current track info"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_seek"
         android:title="@string/seek_restore_position"
+        android:icon="@drawable/seek"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_currenttrack_info"
+        android:title="Current track info"
         app:showAsAction="never"/>
 
     <item
@@ -44,11 +45,6 @@
     <item
         android:id="@+id/action_setcolor"
         android:title="Set theme"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_exportimport"
-        android:title="@string/export_import"
         app:showAsAction="never"/>
 
     <item

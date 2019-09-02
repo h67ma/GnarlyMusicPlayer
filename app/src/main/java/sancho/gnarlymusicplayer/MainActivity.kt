@@ -527,7 +527,6 @@ class MainActivity : AppCompatActivity()
 		val actionClearAll = menu.findItem(R.id.action_clearall)
 		val actionClearAfter = menu.findItem(R.id.action_clearafter)
 		val actionSetColor = menu.findItem(R.id.action_setcolor)
-		val actionExportImport = menu.findItem(R.id.action_exportimport)
 		val actionAbout = menu.findItem(R.id.action_about)
 
 		actionClearMenu.subMenu.clearHeader() // don't show header
@@ -548,7 +547,6 @@ class MainActivity : AppCompatActivity()
 				actionClearAll.isVisible = true
 				actionClearAfter.isVisible = true
 				actionSetColor.isVisible = true
-				actionExportImport.isVisible = true
 				actionAbout.isVisible = true
 				updateDirectoryView(_currentDir, true)
 				_searchResultsOpen = false
@@ -564,7 +562,6 @@ class MainActivity : AppCompatActivity()
 				actionClearAll.isVisible = false
 				actionClearAfter.isVisible = false
 				actionSetColor.isVisible = false
-				actionExportImport.isVisible = false
 				actionAbout.isVisible = false
 				return true
 			}
@@ -624,7 +621,6 @@ class MainActivity : AppCompatActivity()
 			R.id.action_clearall -> clearAll()
 			R.id.action_clearafter -> clearAfter()
 			R.id.action_setcolor -> selectAccent()
-			R.id.action_exportimport -> showExportImportDialog()
 			R.id.action_about -> showAboutDialog()
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -787,16 +783,6 @@ class MainActivity : AppCompatActivity()
 			.setNegativeButton(android.R.string.cancel, null)
 			.create()
 			.show()
-	}
-
-	private fun showExportImportDialog()
-	{
-		/*AlertDialog.Builder(this)
-			.setTitle(getString(R.string.export_import))
-			.setMessage()
-			.setNegativeButton(android.R.string.cancel, null)
-			.create()
-			.show()*/
 	}
 
 	private fun showAboutDialog()
