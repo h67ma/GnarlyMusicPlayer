@@ -1,12 +1,18 @@
 package sancho.gnarlymusicplayer
 import android.Manifest
 import android.app.AlertDialog
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.IBinder
+import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -17,13 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
-import java.util.*
-import android.content.ComponentName
-import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
-import android.os.IBinder
-import android.content.ServiceConnection
-import android.preference.PreferenceManager
+import kotlinx.android.synthetic.main.dialog_seek.view.*
 import sancho.gnarlymusicplayer.App.Companion.ACTION_START_PLAYBACK_SERVICE
 import sancho.gnarlymusicplayer.App.Companion.BUNDLE_LASTSELECTEDTRACK
 import sancho.gnarlymusicplayer.App.Companion.COLOR_NAMES
@@ -35,14 +35,17 @@ import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_LASTDIR
 import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_QUEUE
 import sancho.gnarlymusicplayer.App.Companion.REQUEST_READ_STORAGE
 import sancho.gnarlymusicplayer.App.Companion.SUPPORTED_FILE_EXTENSIONS
-import sancho.gnarlymusicplayer.App.Companion.app_filesAndDirsComparator
 import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
+import sancho.gnarlymusicplayer.App.Companion.app_filesAndDirsComparator
 import sancho.gnarlymusicplayer.App.Companion.app_filesComparator
 import sancho.gnarlymusicplayer.App.Companion.app_mediaPlaybackServiceStarted
 import sancho.gnarlymusicplayer.App.Companion.app_queue
+import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
+import java.io.File
+import java.util.*
 
 class MainActivity : AppCompatActivity()
 {
@@ -656,10 +659,63 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
+		val seekView = View.inflate(this, R.layout.dialog_seek, null)
+
+		// set current/total time
+		val currentTime = _service?.getCurrentTime() ?: 0
+		val totalTime = _service?.getTotalTime() ?: 0
+		val totalTimeMinutes = totalTime / 60
+		val totalTimeSeconds = totalTime % 60
+		seekView.seek_seekbar.progress = currentTime
+		seekView.seek_seekbar.max = totalTime
+		seekView.seek_currenttotaltime.text = getString(
+			R.string.seek_total_time,
+			currentTime / 60,
+			currentTime % 60,
+			totalTimeMinutes,
+			totalTimeSeconds
+		)
+
+		seekView.seek_loadbtn.setOnClickListener{
+
+		}
+
+		seekView.seek_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
+			{
+				if (!fromUser) return
+				seekView.seek_currenttotaltime.text = getString(
+					R.string.seek_total_time,
+					progress / 60,
+					progress % 60,
+					totalTimeMinutes,
+					totalTimeSeconds
+				)
+			}
+
+			override fun onStartTrackingTouch(seekbar: SeekBar?) {}
+
+			override fun onStopTrackingTouch(seekbar: SeekBar?) {}
+		})
+
 		AlertDialog.Builder(this)
 			.setTitle(getString(R.string.seek_restore_position))
-			.setView(R.layout.dialog_seek)
-			.setPositiveButton(getString(R.string.seek), null)
+			.setView(seekView)
+			.setPositiveButton(getString(R.string.seek)) { _, _ ->
+				if (app_mediaPlaybackServiceStarted && _service != null)
+				{
+					try
+					{
+						_service?.seek(seekView.seek_seekbar.progress)
+					}
+					catch(ex: NumberFormatException)
+					{
+						Toast.makeText(this, ex.message, Toast.LENGTH_SHORT).show()
+					}
+				}
+				else
+					Toast.makeText(this, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
+			}
 			.setNegativeButton(android.R.string.cancel, null)
 			.create()
 			.show()

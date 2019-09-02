@@ -25,4 +25,8 @@
     <string name="seek_restore_position">Seek/Restore position</string>
     <string name="no_track_selected">No track selected</string>
     <string name="export_import">Export/Import</string>
+    <string name="load_last_position">Load last position</string>
+    <string name="seek_minute_hint">mm</string>
+    <string name="seek_second_hint">ss</string>
+    <string name="seek_total_time">%1$d:%2$02d/%3$d:%4$02d</string>
 </resources>

@@ -375,6 +375,15 @@ class MediaPlaybackService : Service()
 			playAndUpdateNotification()
 	}
 
+	fun seek(seconds: Int)
+	{
+		_player.seekTo(seconds * 1000)
+	}
+
+	fun getTotalTime() = _player.duration / 1000
+
+	fun getCurrentTime() = _player.currentPosition / 1000
+
 	fun end(saveTrack: Boolean)
 	{
 		if (saveTrack)

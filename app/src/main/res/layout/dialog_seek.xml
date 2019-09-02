@@ -5,49 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/seek_currenttotaltime"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center">
-
-        <EditText
-            android:id="@+id/seek_to_minutes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16pt"
-            android:inputType="number"
-            android:maxLength="4"
-            android:backgroundTint="?android:colorPrimary"
-            android:hint="mm"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16pt"
-            android:text=":"/>
-
-        <EditText
-            android:id="@+id/seek_to_seconds"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16pt"
-            android:inputType="number"
-            android:maxLength="2"
-            android:backgroundTint="?android:colorPrimary"
-            android:hint="ss"/>
-
-        <TextView
-            android:id="@+id/seek_totallength"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16pt"/>
-
-    </LinearLayout>
+        android:gravity="center"
+        android:textSize="15pt"/>
 
     <SeekBar
         android:id="@+id/seek_seekbar"
@@ -55,12 +18,14 @@
         android:layout_height="wrap_content"
         android:thumbTint="?android:colorPrimary"
         android:progressTint="?android:colorPrimary"
-        android:layout_marginTop="5dp"/>
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"/>
 
     <Button
         android:id="@+id/seek_loadbtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Load last position"/>
+        android:enabled="false"
+        android:text="@string/load_last_position"/>
 
 </LinearLayout>
