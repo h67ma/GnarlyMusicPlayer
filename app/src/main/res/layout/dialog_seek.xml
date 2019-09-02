@@ -5,60 +5,62 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Restore saved position"/>
-
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="Current\n88:88"/>
+        android:orientation="horizontal"
+        android:layout_gravity="center">
 
         <EditText
-            android:layout_width="80dp"
+            android:id="@+id/seek_to_minutes"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="18pt"
+            android:textSize="16pt"
             android:inputType="number"
+            android:maxLength="4"
+            android:backgroundTint="?android:colorPrimary"
             android:hint="mm"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="18pt"
+            android:textSize="16pt"
             android:text=":"/>
 
         <EditText
-            android:layout_width="80dp"
+            android:id="@+id/seek_to_seconds"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="18pt"
+            android:textSize="16pt"
             android:inputType="number"
+            android:maxLength="2"
+            android:backgroundTint="?android:colorPrimary"
             android:hint="ss"/>
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:id="@+id/seek_totallength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Length\n102:35"/>
+            android:textSize="16pt"/>
 
     </LinearLayout>
 
     <SeekBar
+        android:id="@+id/seek_seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:thumbTint="?android:colorPrimary"
-        android:progressTint="?android:colorPrimaryDark"
+        android:progressTint="?android:colorPrimary"
         android:layout_marginTop="5dp"/>
+
+    <Button
+        android:id="@+id/seek_loadbtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Load last position"/>
 
 </LinearLayout>
