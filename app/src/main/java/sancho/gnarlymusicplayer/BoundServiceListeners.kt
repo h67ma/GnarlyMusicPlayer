@@ -2,5 +2,6 @@ package sancho.gnarlymusicplayer
 
 interface BoundServiceListeners
 {
-	fun trackChanged(oldPos: Int)
+	fun onTrackChanged(oldPos: Int)
+	fun onEnd()
 }

@@ -64,11 +64,19 @@ class MainActivity : AppCompatActivity()
 		override fun onServiceConnected(className: ComponentName, service: IBinder)
 		{
 			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
-				override fun trackChanged(oldPos: Int)
+				override fun onTrackChanged(oldPos: Int)
 				{
 					_queueAdapter.notifyItemChanged(oldPos)
 					_queueAdapter.notifyItemChanged(App.currentTrack)
-					_seekDialog.dismiss()
+
+					if (_seekDialog.isShowing)
+						_seekDialog.dismiss()
+				}
+
+				override fun onEnd()
+				{
+					if (_seekDialog.isShowing)
+						_seekDialog.dismiss()
 				}
 			})
 		}

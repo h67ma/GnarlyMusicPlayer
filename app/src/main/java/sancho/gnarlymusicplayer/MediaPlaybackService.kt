@@ -315,7 +315,7 @@ class MediaPlaybackService : Service()
 		App.currentTrack = (App.currentTrack + 1) % App.queue.size
 
 		if(_binder.isBinderAlive)
-			_binder.listeners.trackChanged(oldPos)
+			_binder.listeners.onTrackChanged(oldPos)
 
 		setTrack(forcePlay)
 	}
@@ -327,7 +327,7 @@ class MediaPlaybackService : Service()
 		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
 
 		if(_binder.isBinderAlive)
-			_binder.listeners.trackChanged(oldPos)
+			_binder.listeners.onTrackChanged(oldPos)
 
 		setTrack(false)
 	}
@@ -374,6 +374,9 @@ class MediaPlaybackService : Service()
 
 	fun end(saveTrack: Boolean)
 	{
+		if(_binder.isBinderAlive)
+			_binder.listeners.onEnd()
+
 		if (saveTrack)
 		{
 			// SAVE MEEEEEEE (can't wake up)
