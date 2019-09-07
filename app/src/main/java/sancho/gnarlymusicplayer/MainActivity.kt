@@ -56,16 +56,19 @@ class MainActivity : AppCompatActivity()
 
 	private var _searchResultsOpen = false
 
+	private lateinit var _seekDialog: AlertDialog
+
 	private var _service: MediaPlaybackService? = null
 	private val _serviceConn = object : ServiceConnection
 	{
 		override fun onServiceConnected(className: ComponentName, service: IBinder)
 		{
 			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
-				override fun updateQueueRecycler(oldPos: Int)
+				override fun trackChanged(oldPos: Int)
 				{
 					_queueAdapter.notifyItemChanged(oldPos)
 					_queueAdapter.notifyItemChanged(App.currentTrack)
+					_seekDialog.dismiss()
 				}
 			})
 		}
@@ -678,7 +681,7 @@ class MainActivity : AppCompatActivity()
 			override fun onStopTrackingTouch(seekbar: SeekBar?) {}
 		})
 
-		AlertDialog.Builder(this)
+		_seekDialog = AlertDialog.Builder(this)
 			.setTitle(getString(R.string.seek_restore_position))
 			.setView(seekView)
 			.setPositiveButton(getString(R.string.seek)) { _, _ ->
@@ -698,7 +701,8 @@ class MainActivity : AppCompatActivity()
 			}
 			.setNegativeButton(android.R.string.cancel, null)
 			.create()
-			.show()
+
+		_seekDialog.show()
 	}
 
 	private fun clearPrev()

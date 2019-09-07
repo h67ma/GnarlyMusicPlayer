@@ -315,7 +315,7 @@ class MediaPlaybackService : Service()
 		App.currentTrack = (App.currentTrack + 1) % App.queue.size
 
 		if(_binder.isBinderAlive)
-			_binder.listeners.updateQueueRecycler(oldPos)
+			_binder.listeners.trackChanged(oldPos)
 
 		setTrack(forcePlay)
 	}
@@ -327,7 +327,7 @@ class MediaPlaybackService : Service()
 		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
 
 		if(_binder.isBinderAlive)
-			_binder.listeners.updateQueueRecycler(oldPos)
+			_binder.listeners.trackChanged(oldPos)
 
 		setTrack(false)
 	}
