@@ -203,11 +203,11 @@ class MediaPlaybackService : Service()
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
 
-		val channelId =	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				createNotificationChannel("gnarly_playback", "Gnarly Player Playback Service")
-			} else {
+		val channelId =
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+				createNotificationChannel()
+			else
 				App.NOTIFICATION_CHANNEL_ID
-			}
 
 		_notification = NotificationCompat.Builder(this, channelId)
 			.setContentIntent(pcontentIntent)
@@ -397,13 +397,13 @@ class MediaPlaybackService : Service()
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)
-	private fun createNotificationChannel(channelId: String, channelName: String): String{
-		val chan = NotificationChannel(channelId,
-			channelName, NotificationManager.IMPORTANCE_NONE)
+	private fun createNotificationChannel(): String
+	{
+		val chan = NotificationChannel("gnarly_playback", "Gnarly Player Playback Service", NotificationManager.IMPORTANCE_NONE)
 		chan.lightColor = Color.GREEN
-		chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+		chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 		val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		service.createNotificationChannel(chan)
-		return channelId
+		return "gnarly_playback"
 	}
 }
