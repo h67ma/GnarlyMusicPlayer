@@ -23,18 +23,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
-import sancho.gnarlymusicplayer.App.Companion.ACTION_NEXT_TRACK
-import sancho.gnarlymusicplayer.App.Companion.ACTION_PLAYPAUSE
-import sancho.gnarlymusicplayer.App.Companion.ACTION_PREV_TRACK
-import sancho.gnarlymusicplayer.App.Companion.ACTION_REPLAY_TRACK
-import sancho.gnarlymusicplayer.App.Companion.ACTION_START_PLAYBACK_SERVICE
-import sancho.gnarlymusicplayer.App.Companion.ACTION_STOP_PLAYBACK_SERVICE
-import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_CHANNEL_ID
-import sancho.gnarlymusicplayer.App.Companion.NOTIFICATION_ID
-import sancho.gnarlymusicplayer.App.Companion.PREFERENCE_CURRENTTRACK
-import sancho.gnarlymusicplayer.App.Companion.app_currentTrack
-import sancho.gnarlymusicplayer.App.Companion.app_mediaPlaybackServiceStarted
-import sancho.gnarlymusicplayer.App.Companion.app_queue
 import java.io.IOException
 
 class MediaPlaybackService : Service()
@@ -46,7 +34,7 @@ class MediaPlaybackService : Service()
 	private lateinit var _remoteViewBig: RemoteViews
 
 	private val _track: Track
-		get() = if (app_currentTrack < app_queue.size) app_queue[app_currentTrack] else Track("error", "error")
+		get() = if (App.currentTrack < App.queue.size) App.queue[App.currentTrack] else Track("error", "error")
 
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
@@ -121,9 +109,9 @@ class MediaPlaybackService : Service()
 	{
 		when
 		{
-			intent.action == ACTION_START_PLAYBACK_SERVICE ->
+			intent.action == App.ACTION_START_PLAYBACK_SERVICE ->
 			{
-				if(!app_mediaPlaybackServiceStarted)
+				if(!App.mediaPlaybackServiceStarted)
 				{
 					// first service call
 
@@ -143,9 +131,9 @@ class MediaPlaybackService : Service()
 						Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 					}
 
-					startForeground(NOTIFICATION_ID, makeNotification())
+					startForeground(App.NOTIFICATION_ID, makeNotification())
 
-					app_mediaPlaybackServiceStarted = true
+					App.mediaPlaybackServiceStarted = true
 				}
 				else
 				{
@@ -153,24 +141,24 @@ class MediaPlaybackService : Service()
 					playAndUpdateNotification()
 				}
 			}
-			intent.action == ACTION_REPLAY_TRACK ->
+			intent.action == App.ACTION_REPLAY_TRACK ->
 			{
 				// seekTo(0) doesn't actually return to start of track :()
 				setTrack(true)
 			}
-			intent.action == ACTION_PREV_TRACK ->
+			intent.action == App.ACTION_PREV_TRACK ->
 			{
 				_sessionCallback.onSkipToPrevious()
 			}
-			intent.action == ACTION_PLAYPAUSE ->
+			intent.action == App.ACTION_PLAYPAUSE ->
 			{
 				playPause()
 			}
-			intent.action == ACTION_NEXT_TRACK ->
+			intent.action == App.ACTION_NEXT_TRACK ->
 			{
 				_sessionCallback.onSkipToNext()
 			}
-			intent.action == ACTION_STOP_PLAYBACK_SERVICE ->
+			intent.action == App.ACTION_STOP_PLAYBACK_SERVICE ->
 			{
 				_sessionCallback.onStop()
 			}
@@ -184,23 +172,23 @@ class MediaPlaybackService : Service()
 		val pcontentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
 
 		val replayIntent = Intent(this, MediaPlaybackService::class.java)
-		replayIntent.action = ACTION_REPLAY_TRACK
+		replayIntent.action = App.ACTION_REPLAY_TRACK
 		val preplayIntent = PendingIntent.getService(this, 0, replayIntent, 0)
 
 		val previousIntent = Intent(this, MediaPlaybackService::class.java)
-		previousIntent.action = ACTION_PREV_TRACK
+		previousIntent.action = App.ACTION_PREV_TRACK
 		val ppreviousIntent = PendingIntent.getService(this, 0, previousIntent, 0)
 
 		val playIntent = Intent(this, MediaPlaybackService::class.java)
-		playIntent.action = ACTION_PLAYPAUSE
+		playIntent.action = App.ACTION_PLAYPAUSE
 		val pplayIntent = PendingIntent.getService(this, 0, playIntent, 0)
 
 		val nextIntent = Intent(this, MediaPlaybackService::class.java)
-		nextIntent.action = ACTION_NEXT_TRACK
+		nextIntent.action = App.ACTION_NEXT_TRACK
 		val pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0)
 
 		val closeIntent = Intent(this, MediaPlaybackService::class.java)
-		closeIntent.action = ACTION_STOP_PLAYBACK_SERVICE
+		closeIntent.action = App.ACTION_STOP_PLAYBACK_SERVICE
 		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
 
 		_remoteViewSmall = RemoteViews(packageName, R.layout.notification_small)
@@ -218,7 +206,7 @@ class MediaPlaybackService : Service()
 		val channelId =	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				createNotificationChannel("gnarly_playback", "Gnarly Player Playback Service")
 			} else {
-				NOTIFICATION_CHANNEL_ID
+				App.NOTIFICATION_CHANNEL_ID
 			}
 
 		_notification = NotificationCompat.Builder(this, channelId)
@@ -251,7 +239,7 @@ class MediaPlaybackService : Service()
 	private fun updateNotification()
 	{
 		with(NotificationManagerCompat.from(applicationContext)) {
-			notify(NOTIFICATION_ID, makeNotification())
+			notify(App.NOTIFICATION_ID, makeNotification())
 		}
 	}
 
@@ -323,8 +311,8 @@ class MediaPlaybackService : Service()
 
 	private fun nextTrack(forcePlay: Boolean)
 	{
-		val oldPos = app_currentTrack
-		app_currentTrack = (app_currentTrack + 1) % app_queue.size
+		val oldPos = App.currentTrack
+		App.currentTrack = (App.currentTrack + 1) % App.queue.size
 
 		if(_binder.isBinderAlive)
 			_binder.listeners.updateQueueRecycler(oldPos)
@@ -334,9 +322,9 @@ class MediaPlaybackService : Service()
 
 	private fun prevTrack()
 	{
-		val oldPos = app_currentTrack
-		app_currentTrack--
-		if (app_currentTrack < 0) app_currentTrack = app_queue.size - 1
+		val oldPos = App.currentTrack
+		App.currentTrack--
+		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
 
 		if(_binder.isBinderAlive)
 			_binder.listeners.updateQueueRecycler(oldPos)
@@ -390,7 +378,7 @@ class MediaPlaybackService : Service()
 		{
 			// SAVE MEEEEEEE (can't wake up)
 			with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()) {
-				putInt(PREFERENCE_CURRENTTRACK, app_currentTrack)
+				putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
 				apply()
 			}
 		}
@@ -398,7 +386,7 @@ class MediaPlaybackService : Service()
 		_player.reset()
 		_player.release()
 
-		app_mediaPlaybackServiceStarted = false
+		App.mediaPlaybackServiceStarted = false
 		stopForeground(true)
 		stopSelf()
 	}
