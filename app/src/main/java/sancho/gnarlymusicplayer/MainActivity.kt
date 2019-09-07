@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity()
 
 	private var _searchResultsOpen = false
 
-	private lateinit var _seekDialog: AlertDialog
+	private var _seekDialog: AlertDialog? = null
 
 	private var _service: MediaPlaybackService? = null
 	private val _serviceConn = object : ServiceConnection
@@ -69,14 +69,14 @@ class MainActivity : AppCompatActivity()
 					_queueAdapter.notifyItemChanged(oldPos)
 					_queueAdapter.notifyItemChanged(App.currentTrack)
 
-					if (_seekDialog.isShowing)
-						_seekDialog.dismiss()
+					if (_seekDialog?.isShowing == true)
+						_seekDialog?.dismiss()
 				}
 
 				override fun onEnd()
 				{
-					if (_seekDialog.isShowing)
-						_seekDialog.dismiss()
+					if (_seekDialog?.isShowing == true)
+						_seekDialog?.dismiss()
 				}
 			})
 		}
@@ -710,7 +710,7 @@ class MainActivity : AppCompatActivity()
 			.setNegativeButton(android.R.string.cancel, null)
 			.create()
 
-		_seekDialog.show()
+		_seekDialog?.show()
 	}
 
 	private fun clearPrev()
