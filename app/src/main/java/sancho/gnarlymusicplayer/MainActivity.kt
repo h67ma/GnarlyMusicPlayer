@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
@@ -634,9 +635,27 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
+		val mediaInfo = MediaMetadataRetriever()
+		mediaInfo.setDataSource(App.queue[App.currentTrack].path)
+		val durationSS = (mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: "0").toInt() / 1000
+		val kbps = (mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) ?: "0").toInt() / 1000
+
 		AlertDialog.Builder(this)
 			.setTitle(App.queue[App.currentTrack].name)
-			.setMessage(App.queue[App.currentTrack].path)
+			.setMessage(getString(R.string.about_track,
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "",
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "",
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "",
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE) ?: "",
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: "",
+				durationSS / 60,
+				durationSS % 60,
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER) ?: "",
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) ?: "",
+				kbps,
+				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "",
+				App.queue[App.currentTrack].path
+			))
 			.setPositiveButton(getString(R.string.ok), null)
 			.create()
 			.show()

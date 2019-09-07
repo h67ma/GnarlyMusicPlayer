@@ -28,4 +28,5 @@
     <string name="seek_minute_hint">mm</string>
     <string name="seek_second_hint">ss</string>
     <string name="seek_total_time">%1$d:%2$02d/%3$d:%4$02d</string>
+    <string name="about_track">Title: %1$s\nArtist: %2$s\nAlbum: %3$s\nDate: %4$s\nGenre: %5$s\nDuration: %6$d:%7$02d\nDisk number: %8$s\nAlbum artist: %9$s\nBitrate: %10$dkbps\nMIME type: %11$s\nPath: %12$s\n</string>
 </resources>
