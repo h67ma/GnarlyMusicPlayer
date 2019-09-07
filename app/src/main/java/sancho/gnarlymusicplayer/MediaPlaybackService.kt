@@ -363,9 +363,11 @@ class MediaPlaybackService : Service()
 			playAndUpdateNotification()
 	}
 
-	fun seek(seconds: Int)
+	fun seekAndPlay(seconds: Int)
 	{
 		_player.seekTo(seconds * 1000)
+		if (!_player.isPlaying)
+			playAndUpdateNotification()
 	}
 
 	fun getTotalTime() = _player.duration / 1000

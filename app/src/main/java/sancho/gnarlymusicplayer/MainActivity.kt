@@ -697,7 +697,7 @@ class MainActivity : AppCompatActivity()
 				{
 					try
 					{
-						_service?.seek(seekView.seek_seekbar.progress)
+						_service?.seekAndPlay(seekView.seek_seekbar.progress)
 					}
 					catch(ex: NumberFormatException)
 					{
