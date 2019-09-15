@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _mountedDevices: MutableList<File>
 
 	private val _dirList = mutableListOf<File>()
-	private var _prevDirList = mutableListOf<File>()
+	private var _prevDirList = mutableListOf<File>() // store "real" dir listing, for re-searching ability
 	private var _currentDir: File? = null
 	private var _lastDir: File? = null // from shared preferences
 
@@ -234,6 +234,7 @@ class MainActivity : AppCompatActivity()
 				_prevExplorerScrollPositions.clear()
 				updateDirectoryView(dir, false)
 				drawer_layout.closeDrawer(GravityCompat.END)
+				_actionSearch?.collapseActionView() // collapse searchbar thing
 			}
 			else
 				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
@@ -573,17 +574,20 @@ class MainActivity : AppCompatActivity()
 					_prevDirList.addAll(_dirList)
 				}
 
-				val queryButLower = query.toLowerCase()
+				val queryButLower = query.toLowerCase(Locale.getDefault())
+
+				// add results from current dir
 				val list = _prevDirList.filter { file ->
-					file.name.toLowerCase().contains(queryButLower)
+					file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 				}.toMutableList()
 
+				// add results from first level dirs
 				for (dir in _prevDirList.filter{file -> file.isDirectory})
 				{
 					list.addAll(
 						dir.listFiles{file ->
 							(file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS))
-							&& file.name.toLowerCase().contains(queryButLower)
+							&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
 					)
 				}
@@ -820,8 +824,7 @@ class MainActivity : AppCompatActivity()
 
 		_lastSelectedTrack = App.currentTrack
 
-		// collapse searchbar thing
-		_actionSearch?.collapseActionView()
+		_actionSearch?.collapseActionView() // collapse searchbar thing
 
 		// save to shared prefs
 		with(PreferenceManager.getDefaultSharedPreferences(this).edit())
