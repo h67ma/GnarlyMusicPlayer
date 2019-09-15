@@ -149,6 +149,10 @@ class MainActivity : AppCompatActivity()
 
 		if (App.currentTrack == RecyclerView.NO_POSITION) // only on first time
 			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
+
+		@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // what's your problem kotlin?
+		App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "")
+		App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
 	}
 
 	override fun onSaveInstanceState(outState: Bundle?)
@@ -410,6 +414,9 @@ class MainActivity : AppCompatActivity()
 
 	private fun playTrack(newPosition: Int)
 	{
+		if (App.mediaPlaybackServiceStarted && _service != null)
+			_service?.saveTrackPosition()
+
 		val oldPos = App.currentTrack
 		_queueAdapter.notifyItemChanged(oldPos)
 		App.currentTrack = newPosition
@@ -690,14 +697,18 @@ class MainActivity : AppCompatActivity()
 			totalTimeSeconds
 		)
 
-		seekView.seek_loadbtn.setOnClickListener{
-
+		val savedTrack = File(App.savedTrackPath)
+		if (savedTrack.exists() && App.queue[App.currentTrack].path == App.savedTrackPath)
+		{
+			seekView.seek_loadbtn.visibility = View.VISIBLE
+			seekView.seek_loadbtn.setOnClickListener{
+				seekView.seek_seekbar.progress = App.savedTrackTime
+			}
 		}
 
 		seekView.seek_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
 			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
 			{
-				if (!fromUser) return
 				seekView.seek_currenttotaltime.text = getString(
 					R.string.seek_total_time,
 					progress / 60,

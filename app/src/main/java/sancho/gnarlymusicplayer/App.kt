@@ -10,7 +10,9 @@ class App: Application()
 	{
 		var currentTrack: Int = RecyclerView.NO_POSITION
 		lateinit var queue: MutableList<Track>
-		var mediaPlaybackServiceStarted = false
+		var mediaPlaybackServiceStarted: Boolean = false
+		var savedTrackPath: String = ""
+		var savedTrackTime: Int = 0
 
 		const val REQUEST_READ_STORAGE = 42
 
@@ -19,6 +21,8 @@ class App: Application()
 		const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
 		const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
 		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
+		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
+		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 
@@ -31,6 +35,8 @@ class App: Application()
 
 		const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
 		const val NOTIFICATION_ID = 420
+
+		const val MIN_TRACK_TIME_S_TO_SAVE = 30
 
 		// from https://developer.android.com/guide/topics/media/media-formats
 		val SUPPORTED_FILE_EXTENSIONS = arrayOf(

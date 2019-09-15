@@ -309,19 +309,23 @@ class MediaPlaybackService : Service()
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
 	}
 
-	private fun nextTrack(forcePlay: Boolean)
+	private fun nextTrack(trackFinished: Boolean)
 	{
+		if (!trackFinished) saveTrackPosition()
+
 		val oldPos = App.currentTrack
 		App.currentTrack = (App.currentTrack + 1) % App.queue.size
 
 		if(_binder.isBinderAlive)
 			_binder.listeners.onTrackChanged(oldPos)
 
-		setTrack(forcePlay)
+		setTrack(trackFinished)
 	}
 
 	private fun prevTrack()
 	{
+		saveTrackPosition()
+
 		val oldPos = App.currentTrack
 		App.currentTrack--
 		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
@@ -374,16 +378,28 @@ class MediaPlaybackService : Service()
 
 	fun getCurrentTime() = _player.currentPosition / 1000
 
+	fun saveTrackPosition()
+	{
+		val currTime = getCurrentTime()
+		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
+		App.savedTrackPath = _track.path
+		App.savedTrackTime = currTime
+	}
+
 	fun end(saveTrack: Boolean)
 	{
 		if(_binder.isBinderAlive)
 			_binder.listeners.onEnd()
+
+		saveTrackPosition()
 
 		if (saveTrack)
 		{
 			// SAVE MEEEEEEE (can't wake up)
 			with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()) {
 				putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
+				putString(App.PREFERENCE_SAVEDTRACK_PATH, App.savedTrackPath)
+				putInt(App.PREFERENCE_SAVEDTRACK_TIME, App.savedTrackTime)
 				apply()
 			}
 		}

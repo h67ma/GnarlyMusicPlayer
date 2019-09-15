@@ -25,7 +25,7 @@
         android:id="@+id/seek_loadbtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:enabled="false"
+        android:visibility="gone"
         android:text="@string/load_last_position"/>
 
 </LinearLayout>
