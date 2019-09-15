@@ -11,7 +11,10 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Easly editable playing queue
 * Simple context search
 * Simple bookmarks
+* Seek current track
+* Restore track position
 * Media buttons support
+* Get track info (tags) on demand
 * Designed for convenience and simplicity
 * Customizable accent colour
 * Open source
@@ -30,6 +33,10 @@ In my opinion adding too many features to a mobile music player makes it harder 
 This was my first Kotlin project. I'm positively surprised by Kotlin - it has some quirks, like the absence of static keyword, but overall I had much better time working with it than with Java.
 
 I regret nothing.
+
+# Potential improvements #
+* ~Seek bar~
+* Export/Import settings, queue, bookmarks to xml/json or something
 
 # Very short Q&A #
 
