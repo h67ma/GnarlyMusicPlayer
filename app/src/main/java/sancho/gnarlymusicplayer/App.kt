@@ -73,11 +73,11 @@ class App: Application()
 		val COLOR_NAMES = arrayOf(
 			"Poison",
 			"Blu",
-			"Ice cold",
-			"Red",
+			"Cool as an ice cube",
+			"Red it's dead",
 			"Orang",
 			"Purpl",
-			"Pink",
+			"Pinkamena",
 			"Macintosh Plus")
 
 		val filesAndDirsComparator = Comparator<File>{ a, b ->
