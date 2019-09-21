@@ -381,7 +381,7 @@ class MediaPlaybackService : Service()
 	fun saveTrackPosition()
 	{
 		val currTime = getCurrentTime()
-		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
+		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE || getTotalTime() - currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
 		App.savedTrackPath = _track.path
 		App.savedTrackTime = currTime
 	}
