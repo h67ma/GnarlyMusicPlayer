@@ -615,8 +615,9 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			R.id.action_currenttrack_info -> showCurrTrackInfo()
 			R.id.action_seek -> showSeekDialog()
+			R.id.action_currenttrack_info -> showCurrTrackInfo()
+			R.id.action_goto_folder -> gotoCurrentTrackDir()
 			R.id.action_clearprev -> clearPrev()
 			R.id.action_clearall -> clearAll()
 			R.id.action_clearafter -> clearAfter()
@@ -663,6 +664,24 @@ class MainActivity : AppCompatActivity()
 			.setPositiveButton(getString(R.string.ok), null)
 			.create()
 			.show()
+	}
+
+	private fun gotoCurrentTrackDir()
+	{
+		if (App.queue.size < 1 || App.currentTrack == RecyclerView.NO_POSITION)
+		{
+			Toast.makeText(this, getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
+			return
+		}
+
+		val dir = File(App.queue[App.currentTrack].path).parentFile
+		if (dir.exists())
+		{
+			_prevExplorerScrollPositions.clear()
+			updateDirectoryView(dir, false)
+		}
+		else
+			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 	}
 
 	private fun showSeekDialog()
