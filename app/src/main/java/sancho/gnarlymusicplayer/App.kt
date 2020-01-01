@@ -2,6 +2,7 @@ package sancho.gnarlymusicplayer
 
 import android.app.Application
 import androidx.recyclerview.widget.RecyclerView
+import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 
 class App: Application()

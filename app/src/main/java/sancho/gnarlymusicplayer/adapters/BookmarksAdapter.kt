@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.bookmark_item.view.*
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.Track
+import sancho.gnarlymusicplayer.models.Track
 import java.util.Collections.swap
 
 class BookmarksAdapter(
