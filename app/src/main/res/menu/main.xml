@@ -21,6 +21,11 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/action_goto_folder"
+        android:title="Go to current track's directory"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_menu_clear"
         android:title="Clear queue"
         app:showAsAction="never">

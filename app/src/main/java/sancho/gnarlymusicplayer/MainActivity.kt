@@ -524,14 +524,19 @@ class MainActivity : AppCompatActivity()
 
 		// search thing
 		_actionSearch = menu.findItem(R.id.action_search)
-		val actionCurrTrackInfo = menu.findItem(R.id.action_currenttrack_info)
-		val actionSeek = menu.findItem(R.id.action_seek)
 		val actionClearMenu = menu.findItem(R.id.action_menu_clear)
-		val actionClearPrev = menu.findItem(R.id.action_clearprev)
-		val actionClearAll = menu.findItem(R.id.action_clearall)
-		val actionClearAfter = menu.findItem(R.id.action_clearafter)
-		val actionSetColor = menu.findItem(R.id.action_setcolor)
-		val actionAbout = menu.findItem(R.id.action_about)
+
+		val menuElementsToToggle = listOf(
+			menu.findItem(R.id.action_seek),
+			menu.findItem(R.id.action_currenttrack_info),
+			menu.findItem(R.id.action_goto_folder),
+			actionClearMenu,
+			menu.findItem(R.id.action_clearprev),
+			menu.findItem(R.id.action_clearall),
+			menu.findItem(R.id.action_clearafter),
+			menu.findItem(R.id.action_setcolor),
+			menu.findItem(R.id.action_about)
+		)
 
 		actionClearMenu.subMenu.clearHeader() // don't show header
 
@@ -544,14 +549,11 @@ class MainActivity : AppCompatActivity()
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
 			{
-				actionCurrTrackInfo.isVisible = true
-				actionSeek.isVisible = true
-				actionClearMenu.isVisible = true
-				actionClearPrev.isVisible = true
-				actionClearAll.isVisible = true
-				actionClearAfter.isVisible = true
-				actionSetColor.isVisible = true
-				actionAbout.isVisible = true
+				for (menuElem in menuElementsToToggle)
+				{
+					menuElem.isVisible = true
+				}
+
 				updateDirectoryView(_currentDir, true)
 				_searchResultsOpen = false
 				return true
@@ -559,14 +561,11 @@ class MainActivity : AppCompatActivity()
 
 			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
 			{
-				actionCurrTrackInfo.isVisible = false
-				actionSeek.isVisible = false
-				actionClearMenu.isVisible = false
-				actionClearPrev.isVisible = false
-				actionClearAll.isVisible = false
-				actionClearAfter.isVisible = false
-				actionSetColor.isVisible = false
-				actionAbout.isVisible = false
+				for (menuElem in menuElementsToToggle)
+				{
+					menuElem.isVisible = false
+				}
+
 				return true
 			}
 		})
