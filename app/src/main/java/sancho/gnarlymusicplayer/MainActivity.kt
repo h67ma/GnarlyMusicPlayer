@@ -549,10 +549,7 @@ class MainActivity : AppCompatActivity()
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
 			{
-				for (menuElem in menuElementsToToggle)
-				{
-					menuElem.isVisible = true
-				}
+				menuElementsToToggle.forEach{elem -> elem.isVisible = true}
 
 				updateDirectoryView(_currentDir, true)
 				_searchResultsOpen = false
@@ -561,10 +558,7 @@ class MainActivity : AppCompatActivity()
 
 			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
 			{
-				for (menuElem in menuElementsToToggle)
-				{
-					menuElem.isVisible = false
-				}
+				menuElementsToToggle.forEach{elem -> elem.isVisible = false}
 
 				return true
 			}
