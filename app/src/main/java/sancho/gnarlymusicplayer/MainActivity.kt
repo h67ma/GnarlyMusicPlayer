@@ -29,16 +29,17 @@ import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
+import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 import java.util.*
 
 class MainActivity : AppCompatActivity()
 {
-	private lateinit var _mountedDevices: MutableList<File>
+	private lateinit var _mountedDevices: MutableList<ExplorerViewItem>
 
-	private val _dirList = mutableListOf<File>()
-	private var _prevDirList = mutableListOf<File>() // store "real" dir listing, for re-searching ability
+	private val _dirList = mutableListOf<ExplorerViewItem>()
+	private var _prevDirList = mutableListOf<ExplorerViewItem>() // store "real" dir listing, for re-searching ability
 	private var _currentDir: File? = null
 	private var _lastDir: File? = null // from shared preferences
 
@@ -167,7 +168,8 @@ class MainActivity : AppCompatActivity()
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
 		_explorerAdapter = ExplorerAdapter(this, _dirList,
-			{ file, pos ->
+			{ item, pos ->
+				val file = File(item.dirPath)
 				if (file.exists())
 				{
 					if (file.isDirectory)
@@ -186,7 +188,8 @@ class MainActivity : AppCompatActivity()
 				else
 					Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 			},
-			{ file ->
+			{ item ->
+				val file = File(item.dirPath)
 				if (file.exists())
 				{
 					if (file.isDirectory)
@@ -447,7 +450,7 @@ class MainActivity : AppCompatActivity()
 		for(f in externalStorageFiles)
 		{
 			val device = f.parentFile.parentFile.parentFile.parentFile // srsl?
-			_mountedDevices.add(device)
+			_mountedDevices.add(ExplorerViewItem(device.path, device.name, device.isDirectory))
 		}
 	}
 
@@ -500,9 +503,10 @@ class MainActivity : AppCompatActivity()
 
 			if (list != null)
 			{
-				Arrays.sort(list, App.filesAndDirsComparator)
+				val viewList = list.map{file -> ExplorerViewItem(file.path, file.name, file.isDirectory)}.toMutableList()
+				viewList.sortWith(App.filesAndDirsComparator)
 				_dirList.clear()
-				_dirList.addAll(list)
+				_dirList.addAll(viewList)
 				_explorerAdapter.notifyDataSetChanged()
 			}
 			else
@@ -583,13 +587,16 @@ class MainActivity : AppCompatActivity()
 				}.toMutableList()
 
 				// add results from first level dirs
-				for (dir in _prevDirList.filter{file -> file.isDirectory})
+				for (elem in _prevDirList.filter{file -> file.isDirectory})
 				{
+					val dir = File(elem.dirPath)
 					list.addAll(
-						dir.listFiles{file ->
-							(file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS))
-							&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
-						}
+						dir
+							.listFiles{file ->
+								(file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS))
+								&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
+							}
+							.map{file -> ExplorerViewItem(file.path, file.name, file.isDirectory) }
 					)
 				}
 

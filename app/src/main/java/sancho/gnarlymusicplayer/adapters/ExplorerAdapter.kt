@@ -7,13 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.explorer_item.view.*
 import sancho.gnarlymusicplayer.R
-import java.io.File
+import sancho.gnarlymusicplayer.models.ExplorerViewItem
 
 class ExplorerAdapter(
 	private val context: Context,
-	private val files: MutableList<File>,
-	private val cliccListener: (File, Int) -> Unit,
-	private val longCliccListener: (File) -> Boolean) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
+	private val files: MutableList<ExplorerViewItem>,
+	private val cliccListener: (ExplorerViewItem, Int) -> Unit,
+	private val longCliccListener: (ExplorerViewItem) -> Boolean) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	override fun onBindViewHolder(holder: FileHolder, position: Int)
 	{
@@ -29,7 +29,7 @@ class ExplorerAdapter(
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(file: File, clickListener: (File, Int) -> Unit, longClickListener: (File) -> Boolean, position: Int)
+		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem, Int) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean, position: Int)
 		{
 			itemView.explorer_text.text = file.name
 

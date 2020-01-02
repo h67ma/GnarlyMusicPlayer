@@ -2,6 +2,7 @@ package sancho.gnarlymusicplayer
 
 import android.app.Application
 import androidx.recyclerview.widget.RecyclerView
+import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 
@@ -81,11 +82,11 @@ class App: Application()
 			"Pinkamena",
 			"Macintosh Plus")
 
-		val filesAndDirsComparator = Comparator<File>{ a, b ->
+		val filesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when
 			{
-				a.isFile && b.isDirectory -> 1
-				a.isDirectory && b.isFile -> -1
+				!a.isDirectory && b.isDirectory -> 1
+				a.isDirectory && !b.isDirectory -> -1
 				else -> a.name.compareTo(b.name, true)
 			}
 		}
