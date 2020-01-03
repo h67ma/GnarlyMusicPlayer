@@ -18,6 +18,9 @@ class App: Application()
 
 		const val REQUEST_READ_STORAGE = 42
 
+		const val EXPLORER_NORMAL_ITEM = 0
+		const val EXPLORER_GROUP_ITEM = 1
+
 		const val PREFERENCE_BOOKMARKS = "sancho.gnarlymusicplayer.preference.bookmarks"
 		const val PREFERENCE_QUEUE = "sancho.gnarlymusicplayer.preference.queue"
 		const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"

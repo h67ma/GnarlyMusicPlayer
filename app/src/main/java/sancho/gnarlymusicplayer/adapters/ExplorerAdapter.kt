@@ -5,7 +5,9 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
+import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 
@@ -24,21 +26,41 @@ class ExplorerAdapter(
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileHolder
 	{
-		return FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_item, parent, false))
+		return when (viewType)
+		{
+			App.EXPLORER_NORMAL_ITEM -> FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_item, parent, false))
+			else -> FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_group_item, parent, false))
+		}
+
 	}
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
 		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem, Int) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean, position: Int)
 		{
-			itemView.explorer_text.text = file.name
+			if (file.isHeader)
+			{
+				itemView.explorer_header_text.text = file.name
+			}
+			else
+			{
+				itemView.explorer_text.text = file.name
 
-			itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(
-				if (file.isDirectory) R.drawable.folder else R.drawable.note, 0, 0, 0
-			)
+				itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(
+					if (file.isDirectory) R.drawable.folder else R.drawable.note, 0, 0, 0
+				)
 
-			itemView.setOnClickListener { clickListener(file, position)}
-			itemView.setOnLongClickListener { longClickListener(file) }
+				itemView.setOnClickListener { clickListener(file, position) }
+				itemView.setOnLongClickListener { longClickListener(file) }
+			}
 		}
+	}
+
+	override fun getItemViewType(pos: Int): Int
+	{
+		if (files[pos].isHeader)
+			return App.EXPLORER_GROUP_ITEM
+
+		return App.EXPLORER_NORMAL_ITEM
 	}
 }
