@@ -19,22 +19,19 @@
         <Preference
             app:title="Help"
             app:key="help"
-            app:persistent="false">
-        </Preference>
+            app:persistent="false"/>
 
         <Preference
             app:title="Created by"
             app:selectable="false"
             app:persistent="false"
-            app:summary="Sancho 2019-2020">
-        </Preference>
+            app:summary="Sancho 2019-2020"/>
 
         <Preference
             app:title="Version"
             app:key="version"
             app:selectable="false"
-            app:persistent="false">
-        </Preference>
+            app:persistent="false"/>
 
     </PreferenceCategory>
 
