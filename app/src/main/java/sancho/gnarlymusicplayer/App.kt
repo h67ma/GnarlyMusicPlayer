@@ -85,13 +85,17 @@ class App: Application()
 			"Pinkamena",
 			"Macintosh Plus")
 
-		val filesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
+		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when
 			{
 				!a.isDirectory && b.isDirectory -> 1
 				a.isDirectory && !b.isDirectory -> -1
-				else -> a.name.compareTo(b.name, true)
+				else -> a.displayName.compareTo(b.displayName, true)
 			}
+		}
+
+		val explorerViewComparator = Comparator<ExplorerViewItem>{ a, b ->
+			a.displayName.compareTo(b.displayName, true)
 		}
 
 		val filesComparator = Comparator<File>{ a, b ->

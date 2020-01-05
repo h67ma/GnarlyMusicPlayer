@@ -40,11 +40,11 @@ class ExplorerAdapter(
 		{
 			if (file.isHeader)
 			{
-				itemView.explorer_header_text.text = file.name
+				itemView.explorer_header_text.text = file.displayName
 			}
 			else
 			{
-				itemView.explorer_text.text = file.name
+				itemView.explorer_text.text = file.displayName
 
 				itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(
 					if (file.isDirectory) R.drawable.folder else R.drawable.note, 0, 0, 0

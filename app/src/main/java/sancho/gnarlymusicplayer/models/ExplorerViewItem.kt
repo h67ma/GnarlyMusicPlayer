@@ -1,3 +1,3 @@
 package sancho.gnarlymusicplayer.models
 
-class ExplorerViewItem(var dirPath: String, var name: String, var isDirectory: Boolean, var isHeader: Boolean = false)
+abstract class ExplorerViewItem(var path: String, var displayName: String, var isDirectory: Boolean, var isHeader: Boolean)
