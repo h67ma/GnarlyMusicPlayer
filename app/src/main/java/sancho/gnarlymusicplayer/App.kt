@@ -76,14 +76,14 @@ class App: Application()
 			R.style.AppThemeMacintoshPlus)
 
 		val COLOR_NAMES = arrayOf(
-			"Poison",
-			"Blu",
+			"I got the poison, I got the remedy",
+			"Blu Monday",
 			"Cool as an ice cube",
-			"Red it's dead",
-			"Orang",
+			"Red Planet Rock",
+			"Orange Colored Sky",
 			"Purpl",
-			"Pinkamena",
-			"Macintosh Plus")
+			"Pinkie's Lie",
+			"Lisa Frank 420/Modern Computing")
 
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when
