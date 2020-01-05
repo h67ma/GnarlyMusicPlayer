@@ -35,6 +35,7 @@ class SettingsActivity : AppCompatActivity()
 
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
+			// relaunch parent activity after changing style
 			findPreference<androidx.preference.ListPreference>("accentcolor")?.setOnPreferenceChangeListener{_, _ ->
 				activity?.recreate()
 				true
@@ -43,8 +44,7 @@ class SettingsActivity : AppCompatActivity()
 
 		private fun getAppVersion(): String
 		{
-			//return packageManager.getPackageInfo(packageName, 0).versionName
-			return "raz dwa trzy"
+			return activity?.packageManager?.getPackageInfo(activity?.packageName, 0)?.versionName ?: "Unknown"
 		}
 	}
 }
