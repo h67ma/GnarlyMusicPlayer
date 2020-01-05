@@ -108,9 +108,9 @@ class MediaPlaybackService : Service()
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
 	{
-		when
+		when (intent.action)
 		{
-			intent.action == App.ACTION_START_PLAYBACK_SERVICE ->
+			App.ACTION_START_PLAYBACK_SERVICE ->
 			{
 				if(!App.mediaPlaybackServiceStarted)
 				{
@@ -142,24 +142,24 @@ class MediaPlaybackService : Service()
 					playAndUpdateNotification()
 				}
 			}
-			intent.action == App.ACTION_REPLAY_TRACK ->
+			App.ACTION_REPLAY_TRACK ->
 			{
 				// seekTo(0) doesn't actually return to start of track :()
 				setTrack(true)
 			}
-			intent.action == App.ACTION_PREV_TRACK ->
+			App.ACTION_PREV_TRACK ->
 			{
 				_sessionCallback.onSkipToPrevious()
 			}
-			intent.action == App.ACTION_PLAYPAUSE ->
+			App.ACTION_PLAYPAUSE ->
 			{
 				playPause()
 			}
-			intent.action == App.ACTION_NEXT_TRACK ->
+			App.ACTION_NEXT_TRACK ->
 			{
 				_sessionCallback.onSkipToNext()
 			}
-			intent.action == App.ACTION_STOP_PLAYBACK_SERVICE ->
+			App.ACTION_STOP_PLAYBACK_SERVICE ->
 			{
 				_sessionCallback.onStop()
 			}

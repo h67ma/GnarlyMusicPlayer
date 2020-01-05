@@ -590,11 +590,11 @@ class MainActivity : AppCompatActivity()
 					.filter { file ->
 						file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
 					}
-					.sortedWith(App.explorerViewComparator)
+					.sortedWith(App.explorerViewFilesComparator)
 				)
 
 				// add results from first level dirs (grouped by subdir name)
-				for (elem in _prevDirList.filter{file -> file.isDirectory}.sortedWith(App.explorerViewComparator))
+				for (elem in _prevDirList.filter{file -> file.isDirectory}.sortedWith(App.explorerViewFilesComparator))
 				{
 					val dir = File(elem.path)
 
@@ -604,7 +604,7 @@ class MainActivity : AppCompatActivity()
 									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
 						.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
-						.sortedWith(App.explorerViewComparator)
+						.sortedWith(App.explorerViewFilesComparator)
 
 					if (results.isNotEmpty())
 					{

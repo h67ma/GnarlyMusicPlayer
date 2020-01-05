@@ -94,7 +94,7 @@ class App: Application()
 			}
 		}
 
-		val explorerViewComparator = Comparator<ExplorerViewItem>{ a, b ->
+		val explorerViewFilesComparator = Comparator<ExplorerViewItem>{ a, b ->
 			a.displayName.compareTo(b.displayName, true)
 		}
 
