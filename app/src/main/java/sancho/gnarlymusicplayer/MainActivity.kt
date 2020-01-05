@@ -154,9 +154,13 @@ class MainActivity : AppCompatActivity()
 		if (App.currentTrack == RecyclerView.NO_POSITION) // only on first time
 			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
 
-		@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // what's your problem kotlin?
-		App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "")
-		App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
+		// don't load from preferences if playback service is running - it might overwrite the track it saved
+		if (!App.mediaPlaybackServiceStarted)
+		{
+			@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // what's your problem kotlin?
+			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "")
+			App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
+		}
 	}
 
 	override fun onSaveInstanceState(outState: Bundle?)
