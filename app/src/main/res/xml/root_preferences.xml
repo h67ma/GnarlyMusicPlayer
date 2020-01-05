@@ -8,7 +8,7 @@
             app:entries="@array/color_names"
             app:entryValues="@array/color_values"
             app:key="accentcolor"
-            app:title="Accent color"
+            app:title="Theme"
             app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>

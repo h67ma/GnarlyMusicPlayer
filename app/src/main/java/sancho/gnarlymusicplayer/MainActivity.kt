@@ -167,6 +167,14 @@ class MainActivity : AppCompatActivity()
 		outState.putInt(App.BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
 	}
 
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+	{
+		super.onActivityResult(requestCode, resultCode, data)
+
+		if (requestCode == App.INTENT_LAUNCH_FOR_RESULT_SETTINGS)
+			recreate() // must call onCreate after changing theme
+	}
+
 	private fun setupFileList()
 	{
 		library_list_view.layoutManager = LinearLayoutManager(this)
@@ -839,7 +847,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun launchSettings()
 	{
-		startActivity(Intent(this, SettingsActivity::class.java))
+		startActivityForResult(Intent(this, SettingsActivity::class.java), App.INTENT_LAUNCH_FOR_RESULT_SETTINGS)
 	}
 
 	//endregion

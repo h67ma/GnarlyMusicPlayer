@@ -18,6 +18,8 @@ class App: Application()
 
 		const val REQUEST_READ_STORAGE = 42
 
+		const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
+
 		const val EXPLORER_NORMAL_ITEM = 0
 		const val EXPLORER_GROUP_ITEM = 1
 
