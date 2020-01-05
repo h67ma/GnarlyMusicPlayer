@@ -1,5 +1,6 @@
 package sancho.gnarlymusicplayer
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
@@ -36,8 +37,18 @@ class SettingsActivity : AppCompatActivity()
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
 			// relaunch parent activity after changing style
-			findPreference<androidx.preference.ListPreference>("accentcolor")?.setOnPreferenceChangeListener{_, _ ->
+			findPreference<androidx.preference.ListPreference>("accentcolor")?.setOnPreferenceChangeListener { _, _ ->
 				activity?.recreate()
+				true
+			}
+
+			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
+				AlertDialog.Builder(context)
+					.setTitle(getString(R.string.about))
+					.setMessage(getString(R.string.about_message))
+					.setPositiveButton(getString(R.string.ok), null)
+					.create()
+					.show()
 				true
 			}
 		}

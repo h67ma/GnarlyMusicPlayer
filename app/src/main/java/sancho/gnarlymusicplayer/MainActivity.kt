@@ -543,7 +543,6 @@ class MainActivity : AppCompatActivity()
 			menu.findItem(R.id.action_clearprev),
 			menu.findItem(R.id.action_clearall),
 			menu.findItem(R.id.action_clearafter),
-			menu.findItem(R.id.action_about),
 			menu.findItem(R.id.action_settings)
 		)
 
@@ -646,7 +645,6 @@ class MainActivity : AppCompatActivity()
 			R.id.action_clearprev -> clearPrev()
 			R.id.action_clearall -> clearAll()
 			R.id.action_clearafter -> clearAfter()
-			R.id.action_about -> showAboutDialog()
 			R.id.action_settings -> launchSettings()
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -837,16 +835,6 @@ class MainActivity : AppCompatActivity()
 			_queueAdapter.notifyItemRangeRemoved(removedFromIdx, removedCnt)
 			_queueChanged = true
 		}
-	}
-
-	private fun showAboutDialog()
-	{
-		AlertDialog.Builder(this)
-			.setTitle(getString(R.string.about))
-			.setMessage(getString(R.string.about_message))
-			.setPositiveButton(getString(R.string.ok), null)
-			.create()
-			.show()
 	}
 
 	private fun launchSettings()
