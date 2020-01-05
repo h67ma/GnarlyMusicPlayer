@@ -24,7 +24,6 @@ class App: Application()
 		const val PREFERENCE_BOOKMARKS = "sancho.gnarlymusicplayer.preference.bookmarks"
 		const val PREFERENCE_QUEUE = "sancho.gnarlymusicplayer.preference.queue"
 		const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
-		const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
 		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
 		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
 		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
@@ -64,26 +63,6 @@ class App: Application()
 			"wav",
 			"ogg"
 		)
-
-		val COLOR_RESOURCES = arrayOf(
-			R.style.AppThemeGreen,
-			R.style.AppThemeBlu,
-			R.style.AppThemeCyan,
-			R.style.AppThemeRed,
-			R.style.AppThemeOrang,
-			R.style.AppThemePurpl,
-			R.style.AppThemePink,
-			R.style.AppThemeMacintoshPlus)
-
-		val COLOR_NAMES = arrayOf(
-			"I got the poison, I got the remedy",
-			"Blu Monday",
-			"Cool as an ice cube",
-			"Red Planet Rock",
-			"Orange Colored Sky",
-			"Purpl",
-			"Pinkie's Lie",
-			"Lisa Frank 420/Modern Computing")
 
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when

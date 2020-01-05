@@ -8,10 +8,9 @@
     <string name="file_list_error">Can\'t list files</string>
     <string name="dir_doesnt_exist">Dir or file doesn\'t exist</string>
     <string name="storage_devices">Storage devices</string>
-    <string name="about">About + help</string>
+    <string name="about">About</string>
     <string name="about_message">Made by Sancho 2019 - 2020\nIcons from Google Material Design\n\nDirectory press = open directory\nDirectory longpress = add all tracks from directory to queue (not including subdirs)\nTrack press = add to queue\nTrack longpress = add to queue and play\nSwipe from left = queue\nSwipe from right = bookmarks\nSwipe on queue/bookmark items = remove\nQueue/bookmark items four line icon grab = reorder\nQueue inactive item press = play\nQueue active item press = control playback (play/pause)\nBookmark press = navigate to bookmark\nBack = go to parent directory\nSearch includes one level of subdirs\nRestore time is saved only for one track, on notification close or on manual track switch, and only when track is 30 seconds or more from beginning or end</string>
     <string name="ok">Affirmative!</string>
-    <string name="select_accent">Select theme</string>
     <string name="n_tracks_added_to_queue">%1$d tracks added to queue</string>
     <string name="cleared_n_tracks">Cleared %1$d tracks</string>
     <string name="reset">Reset</string>
@@ -29,4 +28,5 @@
     <string name="seek_second_hint">ss</string>
     <string name="seek_total_time">%1$d:%2$02d/%3$d:%4$02d</string>
     <string name="about_track">Title: %1$s\nArtist: %2$s\nAlbum: %3$s\nDate: %4$s\nGenre: %5$s\nDuration: %6$d:%7$02d\nDisk number: %8$s\nAlbum artist: %9$s\nBitrate: %10$dkbps\nMIME type: %11$s\nPath: %12$s\n</string>
+    <string name="settings">Settings</string>
 </resources>

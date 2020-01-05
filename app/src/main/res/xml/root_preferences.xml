@@ -1,0 +1,40 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/settings">
+
+        <ListPreference
+            app:defaultValue="green"
+            app:entries="@array/color_names"
+            app:entryValues="@array/color_values"
+            app:key="accentcolor"
+            app:title="Accent color"
+            app:useSimpleSummaryProvider="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/about">
+
+        <Preference
+            app:title="Help"
+            app:persistent="false">
+        </Preference>
+
+        <Preference
+            app:title="Created by"
+            app:selectable="false"
+            app:persistent="false"
+            app:summary="Sancho 2019-2020">
+        </Preference>
+
+        <Preference
+            app:title="Version"
+            app:key="version"
+            app:selectable="false"
+            app:persistent="false">
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

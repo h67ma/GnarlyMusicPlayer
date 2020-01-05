@@ -48,12 +48,12 @@
     </item>
 
     <item
-        android:id="@+id/action_setcolor"
-        android:title="Set theme"
+        android:id="@+id/action_about"
+        android:title="@string/about"
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_about"
-        android:title="@string/about"
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
         app:showAsAction="never"/>
 </menu>

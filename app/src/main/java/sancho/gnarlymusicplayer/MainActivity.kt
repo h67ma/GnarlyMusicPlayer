@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
 
-	private var _accentColorIdx: Int = 0
+	private var _accentColorKey: String = "green"
 
 	private var _actionSearch: MenuItem? = null
 
@@ -98,8 +98,7 @@ class MainActivity : AppCompatActivity()
 		_bookmarksChanged = false
 		_queueChanged = false
 
-		if (_accentColorIdx >= App.COLOR_RESOURCES.size) _accentColorIdx = 0
-		setTheme(App.COLOR_RESOURCES[_accentColorIdx])
+		setTheme(getStyleFromPreference(_accentColorKey))
 
 		if(savedInstanceState != null)
 			_lastSelectedTrack = savedInstanceState.getInt(App.BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
@@ -149,7 +148,7 @@ class MainActivity : AppCompatActivity()
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, ""))
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
-		_accentColorIdx = sharedPref.getInt(App.PREFERENCE_ACCENTCOLOR, 0)
+		_accentColorKey = sharedPref.getString("accentcolor", "green") ?: "green" // what's your problem kotlin?
 
 		if (App.currentTrack == RecyclerView.NO_POSITION) // only on first time
 			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
@@ -157,16 +156,15 @@ class MainActivity : AppCompatActivity()
 		// don't load from preferences if playback service is running - it might overwrite the track it saved
 		if (!App.mediaPlaybackServiceStarted)
 		{
-			@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // what's your problem kotlin?
-			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "")
+			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "") ?: "" // what's your problem kotlin?
 			App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
 		}
 	}
 
-	override fun onSaveInstanceState(outState: Bundle?)
+	override fun onSaveInstanceState(outState: Bundle)
 	{
 		super.onSaveInstanceState(outState)
-		outState?.putInt(App.BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
+		outState.putInt(App.BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
 	}
 
 	private fun setupFileList()
@@ -202,7 +200,7 @@ class MainActivity : AppCompatActivity()
 					{
 						// add all tracks in dir (not recursive)
 						val files = file.listFiles{fileFromDir ->
-							fileFromDir.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS)
+							isFileExtensionInArray(fileFromDir.name, App.SUPPORTED_FILE_EXTENSIONS)
 						}
 						if (files != null)
 						{
@@ -504,7 +502,7 @@ class MainActivity : AppCompatActivity()
 			// list current dir
 			toolbar_title.text = newDir.absolutePath
 			val list = newDir.listFiles{file ->
-				file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS)
+				file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_FILE_EXTENSIONS)
 			}
 
 			if (list != null)
@@ -545,8 +543,8 @@ class MainActivity : AppCompatActivity()
 			menu.findItem(R.id.action_clearprev),
 			menu.findItem(R.id.action_clearall),
 			menu.findItem(R.id.action_clearafter),
-			menu.findItem(R.id.action_setcolor),
-			menu.findItem(R.id.action_about)
+			menu.findItem(R.id.action_about),
+			menu.findItem(R.id.action_settings)
 		)
 
 		actionClearMenu.subMenu.clearHeader() // don't show header
@@ -604,7 +602,7 @@ class MainActivity : AppCompatActivity()
 
 					val results = dir
 						.listFiles{file ->
-							(file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS))
+							(file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_FILE_EXTENSIONS))
 									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
 						.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
@@ -648,8 +646,8 @@ class MainActivity : AppCompatActivity()
 			R.id.action_clearprev -> clearPrev()
 			R.id.action_clearall -> clearAll()
 			R.id.action_clearafter -> clearAfter()
-			R.id.action_setcolor -> selectAccent()
 			R.id.action_about -> showAboutDialog()
+			R.id.action_settings -> launchSettings()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
@@ -841,19 +839,6 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	private fun selectAccent()
-	{
-		AlertDialog.Builder(this)
-			.setTitle(getString(R.string.select_accent))
-			.setItems(App.COLOR_NAMES){_, which ->
-				_accentColorIdx = which
-				recreate()
-			}
-			.setNegativeButton(android.R.string.cancel, null)
-			.create()
-			.show()
-	}
-
 	private fun showAboutDialog()
 	{
 		AlertDialog.Builder(this)
@@ -862,6 +847,11 @@ class MainActivity : AppCompatActivity()
 			.setPositiveButton(getString(R.string.ok), null)
 			.create()
 			.show()
+	}
+
+	private fun launchSettings()
+	{
+		startActivity(Intent(this, SettingsActivity::class.java))
 	}
 
 	//endregion
@@ -889,7 +879,6 @@ class MainActivity : AppCompatActivity()
 					putString(App.PREFERENCE_QUEUE, gson.toJson(App.queue))
 			}
 			putString(App.PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
-			putInt(App.PREFERENCE_ACCENTCOLOR, _accentColorIdx)
 			putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
 			apply()
 		}
