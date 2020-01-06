@@ -42,7 +42,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 4
-        versionName "1.2." + versionBuild
+        versionName "1.2.0." + versionBuild // major.minor.patch.build
     }
 
     buildTypes {
