@@ -66,6 +66,12 @@ class App: Application()
 			"ogg"
 		)
 
+		val ALBUM_ART_FILENAMES = arrayOf(
+			"Folder.png",
+			"Folder.jpg",
+			"Folder.jpeg"
+		)
+
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when
 			{
