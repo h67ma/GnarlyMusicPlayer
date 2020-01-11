@@ -3,37 +3,44 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 # Features #
 * No library
 * No tags
-* No album art
 * No sound effects/equalizer
 * No playlists
 * No ads
 * Based on folder structure
-* Easly editable playing queue
+* Easily editable playing queue
 * Simple context search
-* Simple bookmarks
-* Seek current track
-* Restore track position
+* Simple directory bookmarks
+* Seek current track + restore last track position
 * Media buttons support
-* Get track info (tags) on demand
+* Album art on lockscreen
+* Track info (tags) on demand
 * Designed for convenience and simplicity
 * Customizable accent colour
-* Open source
 
 # Download #
 [Signed .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
 
-# Description #
-This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked a few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position of previous dir. I used it for a few years, because I couldn't find any app that was even half as convenient to use. Finally I made my own music player and I'm very happy with the result.
+# Changelog #
 
-In my opinion adding too many features to a mobile music player makes it harder to use. I just want to be able to quickly change my playing queue, not watch album art, lyrics, tags, or animations. Also, why bundle equalizer with music player - there are apps just for DSP. Unfortunately, most music players on the Play Store are very feature-rich.
+See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for each release.
+
+# Planned features #
+* Playlist support
+* Better tag support - currently limited only to what MediaMetadataRetriever can do
+* Export/import (settings, queue and bookmarks)
+* Nicer help
+* Tests - unit and black-box
+
+# Description #
+This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked a few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position of previous dir. I used it for a few years, because I couldn't find any better app. Finally I decided to make my own music player.
+
+In my opinion adding too many features to a mobile music player makes it harder to use. I just want to be able to quickly change my playing queue, not watch lyrics or animations. Also, why bundle equalizer with music player - there are apps just for DSP. Unfortunately, most music players on the Play Store are very feature-rich.
 
 This was my first Kotlin project. I'm positively surprised by Kotlin - it has some quirks, like the absence of static keyword, but overall I had much better time working with it than with Java.
 
 I regret nothing.
 
-# Potential improvements #
-* ~Seek bar~
-* Export/Import settings, queue, bookmarks to xml/json or something
+I think the most important thing is that I'm actually using the app daily (since 1.0).
 
 # Q&A #
 
@@ -50,10 +57,10 @@ I regret nothing.
 **A:** I don't think it's necessary. The way I use a music player (and the way I intend this app to be used) is to keep the queue relatively short (<100 tracks or something like that) and edit it frequently. There's no point in adding hundreds of songs to queue with one tap - the list would be too long and you'd probably only listen to some part of it before changing your mind.
 
 **Q:** Why is the interface not user-friendly for new users? :(  
-**A:** I know that not every action is clearly labeled, but it's on purpose. For example the two sliding navs on left and right can be opened only by sliding from left on right, and there's no indication that they exist on main screen. Of course, I could've added some kind of button on the action menu, but this kind of thing takes up space for controls that you actually use. This approach might not be very user-friendly for new users, but I made it mostly for myself. Besides, everything is explained in the help dialog.
+**A:** I know that not every action is clearly labeled, but it's on purpose. For example the two sliding navs on left and right can be opened only by sliding from left on right, and there's no indication that they even exist when you look at main screen. Of course, I could've added some kind of button on the action menu, but this kind of thing takes up space for controls that you actually use. This approach might not be very user-friendly for new users, but I made it mostly for myself. Besides, everything is explained in the help dialog.
 
 **Q:** Why is this not on the Play Store?  
-**A:** I don't feel like paying 25 bucks just to have 5 people download this.
+**A:** I don't feel like paying 25 bucks just to have like 5 people download this.
 
 **Q:** Why there are no media buttons in main app interface?  
 **A:** All buttons are in the notification, so you can access them everywhere in the system. There's no reason to have a copy of them taking space in the main app interface.
