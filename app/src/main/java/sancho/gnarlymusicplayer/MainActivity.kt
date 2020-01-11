@@ -530,7 +530,7 @@ class MainActivity : AppCompatActivity()
 		else
 		{
 			// scroll to top
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0))
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
 		}
 	}
 
