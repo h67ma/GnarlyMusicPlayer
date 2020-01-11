@@ -15,9 +15,19 @@
         android:supportsRtl="false"
         android:theme="@style/AppThemeBlack"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings"
+            android:parentActivityName="sancho.gnarlymusicplayer.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="sancho.gnarlymusicplayer.MainActivity" />
+        </activity>
+
         <service
             android:name=".MediaPlaybackService"
-            android:enabled="true"/>
+            android:enabled="true" />
 
         <activity
             android:name=".MainActivity">

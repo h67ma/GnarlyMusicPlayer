@@ -29,19 +29,22 @@ import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
+import sancho.gnarlymusicplayer.models.ExplorerHeader
+import sancho.gnarlymusicplayer.models.ExplorerItem
+import sancho.gnarlymusicplayer.models.ExplorerViewItem
+import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 import java.util.*
 
 class MainActivity : AppCompatActivity()
 {
-	private lateinit var _mountedDevices: MutableList<File>
+	private lateinit var _mountedDevices: MutableList<ExplorerViewItem>
 
-	private val _dirList = mutableListOf<File>()
-	private var _prevDirList = mutableListOf<File>() // store "real" dir listing, for re-searching ability
+	private val _dirList = mutableListOf<ExplorerViewItem>()
+	private var _prevDirList = mutableListOf<ExplorerViewItem>() // store "real" dir listing, for re-searching ability. because _dirList contains search results
 	private var _currentDir: File? = null
 	private var _lastDir: File? = null // from shared preferences
 
-	private var _prevExplorerScrollPositions = Stack<Int>()
 	private lateinit var _explorerAdapter: ExplorerAdapter
 
 	private lateinit var _queueAdapter: QueueAdapter
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
 
-	private var _accentColorIdx: Int = 0
+	private var _accentColorKey: String = "green"
 
 	private var _actionSearch: MenuItem? = null
 
@@ -94,8 +97,7 @@ class MainActivity : AppCompatActivity()
 		_bookmarksChanged = false
 		_queueChanged = false
 
-		if (_accentColorIdx >= App.COLOR_RESOURCES.size) _accentColorIdx = 0
-		setTheme(App.COLOR_RESOURCES[_accentColorIdx])
+		setTheme(getStyleFromPreference(_accentColorKey))
 
 		if(savedInstanceState != null)
 			_lastSelectedTrack = savedInstanceState.getInt(App.BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
@@ -145,20 +147,31 @@ class MainActivity : AppCompatActivity()
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, ""))
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
-		_accentColorIdx = sharedPref.getInt(App.PREFERENCE_ACCENTCOLOR, 0)
+		_accentColorKey = sharedPref.getString("accentcolor", "green") ?: "green" // what's your problem kotlin?
 
 		if (App.currentTrack == RecyclerView.NO_POSITION) // only on first time
 			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
 
-		@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // what's your problem kotlin?
-		App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "")
-		App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
+		// don't load from preferences if playback service is running - it might overwrite the track it saved
+		if (!App.mediaPlaybackServiceStarted)
+		{
+			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "") ?: "" // what's your problem kotlin?
+			App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
+		}
 	}
 
-	override fun onSaveInstanceState(outState: Bundle?)
+	override fun onSaveInstanceState(outState: Bundle)
 	{
 		super.onSaveInstanceState(outState)
-		outState?.putInt(App.BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
+		outState.putInt(App.BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+	{
+		super.onActivityResult(requestCode, resultCode, data)
+
+		if (requestCode == App.INTENT_LAUNCH_FOR_RESULT_SETTINGS)
+			recreate() // must call onCreate after changing theme
 	}
 
 	private fun setupFileList()
@@ -166,15 +179,15 @@ class MainActivity : AppCompatActivity()
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
 		_explorerAdapter = ExplorerAdapter(this, _dirList,
-			{ file, pos ->
+			{ item ->
+				val file = File(item.path)
 				if (file.exists())
 				{
 					if (file.isDirectory)
 					{
 						// navigate to directory
 
-						updateDirectoryView(file, false)
-						_prevExplorerScrollPositions.push(pos)
+						updateDirectoryView(file)
 						_searchResultsOpen = false // in case the dir was from search results
 					}
 					else
@@ -185,14 +198,15 @@ class MainActivity : AppCompatActivity()
 				else
 					Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 			},
-			{ file ->
+			{ item ->
+				val file = File(item.path)
 				if (file.exists())
 				{
 					if (file.isDirectory)
 					{
 						// add all tracks in dir (not recursive)
 						val files = file.listFiles{fileFromDir ->
-							fileFromDir.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS)
+							isFileExtensionInArray(fileFromDir.name, App.SUPPORTED_FILE_EXTENSIONS)
 						}
 						if (files != null)
 						{
@@ -235,8 +249,7 @@ class MainActivity : AppCompatActivity()
 			val dir = File(bookmark.path)
 			if (dir.exists())
 			{
-				_prevExplorerScrollPositions.clear()
-				updateDirectoryView(dir, false)
+				updateDirectoryView(dir)
 				drawer_layout.closeDrawer(GravityCompat.END)
 				_actionSearch?.collapseActionView() // collapse searchbar thing
 			}
@@ -297,8 +310,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener {
-			_prevExplorerScrollPositions.clear()
-			updateDirectoryView(null, false)
+			updateDirectoryView(null)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 	}
@@ -446,7 +458,7 @@ class MainActivity : AppCompatActivity()
 		for(f in externalStorageFiles)
 		{
 			val device = f.parentFile.parentFile.parentFile.parentFile // srsl?
-			_mountedDevices.add(device)
+			_mountedDevices.add(ExplorerItem(device.path, device.name, device.isDirectory))
 		}
 	}
 
@@ -454,7 +466,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView(_lastDir, false)
+			updateDirectoryView(_lastDir)
 		}
 		else
 		{
@@ -468,7 +480,7 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView(_lastDir, false)
+				updateDirectoryView(_lastDir)
 			}
 			else
 			{
@@ -478,7 +490,7 @@ class MainActivity : AppCompatActivity()
 	}
 
 	// assuming the read permission is granted
-	private fun updateDirectoryView(newDir: File?, restoreScroll: Boolean)
+	private fun updateDirectoryView(newDir: File?, oldPath: String? = null)
 	{
 		_currentDir = newDir
 		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
@@ -494,25 +506,32 @@ class MainActivity : AppCompatActivity()
 			// list current dir
 			toolbar_title.text = newDir.absolutePath
 			val list = newDir.listFiles{file ->
-				file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS)
+				file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_FILE_EXTENSIONS)
 			}
 
 			if (list != null)
 			{
-				Arrays.sort(list, App.filesAndDirsComparator)
+				val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
+				viewList.sortWith(App.explorerViewFilesAndDirsComparator)
 				_dirList.clear()
-				_dirList.addAll(list)
+				_dirList.addAll(viewList)
 				_explorerAdapter.notifyDataSetChanged()
 			}
 			else
 				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 		}
-		if (restoreScroll && !_prevExplorerScrollPositions.empty())
+
+		if (oldPath != null)
 		{
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(_prevExplorerScrollPositions.pop(), 200)
+			// find previous dir (child) in current dir list, scroll to it
+			val pos = _dirList.indexOf(ExplorerItem(oldPath, "", true))
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 200)
 		}
 		else
+		{
+			// scroll to top
 			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+		}
 	}
 
 	//region MENU
@@ -524,14 +543,18 @@ class MainActivity : AppCompatActivity()
 
 		// search thing
 		_actionSearch = menu.findItem(R.id.action_search)
-		val actionCurrTrackInfo = menu.findItem(R.id.action_currenttrack_info)
-		val actionSeek = menu.findItem(R.id.action_seek)
 		val actionClearMenu = menu.findItem(R.id.action_menu_clear)
-		val actionClearPrev = menu.findItem(R.id.action_clearprev)
-		val actionClearAll = menu.findItem(R.id.action_clearall)
-		val actionClearAfter = menu.findItem(R.id.action_clearafter)
-		val actionSetColor = menu.findItem(R.id.action_setcolor)
-		val actionAbout = menu.findItem(R.id.action_about)
+
+		val menuElementsToToggle = listOf(
+			menu.findItem(R.id.action_seek),
+			menu.findItem(R.id.action_currenttrack_info),
+			menu.findItem(R.id.action_goto_folder),
+			actionClearMenu,
+			menu.findItem(R.id.action_clearprev),
+			menu.findItem(R.id.action_clearall),
+			menu.findItem(R.id.action_clearafter),
+			menu.findItem(R.id.action_settings)
+		)
 
 		actionClearMenu.subMenu.clearHeader() // don't show header
 
@@ -544,29 +567,17 @@ class MainActivity : AppCompatActivity()
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
 			{
-				actionCurrTrackInfo.isVisible = true
-				actionSeek.isVisible = true
-				actionClearMenu.isVisible = true
-				actionClearPrev.isVisible = true
-				actionClearAll.isVisible = true
-				actionClearAfter.isVisible = true
-				actionSetColor.isVisible = true
-				actionAbout.isVisible = true
-				updateDirectoryView(_currentDir, true)
+				menuElementsToToggle.forEach{elem -> elem.isVisible = true}
+
+				updateDirectoryView(_currentDir)
 				_searchResultsOpen = false
 				return true
 			}
 
 			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
 			{
-				actionCurrTrackInfo.isVisible = false
-				actionSeek.isVisible = false
-				actionClearMenu.isVisible = false
-				actionClearPrev.isVisible = false
-				actionClearAll.isVisible = false
-				actionClearAfter.isVisible = false
-				actionSetColor.isVisible = false
-				actionAbout.isVisible = false
+				menuElementsToToggle.forEach{elem -> elem.isVisible = false}
+
 				return true
 			}
 		})
@@ -581,27 +592,43 @@ class MainActivity : AppCompatActivity()
 					_prevDirList.addAll(_dirList)
 				}
 
+				val searchResultList = mutableListOf<ExplorerViewItem>()
+
 				val queryButLower = query.toLowerCase(Locale.getDefault())
 
 				// add results from current dir
-				val list = _prevDirList.filter { file ->
-					file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
-				}.toMutableList()
+				searchResultList.addAll(_prevDirList
+					.filter { file ->
+						file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
+					}
+					.sortedWith(App.explorerViewFilesComparator)
+				)
 
-				// add results from first level dirs
-				for (dir in _prevDirList.filter{file -> file.isDirectory})
+				// add results from first level dirs (grouped by subdir name)
+				for (elem in _prevDirList.filter{file -> file.isDirectory}.sortedWith(App.explorerViewFilesComparator))
 				{
-					list.addAll(
-						dir.listFiles{file ->
-							(file.isDirectory || file.name.isFileExtensionInArray(App.SUPPORTED_FILE_EXTENSIONS))
-							&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
+					val dir = File(elem.path)
+
+					val results = dir
+						.listFiles{file ->
+							(file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_FILE_EXTENSIONS))
+									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
-					)
+						.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
+						.sortedWith(App.explorerViewFilesComparator)
+
+					if (results.isNotEmpty())
+					{
+						// add subdir header
+						searchResultList.add(ExplorerHeader(elem.displayName))
+
+						// add results in this dir
+						searchResultList.addAll(results)
+					}
 				}
 
-				list.sortWith(App.filesAndDirsComparator)
 				_dirList.clear()
-				_dirList.addAll(list)
+				_dirList.addAll(searchResultList)
 				_explorerAdapter.notifyDataSetChanged()
 				_searchResultsOpen = true
 
@@ -622,13 +649,13 @@ class MainActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			R.id.action_currenttrack_info -> showCurrTrackInfo()
 			R.id.action_seek -> showSeekDialog()
+			R.id.action_currenttrack_info -> showCurrTrackInfo()
+			R.id.action_goto_folder -> gotoCurrentTrackDir()
 			R.id.action_clearprev -> clearPrev()
 			R.id.action_clearall -> clearAll()
 			R.id.action_clearafter -> clearAfter()
-			R.id.action_setcolor -> selectAccent()
-			R.id.action_about -> showAboutDialog()
+			R.id.action_settings -> launchSettings()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
@@ -667,9 +694,26 @@ class MainActivity : AppCompatActivity()
 				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "",
 				App.queue[App.currentTrack].path
 			))
-			.setPositiveButton(getString(R.string.ok), null)
+			.setPositiveButton(getString(R.string.close), null)
 			.create()
 			.show()
+	}
+
+	private fun gotoCurrentTrackDir()
+	{
+		if (App.queue.size < 1 || App.currentTrack == RecyclerView.NO_POSITION)
+		{
+			Toast.makeText(this, getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
+			return
+		}
+
+		val dir = File(App.queue[App.currentTrack].path).parentFile
+		if (dir.exists())
+		{
+			updateDirectoryView(dir)
+		}
+		else
+			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 	}
 
 	private fun showSeekDialog()
@@ -802,27 +846,9 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	private fun selectAccent()
+	private fun launchSettings()
 	{
-		AlertDialog.Builder(this)
-			.setTitle(getString(R.string.select_accent))
-			.setItems(App.COLOR_NAMES){_, which ->
-				_accentColorIdx = which
-				recreate()
-			}
-			.setNegativeButton(android.R.string.cancel, null)
-			.create()
-			.show()
-	}
-
-	private fun showAboutDialog()
-	{
-		AlertDialog.Builder(this)
-			.setTitle(getString(R.string.about))
-			.setMessage(getString(R.string.about_message))
-			.setPositiveButton(getString(R.string.ok), null)
-			.create()
-			.show()
+		startActivityForResult(Intent(this, SettingsActivity::class.java), App.INTENT_LAUNCH_FOR_RESULT_SETTINGS)
 	}
 
 	//endregion
@@ -850,7 +876,6 @@ class MainActivity : AppCompatActivity()
 					putString(App.PREFERENCE_QUEUE, gson.toJson(App.queue))
 			}
 			putString(App.PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
-			putInt(App.PREFERENCE_ACCENTCOLOR, _accentColorIdx)
 			putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
 			apply()
 		}
@@ -866,10 +891,10 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
 			_searchResultsOpen ->
 			{
-				updateDirectoryView(_currentDir, false)
+				updateDirectoryView(_currentDir)
 				_searchResultsOpen = false
 			}
-			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, true)
+			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, _currentDir?.path)
 			else -> super.onBackPressed() // exit app
 		}
 	}

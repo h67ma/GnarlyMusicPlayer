@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
 import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.Track
+import sancho.gnarlymusicplayer.models.Track
 import java.util.Collections.swap
 
 class QueueAdapter(

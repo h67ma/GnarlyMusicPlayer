@@ -5,14 +5,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.AudioManager
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.preference.PreferenceManager
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.RemoteViews
@@ -23,6 +27,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import sancho.gnarlymusicplayer.models.Track
+import java.io.File
 import java.io.IOException
 
 class MediaPlaybackService : Service()
@@ -107,9 +113,9 @@ class MediaPlaybackService : Service()
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
 	{
-		when
+		when (intent.action)
 		{
-			intent.action == App.ACTION_START_PLAYBACK_SERVICE ->
+			App.ACTION_START_PLAYBACK_SERVICE ->
 			{
 				if(!App.mediaPlaybackServiceStarted)
 				{
@@ -141,24 +147,24 @@ class MediaPlaybackService : Service()
 					playAndUpdateNotification()
 				}
 			}
-			intent.action == App.ACTION_REPLAY_TRACK ->
+			App.ACTION_REPLAY_TRACK ->
 			{
 				// seekTo(0) doesn't actually return to start of track :()
 				setTrack(true)
 			}
-			intent.action == App.ACTION_PREV_TRACK ->
+			App.ACTION_PREV_TRACK ->
 			{
 				_sessionCallback.onSkipToPrevious()
 			}
-			intent.action == App.ACTION_PLAYPAUSE ->
+			App.ACTION_PLAYPAUSE ->
 			{
 				playPause()
 			}
-			intent.action == App.ACTION_NEXT_TRACK ->
+			App.ACTION_NEXT_TRACK ->
 			{
 				_sessionCallback.onSkipToNext()
 			}
-			intent.action == App.ACTION_STOP_PLAYBACK_SERVICE ->
+			App.ACTION_STOP_PLAYBACK_SERVICE ->
 			{
 				_sessionCallback.onStop()
 			}
@@ -280,6 +286,38 @@ class MediaPlaybackService : Service()
 					registerReceiver(_noisyAudioReceiver, _intentFilter)
 					_receiverRegistered = true
 				}
+
+				// set lockscreen cover art
+
+				// first try embedded artwork
+				val mmr = MediaMetadataRetriever()
+				mmr.setDataSource(_track.path)
+
+				val embeddedPic = mmr.embeddedPicture
+
+				if(embeddedPic != null)
+				{
+					val bitmap = BitmapFactory.decodeByteArray(embeddedPic, 0, embeddedPic.size)
+					setArtwork(bitmap)
+				}
+				else
+				{
+					// fallback to album art in track's dir
+
+					val dir = File(_track.path).parent
+
+					for (filename in App.ALBUM_ART_FILENAMES)
+					{
+						val art = File(dir, filename)
+
+						if (art.exists())
+						{
+							val bitmap = BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
+							setArtwork(bitmap)
+							break
+						}
+					}
+				}
 			}
 
 			override fun onPause()
@@ -307,6 +345,15 @@ class MediaPlaybackService : Service()
 		_mediaSession.isActive = true
 
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
+	}
+
+	private fun setArtwork(art: Bitmap)
+	{
+		val metadata = MediaMetadataCompat.Builder()
+			.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, art)
+			.build()
+
+		_mediaSession.setMetadata(metadata)
 	}
 
 	private fun nextTrack(trackFinished: Boolean)

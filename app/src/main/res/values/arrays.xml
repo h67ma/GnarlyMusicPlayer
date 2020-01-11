@@ -1,0 +1,23 @@
+<resources>
+    <string-array name="color_names">
+        <item>I got the poison, I got the remedy</item>
+        <item>Blu Monday</item>
+        <item>Cool as an ice cube</item>
+        <item>Red Planet Rock</item>
+        <item>Orange Colored Sky</item>
+        <item>Purpl</item>
+        <item>Pinkie\'s Lie</item>
+        <item>Lisa Frank 420/Modern Computing</item>
+    </string-array>
+
+    <string-array name="color_values">
+        <item>green</item>
+        <item>blu</item>
+        <item>cyan</item>
+        <item>red</item>
+        <item>orang</item>
+        <item>purpl</item>
+        <item>pink</item>
+        <item>macintosh</item>
+    </string-array>
+</resources>

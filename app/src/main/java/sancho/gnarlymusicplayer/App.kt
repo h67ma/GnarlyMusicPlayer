@@ -2,6 +2,8 @@ package sancho.gnarlymusicplayer
 
 import android.app.Application
 import androidx.recyclerview.widget.RecyclerView
+import sancho.gnarlymusicplayer.models.ExplorerViewItem
+import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 
 class App: Application()
@@ -16,10 +18,14 @@ class App: Application()
 
 		const val REQUEST_READ_STORAGE = 42
 
+		const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
+
+		const val EXPLORER_NORMAL_ITEM = 0
+		const val EXPLORER_GROUP_ITEM = 1
+
 		const val PREFERENCE_BOOKMARKS = "sancho.gnarlymusicplayer.preference.bookmarks"
 		const val PREFERENCE_QUEUE = "sancho.gnarlymusicplayer.preference.queue"
 		const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
-		const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
 		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
 		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
 		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
@@ -60,33 +66,23 @@ class App: Application()
 			"ogg"
 		)
 
-		val COLOR_RESOURCES = arrayOf(
-			R.style.AppThemeGreen,
-			R.style.AppThemeBlu,
-			R.style.AppThemeCyan,
-			R.style.AppThemeRed,
-			R.style.AppThemeOrang,
-			R.style.AppThemePurpl,
-			R.style.AppThemePink,
-			R.style.AppThemeMacintoshPlus)
+		val ALBUM_ART_FILENAMES = arrayOf(
+			"Folder.png",
+			"Folder.jpg",
+			"Folder.jpeg"
+		)
 
-		val COLOR_NAMES = arrayOf(
-			"Poison",
-			"Blu",
-			"Cool as an ice cube",
-			"Red it's dead",
-			"Orang",
-			"Purpl",
-			"Pinkamena",
-			"Macintosh Plus")
-
-		val filesAndDirsComparator = Comparator<File>{ a, b ->
+		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when
 			{
-				a.isFile && b.isDirectory -> 1
-				a.isDirectory && b.isFile -> -1
-				else -> a.name.compareTo(b.name, true)
+				!a.isDirectory && b.isDirectory -> 1
+				a.isDirectory && !b.isDirectory -> -1
+				else -> a.displayName.compareTo(b.displayName, true)
 			}
+		}
+
+		val explorerViewFilesComparator = Comparator<ExplorerViewItem>{ a, b ->
+			a.displayName.compareTo(b.displayName, true)
 		}
 
 		val filesComparator = Comparator<File>{ a, b ->
