@@ -1,6 +1,8 @@
 package sancho.gnarlymusicplayer
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
@@ -46,7 +48,7 @@ class SettingsActivity : AppCompatActivity()
 				AlertDialog.Builder(context)
 					.setTitle(getString(R.string.about))
 					.setMessage(getString(R.string.about_message))
-					.setPositiveButton(getString(R.string.ok), null)
+					.setPositiveButton(getString(R.string.close), null)
 					.create()
 					.show()
 				true

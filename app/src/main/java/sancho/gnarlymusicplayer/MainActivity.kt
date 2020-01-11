@@ -694,7 +694,7 @@ class MainActivity : AppCompatActivity()
 				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "",
 				App.queue[App.currentTrack].path
 			))
-			.setPositiveButton(getString(R.string.ok), null)
+			.setPositiveButton(getString(R.string.close), null)
 			.create()
 			.show()
 	}
