@@ -14,7 +14,7 @@ import sancho.gnarlymusicplayer.models.ExplorerViewItem
 class ExplorerAdapter(
 	private val context: Context,
 	private val files: MutableList<ExplorerViewItem>,
-	private val cliccListener: (ExplorerViewItem, Int) -> Unit,
+	private val cliccListener: (ExplorerViewItem) -> Unit,
 	private val longCliccListener: (ExplorerViewItem) -> Boolean) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	override fun onBindViewHolder(holder: FileHolder, position: Int)
@@ -36,7 +36,7 @@ class ExplorerAdapter(
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem, Int) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean, position: Int)
+		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean, position: Int)
 		{
 			if (file.isHeader)
 			{
@@ -50,7 +50,7 @@ class ExplorerAdapter(
 					if (file.isDirectory) R.drawable.folder else R.drawable.note, 0, 0, 0
 				)
 
-				itemView.setOnClickListener { clickListener(file, position) }
+				itemView.setOnClickListener { clickListener(file) }
 				itemView.setOnLongClickListener { longClickListener(file) }
 			}
 		}

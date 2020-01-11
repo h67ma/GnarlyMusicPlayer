@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity()
 	private var _currentDir: File? = null
 	private var _lastDir: File? = null // from shared preferences
 
-	private var _prevExplorerScrollPositions = Stack<Int>()
 	private lateinit var _explorerAdapter: ExplorerAdapter
 
 	private lateinit var _queueAdapter: QueueAdapter
@@ -180,7 +179,7 @@ class MainActivity : AppCompatActivity()
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
 		_explorerAdapter = ExplorerAdapter(this, _dirList,
-			{ item, pos ->
+			{ item ->
 				val file = File(item.path)
 				if (file.exists())
 				{
@@ -188,8 +187,7 @@ class MainActivity : AppCompatActivity()
 					{
 						// navigate to directory
 
-						updateDirectoryView(file, false)
-						_prevExplorerScrollPositions.push(pos)
+						updateDirectoryView(file)
 						_searchResultsOpen = false // in case the dir was from search results
 					}
 					else
@@ -251,8 +249,7 @@ class MainActivity : AppCompatActivity()
 			val dir = File(bookmark.path)
 			if (dir.exists())
 			{
-				_prevExplorerScrollPositions.clear()
-				updateDirectoryView(dir, false)
+				updateDirectoryView(dir)
 				drawer_layout.closeDrawer(GravityCompat.END)
 				_actionSearch?.collapseActionView() // collapse searchbar thing
 			}
@@ -313,8 +310,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener {
-			_prevExplorerScrollPositions.clear()
-			updateDirectoryView(null, false)
+			updateDirectoryView(null)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 	}
@@ -470,7 +466,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView(_lastDir, false)
+			updateDirectoryView(_lastDir)
 		}
 		else
 		{
@@ -484,7 +480,7 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView(_lastDir, false)
+				updateDirectoryView(_lastDir)
 			}
 			else
 			{
@@ -494,7 +490,7 @@ class MainActivity : AppCompatActivity()
 	}
 
 	// assuming the read permission is granted
-	private fun updateDirectoryView(newDir: File?, restoreScroll: Boolean)
+	private fun updateDirectoryView(newDir: File?, oldPath: String? = null)
 	{
 		_currentDir = newDir
 		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
@@ -524,12 +520,18 @@ class MainActivity : AppCompatActivity()
 			else
 				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 		}
-		if (restoreScroll && !_prevExplorerScrollPositions.empty())
+
+		if (oldPath != null)
 		{
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(_prevExplorerScrollPositions.pop(), 200)
+			// find previous dir (child) in current dir list, scroll to it
+			val pos = _dirList.indexOf(ExplorerItem(oldPath, "", true))
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 200)
 		}
 		else
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+		{
+			// scroll to top
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0))
+		}
 	}
 
 	//region MENU
@@ -567,7 +569,7 @@ class MainActivity : AppCompatActivity()
 			{
 				menuElementsToToggle.forEach{elem -> elem.isVisible = true}
 
-				updateDirectoryView(_currentDir, true)
+				updateDirectoryView(_currentDir)
 				_searchResultsOpen = false
 				return true
 			}
@@ -708,8 +710,7 @@ class MainActivity : AppCompatActivity()
 		val dir = File(App.queue[App.currentTrack].path).parentFile
 		if (dir.exists())
 		{
-			_prevExplorerScrollPositions.clear()
-			updateDirectoryView(dir, false)
+			updateDirectoryView(dir)
 		}
 		else
 			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
@@ -890,10 +891,10 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
 			_searchResultsOpen ->
 			{
-				updateDirectoryView(_currentDir, false)
+				updateDirectoryView(_currentDir)
 				_searchResultsOpen = false
 			}
-			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, true)
+			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, _currentDir?.path)
 			else -> super.onBackPressed() // exit app
 		}
 	}
