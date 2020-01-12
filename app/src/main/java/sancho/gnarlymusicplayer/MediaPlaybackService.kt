@@ -306,6 +306,7 @@ class MediaPlaybackService : Service()
 
 					val dir = File(_track.path).parent
 
+					var foundCover = false
 					for (filename in App.ALBUM_ART_FILENAMES)
 					{
 						val art = File(dir, filename)
@@ -314,9 +315,14 @@ class MediaPlaybackService : Service()
 						{
 							val bitmap = BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
 							setArtwork(bitmap)
+							foundCover = true
 							break
 						}
 					}
+
+					// remove art if no cover found
+					if (!foundCover)
+						setArtwork(null)
 				}
 			}
 
@@ -347,7 +353,7 @@ class MediaPlaybackService : Service()
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
 	}
 
-	private fun setArtwork(art: Bitmap)
+	private fun setArtwork(art: Bitmap?)
 	{
 		val metadata = MediaMetadataCompat.Builder()
 			.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, art)
