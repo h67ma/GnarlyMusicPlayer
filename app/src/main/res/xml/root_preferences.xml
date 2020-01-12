@@ -1,7 +1,8 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        app:title="General">
+        app:title="General"
+        app:iconSpaceReserved="false">
 
         <ListPreference
             app:defaultValue="green"
@@ -9,29 +10,42 @@
             app:entryValues="@array/color_values"
             app:key="accentcolor"
             app:title="Theme"
-            app:useSimpleSummaryProvider="true"/>
+            app:useSimpleSummaryProvider="true"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:title="@string/about">
+        app:title="@string/about"
+        app:iconSpaceReserved="false">
 
         <Preference
             app:title="Help"
             app:key="help"
-            app:persistent="false"/>
+            app:persistent="false"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:title="Project repository"
+            app:key="repo"
+            app:persistent="false"
+            app:allowDividerAbove="true"
+            app:iconSpaceReserved="false"/>
 
         <Preference
             app:title="Created by"
-            app:selectable="false"
             app:persistent="false"
-            app:summary="Sancho 2019-2020"/>
+            app:summary="Sancho 2019-2020"
+            app:allowDividerAbove="true"
+            app:iconSpaceReserved="false"/>
 
         <Preference
             app:title="Version"
             app:key="version"
-            app:selectable="false"
-            app:persistent="false"/>
+            app:persistent="false"
+            app:allowDividerAbove="true"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
