@@ -53,6 +53,12 @@ class SettingsActivity : AppCompatActivity()
 					.show()
 				true
 			}
+
+			findPreference<Preference>("repo")?.setOnPreferenceClickListener { _ ->
+				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
+				startActivity(browserIntent)
+				true
+			}
 		}
 
 		private fun getAppVersion(): String
