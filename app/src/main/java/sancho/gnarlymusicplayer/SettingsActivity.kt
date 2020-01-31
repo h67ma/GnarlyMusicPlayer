@@ -41,6 +41,10 @@ class SettingsActivity : AppCompatActivity()
 
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
+			findPreference<Preference>("version")?.setOnPreferenceClickListener { _ ->
+				Toast.makeText(context, getString(R.string.ur_not_a_developer), Toast.LENGTH_SHORT).show()
+				true
+			}
 
 			// relaunch parent activity after changing style
 			findPreference<androidx.preference.ListPreference>("accentcolor")?.setOnPreferenceChangeListener { _, _ ->
