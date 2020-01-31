@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
+import android.media.audiofx.AudioEffect
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -122,6 +123,18 @@ class MediaPlaybackService : Service()
 					// first service call
 
 					_player = MediaPlayer()
+					App.audioSessionId = _player.audioSessionId
+
+					if (App.audioSessionId != AudioManager.ERROR)
+					{
+						// send broadcast to equalizer thing so audio effects can are applied
+						val eqIntent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
+						eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+						eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, applicationContext.packageName)
+						eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+						sendBroadcast(eqIntent)
+					}
+
 					_player.isLooping = false
 					_player.setOnCompletionListener { nextTrack(true) }
 					_player.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
@@ -457,6 +470,17 @@ class MediaPlaybackService : Service()
 			}
 		}
 
+		if (App.audioSessionId != AudioManager.ERROR)
+		{
+			// send broadcast to equalizer thing to close audio session
+			val eqIntent = Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)
+			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+			eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, applicationContext.packageName)
+			eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+			sendBroadcast(eqIntent)
+		}
+
+		App.audioSessionId = AudioManager.ERROR
 		_player.reset()
 		_player.release()
 

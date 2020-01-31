@@ -17,6 +17,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="Audio"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:title="Equalizer"
+            app:key="eq"
+            app:persistent="false"
+            app:iconSpaceReserved="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/about"
         app:iconSpaceReserved="false">
 

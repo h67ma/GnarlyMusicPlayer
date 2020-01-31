@@ -2,9 +2,12 @@ package sancho.gnarlymusicplayer
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.media.AudioManager
+import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -38,6 +41,7 @@ class SettingsActivity : AppCompatActivity()
 
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
+
 			// relaunch parent activity after changing style
 			findPreference<androidx.preference.ListPreference>("accentcolor")?.setOnPreferenceChangeListener { _, _ ->
 				activity?.recreate()
@@ -57,6 +61,26 @@ class SettingsActivity : AppCompatActivity()
 			findPreference<Preference>("repo")?.setOnPreferenceClickListener { _ ->
 				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
 				startActivity(browserIntent)
+				true
+			}
+
+			findPreference<Preference>("eq")?.setOnPreferenceClickListener { _ ->
+				val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
+
+				val pm = activity?.packageManager
+				if (pm != null && eqIntent.resolveActivity(pm) != null)
+				{
+					// don't pass value if not set - eq app will do some magic and save settings for next time
+					if (App.audioSessionId != AudioManager.ERROR)
+						eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+
+					eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context?.packageName)
+					eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+					startActivityForResult(eqIntent, App.INTENT_LAUNCH_EQ)
+				}
+				else
+					Toast.makeText(context, getString(R.string.no_eq_found), Toast.LENGTH_SHORT).show()
+
 				true
 			}
 		}

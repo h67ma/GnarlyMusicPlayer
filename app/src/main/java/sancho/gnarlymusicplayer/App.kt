@@ -1,6 +1,7 @@
 package sancho.gnarlymusicplayer
 
 import android.app.Application
+import android.media.AudioManager
 import androidx.recyclerview.widget.RecyclerView
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.Track
@@ -16,9 +17,14 @@ class App: Application()
 		var savedTrackPath: String = ""
 		var savedTrackTime: Int = 0
 
+		// needs to be global because is used in service and in settings activity
+		// let's set it to error when session doesn't exist, shall we?
+		var audioSessionId: Int = AudioManager.ERROR
+
 		const val REQUEST_READ_STORAGE = 42
 
 		const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
+		const val INTENT_LAUNCH_EQ = 1337
 
 		const val EXPLORER_NORMAL_ITEM = 0
 		const val EXPLORER_GROUP_ITEM = 1
