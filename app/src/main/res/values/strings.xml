@@ -29,5 +29,5 @@
     <string name="about_track">Title: %1$s\nArtist: %2$s\nAlbum: %3$s\nDate: %4$s\nGenre: %5$s\nDuration: %6$d:%7$02d\nDisk number: %8$s\nAlbum artist: %9$s\nBitrate: %10$dkbps\nMIME type: %11$s\nPath: %12$s\n</string>
     <string name="settings">Settings</string>
     <string name="no_eq_found">No equalizer app found</string>
-    <string name="ur_not_a_developer">You won\'t become a developer by clicking on this</string>
+    <string name="ur_not_a_developer">You won\'t become a developer by clicking this</string>
 </resources>
