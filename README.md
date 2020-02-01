@@ -25,7 +25,8 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for each release.
 
 # Backlog #
-* Bug: sometimes the notification takes long to close (a few seconds). This wasn't happening on Noughat, but on Pie is clearly visible
+* Problem: current wakelock method doesn't actually prevent phone from sleeping... Often when a track reaches its end, next track won't play until you wake the device
+* Bug: sometimes the notification takes long time to close (a few seconds). This wasn't happening on Noughat, but on Pie is clearly visible
 * Playlist support
 * Default media notification layout?
 * Nicer help
