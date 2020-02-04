@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
@@ -222,13 +221,10 @@ class MediaPlaybackService : Service()
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
 
-		val channelId =
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-				createNotificationChannel()
-			else
-				App.NOTIFICATION_CHANNEL_ID
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			createNotificationChannel()
 
-		_notification = NotificationCompat.Builder(this, channelId)
+		_notification = NotificationCompat.Builder(this, App.NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
 			.setCustomContentView(_remoteViewSmall)
@@ -490,13 +486,11 @@ class MediaPlaybackService : Service()
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)
-	private fun createNotificationChannel(): String
+	private fun createNotificationChannel()
 	{
-		val chan = NotificationChannel("gnarly_playback", "Gnarly Player Playback Service", NotificationManager.IMPORTANCE_NONE)
-		chan.lightColor = Color.GREEN
+		val chan = NotificationChannel(App.NOTIFICATION_CHANNEL_ID, "Media notification", NotificationManager.IMPORTANCE_LOW)
 		chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 		val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		service.createNotificationChannel(chan)
-		return "gnarly_playback"
 	}
 }
