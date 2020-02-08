@@ -151,6 +151,8 @@ class MainActivity : AppCompatActivity()
 
 		App.volumeStepsTotal = sharedPref.getInt(getString(R.string.pref_totalsteps), 30)
 		App.volumeInappEnabled = sharedPref.getBoolean(getString(R.string.pref_inappenabled), false)
+		App.volumeSystemSet = sharedPref.getBoolean(getString(R.string.pref_lockvolume), false)
+		App.volumeSystemLevel = sharedPref.getInt(App.PREFERENCE_VOLUME_SYSTEM_TO_SET, 7)
 
 		// settings that playback service can change
 		// don't load from preferences if playback service is running - will overwrite its settings

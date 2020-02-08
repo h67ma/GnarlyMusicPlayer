@@ -44,6 +44,20 @@
             app:showSeekBarValue="true"
             app:dependency="@string/pref_inappenabled"/>
 
+        <CheckBoxPreference
+            app:title="Set system media volume"
+            app:summary="App will set a specific system media volume when starting music playback. This will be your defacto max volume when using in-app volume control"
+            app:key="@string/pref_lockvolume"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:title="Set system volume level"
+            app:summary="Tap to set to current system media volume"
+            app:key="setlockvolume"
+            app:persistent="false"
+            app:iconSpaceReserved="false"
+            android:dependency="@string/pref_lockvolume"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

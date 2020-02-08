@@ -21,6 +21,8 @@ class App: Application()
 		var volumeInappEnabled: Boolean = false
 		var volumeStepsTotal: Int = 30
 		var volumeStepIdx: Int = 15
+		var volumeSystemSet: Boolean = false
+		var volumeSystemLevel: Int = 7
 
 		// needs to be global because is used in service and in settings activity
 		// let's set it to error when session doesn't exist, shall we?
@@ -41,6 +43,7 @@ class App: Application()
 		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
 		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
 		const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
+		const val PREFERENCE_VOLUME_SYSTEM_TO_SET = "sancho.gnarlymusicplayer.preference.volume.setsystem"
 
 		const val DEFAULT_ACCENTCOLOR = "green"
 

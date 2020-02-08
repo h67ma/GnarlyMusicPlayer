@@ -1,6 +1,7 @@
 package sancho.gnarlymusicplayer
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
@@ -95,6 +96,27 @@ class SettingsActivity : AppCompatActivity()
 				}
 
 				updateAudioService()
+
+				true
+			}
+
+			findPreference<CheckBoxPreference>(getString(R.string.pref_lockvolume))?.setOnPreferenceChangeListener { _, newValue ->
+				App.volumeSystemSet = (newValue as Boolean) == true
+
+				true
+			}
+
+			findPreference<Preference>("setlockvolume")?.setOnPreferenceClickListener { _ ->
+				val manager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+				val current = manager.getStreamVolume(AudioManager.STREAM_MUSIC)
+
+				with (PreferenceManager.getDefaultSharedPreferences(context).edit())
+				{
+					putInt(App.PREFERENCE_VOLUME_SYSTEM_TO_SET, current)
+					apply()
+				}
+
+				Toast.makeText(context, "Will set to $current", Toast.LENGTH_SHORT).show()
 
 				true
 			}

@@ -122,6 +122,16 @@ class MediaPlaybackService : Service()
 				if(!App.mediaPlaybackServiceStarted)
 				{
 					// first service call
+
+					// set media volume
+					if (App.volumeSystemSet)
+					{
+						val max = _audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+						if (App.volumeSystemLevel > max) App.volumeSystemLevel = max
+
+						_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
+					}
+
 					prepareMediaSession()
 					prepareMediaPlayer()
 
