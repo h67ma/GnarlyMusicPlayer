@@ -1,21 +1,24 @@
 Gnarly Music Player is a lightweight folder music player, focused on quick, intuitive navigation.
 
 # Features #
-* No library
-* No tags
-* No playlists
-* No ads
-* Based on folder structure
+* Based on folder structure - no library
 * Easily editable playing queue
 * Simple context search
 * Simple directory bookmarks
+* Fixes for stock Android ROMs
+	* Configurable volume step count (in-app volume) (2020 and we _still_ only got 15 volume steps. Shame.)
+	* Pressing volume buttons actually adjusts volume, instead of just bringing up volume slider (first press, screen on, Android 9)
 * Integration with audio equalizer apps (specifically Android's built-in equalizer)
 * Seek current track + restore last track position
 * Media buttons support
 * Album art on lockscreen
 * Track info (tags) on demand
 * Designed for convenience and simplicity
+* No ads
 * Customizable accent colour
+
+# Troubleshooting #
+* If the playback sometimes stops when a track ends with screen off, and resumes when device is awoken, this might be fault of overly aggressive power management. App uses a wakelock, but it doesn't help much. Disabling "battery optimization" for this app might help (do this in device settings).
 
 # Download #
 [Latest release .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
@@ -25,7 +28,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for each release.
 
 # Backlog #
-* Problem: current wakelock method doesn't actually prevent phone from sleeping... Often when a track reaches its end, next track won't play until you wake the device
+* .cue support?
 * Playlist support
 * Default media notification layout?
 * Nicer help
