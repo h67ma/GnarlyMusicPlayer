@@ -110,7 +110,7 @@ class MediaPlaybackService : Service()
 
 		prepareNotifications()
 
-		prepareMediaSession()
+		// can't rely on onCreate to prepare important stuff as it only gets called for first service creation
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -122,23 +122,8 @@ class MediaPlaybackService : Service()
 				if(!App.mediaPlaybackServiceStarted)
 				{
 					// first service call
-
-					_player = MediaPlayer()
-					App.audioSessionId = _player.audioSessionId
-
-					if (App.audioSessionId != AudioManager.ERROR)
-					{
-						// send broadcast to equalizer thing so audio effects can are applied
-						val eqIntent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
-						eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
-						eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
-						eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-						sendBroadcast(eqIntent)
-					}
-
-					_player.isLooping = false
-					_player.setOnCompletionListener { nextTrack(true) }
-					_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
+					prepareMediaSession()
+					prepareMediaPlayer()
 
 					try
 					{
@@ -150,6 +135,9 @@ class MediaPlaybackService : Service()
 					{
 						Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 					}
+
+					if (App.volumeInappEnabled)
+						setVolume(App.volumeStepIdx)
 
 					startForeground(App.NOTIFICATION_ID, makeNotification())
 
@@ -170,6 +158,27 @@ class MediaPlaybackService : Service()
 		}
 
 		return START_STICKY
+	}
+
+	private fun prepareMediaPlayer()
+	{
+		_player = MediaPlayer()
+
+		App.audioSessionId = _player.audioSessionId
+
+		if (App.audioSessionId != AudioManager.ERROR)
+		{
+			// send broadcast to equalizer thing so audio effects can are applied
+			val eqIntent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
+			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+			eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
+			eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+			sendBroadcast(eqIntent)
+		}
+
+		_player.isLooping = false
+		_player.setOnCompletionListener { nextTrack(true) }
+		_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
 	}
 
 	private fun prepareNotifications()
@@ -357,6 +366,11 @@ class MediaPlaybackService : Service()
 		_player.setVolume(vol, vol)
 	}
 
+	private fun setMaxVolume()
+	{
+		_player.setVolume(1f, 1f)
+	}
+
 	private fun setVolumeProvider()
 	{
 		if (App.volumeInappEnabled)
@@ -374,9 +388,17 @@ class MediaPlaybackService : Service()
 				}
 			}
 			_mediaSession.setPlaybackToRemote(_volProvider)
+
+			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
+				setVolume(App.volumeStepIdx)
 		}
 		else
+		{
 			_mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC) // removes remote volume thing
+
+			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
+				setMaxVolume()
+		}
 	}
 
 	private fun setArtwork(art: Bitmap?)
