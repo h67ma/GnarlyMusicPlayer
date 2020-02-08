@@ -21,7 +21,7 @@ class SettingsActivity : AppCompatActivity()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-		val accentColorKey = sharedPref.getString(App.PREFERENCE_ACCENTCOLOR, "green") ?: "green" // what's your problem kotlin?
+		val accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
 		setTheme(getStyleFromPreference(accentColorKey))
 
 		super.onCreate(savedInstanceState)
@@ -49,7 +49,7 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			// relaunch parent activity after changing style
-			findPreference<androidx.preference.ListPreference>(App.PREFERENCE_ACCENTCOLOR)?.setOnPreferenceChangeListener { _, _ ->
+			findPreference<androidx.preference.ListPreference>(getString(R.string.pref_accentcolor))?.setOnPreferenceChangeListener { _, _ ->
 				activity?.recreate()
 				true
 			}
@@ -74,7 +74,7 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
-			findPreference<CheckBoxPreference>(App.PREFERENCE_VOLUME_INAPP_ENABLED)?.setOnPreferenceChangeListener { _, newValue ->
+			findPreference<CheckBoxPreference>(getString(R.string.pref_inappenabled))?.setOnPreferenceChangeListener { _, newValue ->
 				App.volumeInappEnabled = (newValue as Boolean) == true
 
 				updateAudioService()
@@ -82,7 +82,7 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
-			findPreference<SeekBarPreference>(App.PREFERENCE_VOLUME_STEPS_TOTAL)?.setOnPreferenceChangeListener { _, newValue ->
+			findPreference<SeekBarPreference>(getString(R.string.pref_totalsteps))?.setOnPreferenceChangeListener { _, newValue ->
 				val newTotal = newValue as Int
 				App.volumeStepIdx = App.volumeStepIdx * newTotal / App.volumeStepsTotal // scale to about the same relative level
 				App.volumeStepsTotal = newTotal

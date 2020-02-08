@@ -40,10 +40,9 @@ class App: Application()
 		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
 		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
 		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
-		const val PREFERENCE_VOLUME_INAPP_ENABLED = "sancho.gnarlymusicplayer.preference.volume.inappenabled"
-		const val PREFERENCE_VOLUME_STEPS_TOTAL = "sancho.gnarlymusicplayer.preference.volume.totalsteps"
 		const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
-		const val PREFERENCE_ACCENTCOLOR = "sancho.gnarlymusicplayer.preference.accentcolor"
+
+		const val DEFAULT_ACCENTCOLOR = "green"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 

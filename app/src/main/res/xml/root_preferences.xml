@@ -9,7 +9,7 @@
             app:defaultValue="green"
             app:entries="@array/color_names"
             app:entryValues="@array/color_values"
-            app:key="sancho.gnarlymusicplayer.preference.accentcolor"
+            app:key="@string/pref_accentcolor"
             app:title="Theme"
             app:useSimpleSummaryProvider="true"
             app:iconSpaceReserved="false"/>
@@ -31,18 +31,18 @@
         <CheckBoxPreference
             app:title="In-app volume control"
             app:summary="Tired of having only 15 volume steps? When enabled, volume keys will change in-app volume instead of global media volume"
-            app:key="sancho.gnarlymusicplayer.preference.volume.inappenabled"
+            app:key="@string/pref_inappenabled"
             app:iconSpaceReserved="false"/>
 
         <SeekBarPreference
             app:title="In-app volume step count"
-            app:key="sancho.gnarlymusicplayer.preference.volume.totalsteps"
+            app:key="@string/pref_totalsteps"
             app:iconSpaceReserved="false"
             app:defaultValue="30"
             android:max="100"
             app:min="1"
             app:showSeekBarValue="true"
-            app:dependency="sancho.gnarlymusicplayer.preference.volume.inappenabled"/>
+            app:dependency="@string/pref_inappenabled"/>
 
     </PreferenceCategory>
 

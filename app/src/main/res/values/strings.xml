@@ -30,4 +30,7 @@
     <string name="settings">Settings</string>
     <string name="no_eq_found">No equalizer app found</string>
     <string name="ur_not_a_developer">You won\'t become a developer by clicking this</string>
+    <string name="pref_inappenabled">sancho.gnarlymusicplayer.preference.volume.inappenabled</string>
+    <string name="pref_totalsteps">sancho.gnarlymusicplayer.preference.volume.totalsteps</string>
+    <string name="pref_accentcolor">sancho.gnarlymusicplayer.preference.accentcolor</string>
 </resources>

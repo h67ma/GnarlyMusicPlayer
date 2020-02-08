@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
 
-	private var _accentColorKey: String = "green"
+	private var _accentColorKey: String = App.DEFAULT_ACCENTCOLOR
 
 	private var _actionSearch: MenuItem? = null
 
@@ -147,10 +147,10 @@ class MainActivity : AppCompatActivity()
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, ""))
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
-		_accentColorKey = sharedPref.getString(App.PREFERENCE_ACCENTCOLOR, "green") ?: "green" // what's your problem kotlin?
+		_accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
 
-		App.volumeStepsTotal = sharedPref.getInt(App.PREFERENCE_VOLUME_STEPS_TOTAL, 30)
-		App.volumeInappEnabled = sharedPref.getBoolean(App.PREFERENCE_VOLUME_INAPP_ENABLED, false)
+		App.volumeStepsTotal = sharedPref.getInt(getString(R.string.pref_totalsteps), 30)
+		App.volumeInappEnabled = sharedPref.getBoolean(getString(R.string.pref_inappenabled), false)
 
 		// settings that playback service can change
 		// don't load from preferences if playback service is running - will overwrite its settings
