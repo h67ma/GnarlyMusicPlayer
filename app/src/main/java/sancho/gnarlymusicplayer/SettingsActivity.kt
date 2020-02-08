@@ -9,8 +9,10 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SeekBarPreference
 import kotlinx.android.synthetic.main.activity_settings.*
 
 
@@ -19,7 +21,7 @@ class SettingsActivity : AppCompatActivity()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-		val accentColorKey = sharedPref.getString("accentcolor", "green") ?: "green" // what's your problem kotlin?
+		val accentColorKey = sharedPref.getString(App.PREFERENCE_ACCENTCOLOR, "green") ?: "green" // what's your problem kotlin?
 		setTheme(getStyleFromPreference(accentColorKey))
 
 		super.onCreate(savedInstanceState)
@@ -47,24 +49,8 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			// relaunch parent activity after changing style
-			findPreference<androidx.preference.ListPreference>("accentcolor")?.setOnPreferenceChangeListener { _, _ ->
+			findPreference<androidx.preference.ListPreference>(App.PREFERENCE_ACCENTCOLOR)?.setOnPreferenceChangeListener { _, _ ->
 				activity?.recreate()
-				true
-			}
-
-			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
-				AlertDialog.Builder(context)
-					.setTitle(getString(R.string.about))
-					.setMessage(getString(R.string.about_message))
-					.setPositiveButton(getString(R.string.close), null)
-					.create()
-					.show()
-				true
-			}
-
-			findPreference<Preference>("repo")?.setOnPreferenceClickListener { _ ->
-				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
-				startActivity(browserIntent)
 				true
 			}
 
@@ -86,6 +72,57 @@ class SettingsActivity : AppCompatActivity()
 					Toast.makeText(context, getString(R.string.no_eq_found), Toast.LENGTH_SHORT).show()
 
 				true
+			}
+
+			findPreference<CheckBoxPreference>(App.PREFERENCE_VOLUME_INAPP_ENABLED)?.setOnPreferenceChangeListener { _, newValue ->
+				App.volumeInappEnabled = (newValue as Boolean) == true
+
+				updateAudioService()
+
+				true
+			}
+
+			findPreference<SeekBarPreference>(App.PREFERENCE_VOLUME_STEPS_TOTAL)?.setOnPreferenceChangeListener { _, newValue ->
+				val newTotal = newValue as Int
+				App.volumeStepIdx = App.volumeStepIdx * newTotal / App.volumeStepsTotal // scale to about the same relative level
+				App.volumeStepsTotal = newTotal
+
+				// also save volumestepidx to preference (so MainActivity won't overwrite it if the service is not running)
+				with (PreferenceManager.getDefaultSharedPreferences(context).edit())
+				{
+					putInt(App.PREFERENCE_VOLUME_STEP_IDX, App.volumeStepIdx)
+					apply()
+				}
+
+				updateAudioService()
+
+				true
+			}
+
+			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
+				AlertDialog.Builder(context)
+					.setTitle(getString(R.string.about))
+					.setMessage(getString(R.string.about_message))
+					.setPositiveButton(getString(R.string.close), null)
+					.create()
+					.show()
+				true
+			}
+
+			findPreference<Preference>("repo")?.setOnPreferenceClickListener { _ ->
+				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
+				startActivity(browserIntent)
+				true
+			}
+		}
+
+		private fun updateAudioService()
+		{
+			if (App.mediaPlaybackServiceStarted)
+			{
+				val intent = Intent(context, MediaPlaybackService::class.java)
+				intent.action = App.ACTION_UPDATE_MAX_VOLUME
+				activity?.startService(intent)
 			}
 		}
 

@@ -147,16 +147,21 @@ class MainActivity : AppCompatActivity()
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, ""))
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
-		_accentColorKey = sharedPref.getString("accentcolor", "green") ?: "green" // what's your problem kotlin?
+		_accentColorKey = sharedPref.getString(App.PREFERENCE_ACCENTCOLOR, "green") ?: "green" // what's your problem kotlin?
 
-		if (App.currentTrack == RecyclerView.NO_POSITION) // only on first time
-			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
+		App.volumeStepsTotal = sharedPref.getInt(App.PREFERENCE_VOLUME_STEPS_TOTAL, 30)
+		App.volumeInappEnabled = sharedPref.getBoolean(App.PREFERENCE_VOLUME_INAPP_ENABLED, false)
 
-		// don't load from preferences if playback service is running - it might overwrite the track it saved
+		// settings that playback service can change
+		// don't load from preferences if playback service is running - will overwrite its settings
 		if (!App.mediaPlaybackServiceStarted)
 		{
+			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
 			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "") ?: "" // what's your problem kotlin?
 			App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
+
+			if (App.volumeInappEnabled)
+				App.volumeStepIdx = sharedPref.getInt(App.PREFERENCE_VOLUME_STEP_IDX, 15)
 		}
 	}
 

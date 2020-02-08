@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
         app:title="General"
@@ -8,7 +9,7 @@
             app:defaultValue="green"
             app:entries="@array/color_names"
             app:entryValues="@array/color_values"
-            app:key="accentcolor"
+            app:key="sancho.gnarlymusicplayer.preference.accentcolor"
             app:title="Theme"
             app:useSimpleSummaryProvider="true"
             app:iconSpaceReserved="false"/>
@@ -22,9 +23,26 @@
 
         <Preference
             app:title="Equalizer"
+            app:summary="Launch audio FX app"
             app:key="eq"
             app:persistent="false"
             app:iconSpaceReserved="false"/>
+
+        <CheckBoxPreference
+            app:title="In-app volume control"
+            app:summary="Tired of having only 15 volume steps? When enabled, volume keys will change in-app volume instead of global media volume"
+            app:key="sancho.gnarlymusicplayer.preference.volume.inappenabled"
+            app:iconSpaceReserved="false"/>
+
+        <SeekBarPreference
+            app:title="In-app volume step count"
+            app:key="sancho.gnarlymusicplayer.preference.volume.totalsteps"
+            app:iconSpaceReserved="false"
+            app:defaultValue="30"
+            android:max="100"
+            app:min="1"
+            app:showSeekBarValue="true"
+            app:dependency="sancho.gnarlymusicplayer.preference.volume.inappenabled"/>
 
     </PreferenceCategory>
 
@@ -35,12 +53,14 @@
 
         <Preference
             app:title="Help"
+            app:summary="Display help dialog"
             app:key="help"
             app:persistent="false"
             app:iconSpaceReserved="false"/>
 
         <Preference
             app:title="Project repository"
+            app:summary="Open webpage"
             app:key="repo"
             app:persistent="false"
             app:iconSpaceReserved="false"/>
