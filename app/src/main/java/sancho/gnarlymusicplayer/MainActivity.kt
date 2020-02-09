@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _bookmarks: MutableList<Track>
 	private var _bookmarksChanged = false
 
-	private var _accentColorKey: String = "green"
+	private var _accentColorKey: String = App.DEFAULT_ACCENTCOLOR
 
 	private var _actionSearch: MenuItem? = null
 
@@ -116,6 +116,8 @@ class MainActivity : AppCompatActivity()
 		setupFileList()
 
 		requestReadPermishon() // check for permissions and initial update of file list
+
+		checkLongpressPermishon()
 	}
 
 	override fun onResume()
@@ -147,16 +149,23 @@ class MainActivity : AppCompatActivity()
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, ""))
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
-		_accentColorKey = sharedPref.getString("accentcolor", "green") ?: "green" // what's your problem kotlin?
+		_accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
 
-		if (App.currentTrack == RecyclerView.NO_POSITION) // only on first time
-			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
+		App.volumeStepsTotal = sharedPref.getInt(getString(R.string.pref_totalsteps), 30)
+		App.volumeInappEnabled = sharedPref.getBoolean(getString(R.string.pref_inappenabled), false)
+		App.volumeSystemSet = sharedPref.getBoolean(getString(R.string.pref_lockvolume), false)
+		App.volumeSystemLevel = sharedPref.getInt(App.PREFERENCE_VOLUME_SYSTEM_TO_SET, 7)
 
-		// don't load from preferences if playback service is running - it might overwrite the track it saved
+		// settings that playback service can change
+		// don't load from preferences if playback service is running - will overwrite its settings
 		if (!App.mediaPlaybackServiceStarted)
 		{
+			App.currentTrack = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
 			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "") ?: "" // what's your problem kotlin?
 			App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
+
+			if (App.volumeInappEnabled)
+				App.volumeStepIdx = sharedPref.getInt(App.PREFERENCE_VOLUME_STEP_IDX, 15)
 		}
 	}
 
@@ -436,7 +445,7 @@ class MainActivity : AppCompatActivity()
 
 		if (!App.mediaPlaybackServiceStarted || _service == null)
 		{
-			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN
+			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN. why not ..-::class::..kt..*java*::-.. while we're at it?
 			intent.action = App.ACTION_START_PLAYBACK_SERVICE
 			startService(intent)
 
@@ -471,6 +480,14 @@ class MainActivity : AppCompatActivity()
 		else
 		{
 			requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), App.REQUEST_READ_STORAGE)
+		}
+	}
+
+	private fun checkLongpressPermishon()
+	{
+		if (checkSelfPermission(Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) == PackageManager.PERMISSION_GRANTED)
+		{
+			App.longpressPermishon = true
 		}
 	}
 

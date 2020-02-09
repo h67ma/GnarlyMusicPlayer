@@ -9,7 +9,6 @@
     <string name="dir_doesnt_exist">Dir or file doesn\'t exist</string>
     <string name="storage_devices">Storage devices</string>
     <string name="about">About</string>
-    <string name="about_message">Directory press = open directory\n\nDirectory longpress = add all tracks from directory to queue (not including subdirs)\n\nTrack press = add to queue\n\nTrack longpress = add to queue and play\n\nSwipe from left = queue\n\nSwipe from right = bookmarks\n\nSwipe on queue/bookmark items = remove\n\nQueue/bookmark items four line icon grab = reorder\n\nQueue inactive item press = play\n\nQueue active item press = control playback (play/pause)\n\nBookmark press = navigate to bookmark\n\nBack = go to parent directory\n\nSearch includes one level of subdirs\n\nRestore time is saved only for one track, on notification close or on manual track switch, and only when track is 30 seconds or more from beginning or end\n\nAlbum art priority: embedded artwork, Folder.png, Folder.jpg, Folder.jpeg</string>
     <string name="n_tracks_added_to_queue">%1$d tracks added to queue</string>
     <string name="cleared_n_tracks">Cleared %1$d tracks</string>
     <string name="reset">Reset</string>
@@ -28,4 +27,10 @@
     <string name="seek_total_time">%1$d:%2$02d/%3$d:%4$02d</string>
     <string name="about_track">Title: %1$s\nArtist: %2$s\nAlbum: %3$s\nDate: %4$s\nGenre: %5$s\nDuration: %6$d:%7$02d\nDisk number: %8$s\nAlbum artist: %9$s\nBitrate: %10$dkbps\nMIME type: %11$s\nPath: %12$s\n</string>
     <string name="settings">Settings</string>
+    <string name="no_eq_found">No equalizer app found</string>
+    <string name="ur_not_a_developer">You won\'t become a developer by clicking this</string>
+    <string name="pref_inappenabled">sancho.gnarlymusicplayer.preference.volume.inappenabled</string>
+    <string name="pref_totalsteps">sancho.gnarlymusicplayer.preference.volume.totalsteps</string>
+    <string name="pref_accentcolor">sancho.gnarlymusicplayer.preference.accentcolor</string>
+    <string name="pref_lockvolume">sancho.gnarlymusicplayer.preference.volume.lock</string>
 </resources>

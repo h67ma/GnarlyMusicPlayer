@@ -19,7 +19,7 @@ class ExplorerAdapter(
 {
 	override fun onBindViewHolder(holder: FileHolder, position: Int)
 	{
-		holder.bind(files[position], cliccListener, longCliccListener, position)
+		holder.bind(files[position], cliccListener, longCliccListener)
 	}
 
 	override fun getItemCount() = files.size
@@ -36,7 +36,7 @@ class ExplorerAdapter(
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean, position: Int)
+		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean)
 		{
 			if (file.isHeader)
 			{

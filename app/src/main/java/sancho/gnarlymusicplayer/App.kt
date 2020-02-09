@@ -1,6 +1,7 @@
 package sancho.gnarlymusicplayer
 
 import android.app.Application
+import android.media.AudioManager
 import androidx.recyclerview.widget.RecyclerView
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.Track
@@ -13,12 +14,26 @@ class App: Application()
 		var currentTrack: Int = RecyclerView.NO_POSITION
 		lateinit var queue: MutableList<Track>
 		var mediaPlaybackServiceStarted: Boolean = false
+
 		var savedTrackPath: String = ""
 		var savedTrackTime: Int = 0
+
+		var volumeInappEnabled: Boolean = false
+		var volumeStepsTotal: Int = 30
+		var volumeStepIdx: Int = 15
+		var volumeSystemSet: Boolean = false
+		var volumeSystemLevel: Int = 7
+
+		var longpressPermishon: Boolean = false
+
+		// needs to be global because is used in service and in settings activity
+		// let's set it to error when session doesn't exist, shall we?
+		var audioSessionId: Int = AudioManager.ERROR
 
 		const val REQUEST_READ_STORAGE = 42
 
 		const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
+		const val INTENT_LAUNCH_EQ = 1337
 
 		const val EXPLORER_NORMAL_ITEM = 0
 		const val EXPLORER_GROUP_ITEM = 1
@@ -29,6 +44,10 @@ class App: Application()
 		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
 		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
 		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
+		const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
+		const val PREFERENCE_VOLUME_SYSTEM_TO_SET = "sancho.gnarlymusicplayer.preference.volume.setsystem"
+
+		const val DEFAULT_ACCENTCOLOR = "green"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 
@@ -38,6 +57,7 @@ class App: Application()
 		const val ACTION_PREV_TRACK = "sancho.gnarlymusicplayer.action.prevtrack"
 		const val ACTION_PLAYPAUSE = "sancho.gnarlymusicplayer.action.playpause"
 		const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
+		const val ACTION_UPDATE_MAX_VOLUME = "sancho.gnarlymusicplayer.action.updatemaxvolume"
 
 		const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
 		const val NOTIFICATION_ID = 420

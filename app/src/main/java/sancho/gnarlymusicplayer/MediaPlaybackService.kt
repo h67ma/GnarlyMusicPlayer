@@ -7,10 +7,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
+import android.media.audiofx.AudioEffect
+import android.media.session.MediaSessionManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -19,6 +20,7 @@ import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.view.KeyEvent
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -27,9 +29,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import androidx.media.VolumeProviderCompat
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 import java.io.IOException
+import kotlin.math.log2
 
 class MediaPlaybackService : Service()
 {
@@ -44,7 +48,9 @@ class MediaPlaybackService : Service()
 
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
+	private lateinit var _volProvider: VolumeProviderCompat
 	private lateinit var _audioManager: AudioManager
+	private lateinit var _mediaSessionManager: MediaSessionManager
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
 	private val _noisyAudioReceiver = object : BroadcastReceiver()
 	{
@@ -105,10 +111,11 @@ class MediaPlaybackService : Service()
 		super.onCreate()
 
 		_audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+		_mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
 		prepareNotifications()
 
-		prepareMediaSession()
+		// can't rely on onCreate to prepare important stuff as it only gets called for first service creation
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -121,10 +128,19 @@ class MediaPlaybackService : Service()
 				{
 					// first service call
 
-					_player = MediaPlayer()
-					_player.isLooping = false
-					_player.setOnCompletionListener { nextTrack(true) }
-					_player.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+					if (App.longpressPermishon) setupLongpress()
+
+					// set media volume
+					if (App.volumeSystemSet)
+					{
+						val max = _audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+						if (App.volumeSystemLevel > max) App.volumeSystemLevel = max
+
+						_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
+					}
+
+					prepareMediaSession()
+					prepareMediaPlayer()
 
 					try
 					{
@@ -134,8 +150,11 @@ class MediaPlaybackService : Service()
 					}
 					catch (_: IOException)
 					{
-						Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+						Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 					}
+
+					if (App.volumeInappEnabled)
+						setVolume(App.volumeStepIdx)
 
 					startForeground(App.NOTIFICATION_ID, makeNotification())
 
@@ -147,30 +166,49 @@ class MediaPlaybackService : Service()
 					playAndUpdateNotification()
 				}
 			}
-			App.ACTION_REPLAY_TRACK ->
-			{
-				// seekTo(0) doesn't actually return to start of track :()
-				setTrack(true)
-			}
-			App.ACTION_PREV_TRACK ->
-			{
-				_sessionCallback.onSkipToPrevious()
-			}
-			App.ACTION_PLAYPAUSE ->
-			{
-				playPause()
-			}
-			App.ACTION_NEXT_TRACK ->
-			{
-				_sessionCallback.onSkipToNext()
-			}
-			App.ACTION_STOP_PLAYBACK_SERVICE ->
-			{
-				_sessionCallback.onStop()
-			}
+			App.ACTION_REPLAY_TRACK -> setTrack(true) // seekTo(0) doesn't actually return to start of track :()
+			App.ACTION_PREV_TRACK -> _sessionCallback.onSkipToPrevious()
+			App.ACTION_PLAYPAUSE -> playPause()
+			App.ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
+			App.ACTION_STOP_PLAYBACK_SERVICE ->	_sessionCallback.onStop()
+			App.ACTION_UPDATE_MAX_VOLUME -> setVolumeProvider()
 		}
 
 		return START_STICKY
+	}
+
+	private fun prepareMediaPlayer()
+	{
+		_player = MediaPlayer()
+
+		App.audioSessionId = _player.audioSessionId
+
+		if (App.audioSessionId != AudioManager.ERROR)
+		{
+			// send broadcast to equalizer thing so audio effects can are applied
+			val eqIntent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
+			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+			eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
+			eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+			sendBroadcast(eqIntent)
+		}
+
+		_player.isLooping = false
+		_player.setOnCompletionListener { nextTrack(true) }
+		_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
+	}
+
+	private fun setupLongpress()
+	{
+		_mediaSessionManager.setOnVolumeKeyLongPressListener({ keyEvent ->
+			if(keyEvent.flags == KeyEvent.FLAG_FROM_SYSTEM && keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.repeatCount <= 1)
+			{
+				if (keyEvent.keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+					_sessionCallback.onSkipToNext()
+				else if (keyEvent.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
+					_sessionCallback.onSkipToPrevious()
+			}
+		}, null)
 	}
 
 	private fun prepareNotifications()
@@ -209,13 +247,10 @@ class MediaPlaybackService : Service()
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
 		_remoteViewBig.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
 
-		val channelId =
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-				createNotificationChannel()
-			else
-				App.NOTIFICATION_CHANNEL_ID
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			createNotificationChannel()
 
-		_notification = NotificationCompat.Builder(this, channelId)
+		_notification = NotificationCompat.Builder(this, App.NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
 			.setCustomContentView(_remoteViewSmall)
@@ -244,7 +279,7 @@ class MediaPlaybackService : Service()
 
 	private fun updateNotification()
 	{
-		with(NotificationManagerCompat.from(applicationContext)) {
+		with(NotificationManagerCompat.from(this)) {
 			notify(App.NOTIFICATION_ID, makeNotification())
 		}
 	}
@@ -260,7 +295,7 @@ class MediaPlaybackService : Service()
 						PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me kotlin???????
 			.setState(PlaybackStateCompat.STATE_STOPPED, 0L, 0f)
 
-		_mediaSession = MediaSessionCompat(applicationContext, "shirley")
+		_mediaSession = MediaSessionCompat(this, "shirley")
 
 		_sessionCallback = object: MediaSessionCompat.Callback()
 		{
@@ -348,9 +383,55 @@ class MediaPlaybackService : Service()
 		}
 		_mediaSession.setCallback(_sessionCallback)
 
+		setVolumeProvider()
+
 		_mediaSession.isActive = true
 
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
+	}
+
+	private fun setVolume(stepIdx: Int)
+	{
+		// can't just divide step/max - setVolume input needs to be logarithmically scaled
+		// at low levels grows slowly, at high levels grows rapidly
+		// something like 0, 0.05, 0.11, 0.18, 0.27, 0.37, 0.5, 0.68, 1 for 8 volume levels
+		val vol = 1 - log2((App.volumeStepsTotal - stepIdx + 1).toFloat())/log2((App.volumeStepsTotal + 1).toFloat())
+		_player.setVolume(vol, vol)
+	}
+
+	private fun setMaxVolume()
+	{
+		_player.setVolume(1f, 1f)
+	}
+
+	private fun setVolumeProvider()
+	{
+		if (App.volumeInappEnabled)
+		{
+			_volProvider = object : VolumeProviderCompat(VOLUME_CONTROL_RELATIVE, App.volumeStepsTotal, App.volumeStepIdx)
+			{
+				override fun onAdjustVolume(direction: Int)
+				{
+					// don't adjust system volume; change inside-app player volume instead
+					// muhahaha
+					// documentation doesn't say anything about "direction", but it's 1/-1 on my phone, so I guess I'll roll with that -_-
+					App.volumeStepIdx += direction
+					setVolume(App.volumeStepIdx)
+					currentVolume = App.volumeStepIdx // necessary to keep internal VolumeProviderCompat state
+				}
+			}
+			_mediaSession.setPlaybackToRemote(_volProvider)
+
+			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
+				setVolume(App.volumeStepIdx)
+		}
+		else
+		{
+			_mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC) // removes remote volume thing
+
+			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
+				setMaxVolume()
+		}
 	}
 
 	private fun setArtwork(art: Bitmap?)
@@ -402,7 +483,7 @@ class MediaPlaybackService : Service()
 		}
 		catch(_: IOException)
 		{
-			Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 		}
 	}
 
@@ -439,24 +520,47 @@ class MediaPlaybackService : Service()
 		App.savedTrackTime = currTime
 	}
 
+	// called by MainActivity when all tracks get removed
+	// also called when notification is closed
 	fun end(saveTrack: Boolean)
 	{
 		if(_binder.isBinderAlive)
 			_binder.listeners.onEnd()
 
+		// remove longpress listener
+		if (App.longpressPermishon) _mediaSessionManager.setOnVolumeKeyLongPressListener(null, null)
+
 		saveTrackPosition()
 
+		_mediaSession.release()
+
+		// SAVE MEEEEEEE (can't wake up)
+		val editor = PreferenceManager.getDefaultSharedPreferences(this).edit()
 		if (saveTrack)
 		{
-			// SAVE MEEEEEEE (can't wake up)
-			with(PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()) {
-				putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
-				putString(App.PREFERENCE_SAVEDTRACK_PATH, App.savedTrackPath)
-				putInt(App.PREFERENCE_SAVEDTRACK_TIME, App.savedTrackTime)
-				apply()
-			}
+			// not needed when all tracks have been cleared
+			editor.putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
+			editor.putString(App.PREFERENCE_SAVEDTRACK_PATH, App.savedTrackPath)
+			editor.putInt(App.PREFERENCE_SAVEDTRACK_TIME, App.savedTrackTime)
 		}
 
+		// save last volume setting
+		if (App.volumeInappEnabled)
+			editor.putInt(App.PREFERENCE_VOLUME_STEP_IDX, App.volumeStepIdx)
+
+		editor.apply()
+
+		if (App.audioSessionId != AudioManager.ERROR)
+		{
+			// send broadcast to equalizer thing to close audio session
+			val eqIntent = Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)
+			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+			eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
+			eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+			sendBroadcast(eqIntent)
+		}
+
+		App.audioSessionId = AudioManager.ERROR
 		_player.reset()
 		_player.release()
 
@@ -466,13 +570,11 @@ class MediaPlaybackService : Service()
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)
-	private fun createNotificationChannel(): String
+	private fun createNotificationChannel()
 	{
-		val chan = NotificationChannel("gnarly_playback", "Gnarly Player Playback Service", NotificationManager.IMPORTANCE_NONE)
-		chan.lightColor = Color.GREEN
+		val chan = NotificationChannel(App.NOTIFICATION_CHANNEL_ID, "Media notification", NotificationManager.IMPORTANCE_LOW)
 		chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 		val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		service.createNotificationChannel(chan)
-		return "gnarly_playback"
 	}
 }
