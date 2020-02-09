@@ -31,6 +31,7 @@ import androidx.media.VolumeProviderCompat
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 import java.io.IOException
+import kotlin.math.log2
 
 class MediaPlaybackService : Service()
 {
@@ -372,7 +373,10 @@ class MediaPlaybackService : Service()
 
 	private fun setVolume(stepIdx: Int)
 	{
-		val vol: Float = stepIdx.toFloat()/App.volumeStepsTotal
+		// can't just divide step/max - setVolume input needs to be logarithmically scaled
+		// at low levels grows slowly, at high levels grows rapidly
+		// something like 0, 0.05, 0.11, 0.18, 0.27, 0.37, 0.5, 0.68, 1 for 8 volume levels
+		val vol = 1 - log2((App.volumeStepsTotal - stepIdx + 1).toFloat())/log2((App.volumeStepsTotal + 1).toFloat())
 		_player.setVolume(vol, vol)
 	}
 
