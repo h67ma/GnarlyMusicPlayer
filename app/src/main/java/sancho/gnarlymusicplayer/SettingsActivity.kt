@@ -1,7 +1,6 @@
 package sancho.gnarlymusicplayer
 
 import android.Manifest
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -131,12 +130,8 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
-				AlertDialog.Builder(context)
-					.setTitle(getString(R.string.about))
-					.setMessage(getString(R.string.about_message))
-					.setPositiveButton(getString(R.string.close), null)
-					.create()
-					.show()
+				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer/wiki/Help"))
+				startActivity(browserIntent)
 				true
 			}
 

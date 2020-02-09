@@ -73,7 +73,7 @@
 
         <Preference
             app:title="Help"
-            app:summary="Display help dialog"
+            app:summary="Show online help"
             app:key="help"
             app:persistent="false"
             app:iconSpaceReserved="false"/>
