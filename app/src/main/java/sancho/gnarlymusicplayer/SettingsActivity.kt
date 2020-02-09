@@ -1,8 +1,10 @@
 package sancho.gnarlymusicplayer
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.net.Uri
@@ -41,6 +43,8 @@ class SettingsActivity : AppCompatActivity()
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?)
 		{
 			setPreferencesFromResource(R.xml.root_preferences, rootKey)
+
+			updatePermishonStatus()
 
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
@@ -121,6 +125,11 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			findPreference<Preference>("permishon")?.setOnPreferenceClickListener { _ ->
+				updatePermishonStatus()
+				true
+			}
+
 			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
 				AlertDialog.Builder(context)
 					.setTitle(getString(R.string.about))
@@ -135,6 +144,20 @@ class SettingsActivity : AppCompatActivity()
 				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
 				startActivity(browserIntent)
 				true
+			}
+		}
+
+		private fun updatePermishonStatus()
+		{
+			if (activity?.checkSelfPermission(Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) == PackageManager.PERMISSION_GRANTED)
+			{
+				App.longpressPermishon = true
+				findPreference<Preference>("permishon")?.summary = "Granted"
+			}
+			else
+			{
+				App.longpressPermishon = false
+				findPreference<Preference>("permishon")?.summary = "Not granted. Tap to check"
 			}
 		}
 
