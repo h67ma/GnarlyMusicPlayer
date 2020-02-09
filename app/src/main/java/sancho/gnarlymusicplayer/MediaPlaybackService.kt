@@ -11,6 +11,7 @@ import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.media.audiofx.AudioEffect
+import android.media.session.MediaSessionManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -19,6 +20,7 @@ import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.view.KeyEvent
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -48,6 +50,7 @@ class MediaPlaybackService : Service()
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
 	private lateinit var _volProvider: VolumeProviderCompat
 	private lateinit var _audioManager: AudioManager
+	private lateinit var _mediaSessionManager: MediaSessionManager
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
 	private val _noisyAudioReceiver = object : BroadcastReceiver()
 	{
@@ -108,6 +111,7 @@ class MediaPlaybackService : Service()
 		super.onCreate()
 
 		_audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+		_mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
 		prepareNotifications()
 
@@ -123,6 +127,8 @@ class MediaPlaybackService : Service()
 				if(!App.mediaPlaybackServiceStarted)
 				{
 					// first service call
+
+					if (App.longpressPermishon) setupLongpress()
 
 					// set media volume
 					if (App.volumeSystemSet)
@@ -190,6 +196,19 @@ class MediaPlaybackService : Service()
 		_player.isLooping = false
 		_player.setOnCompletionListener { nextTrack(true) }
 		_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
+	}
+
+	private fun setupLongpress()
+	{
+		_mediaSessionManager.setOnVolumeKeyLongPressListener({ keyEvent ->
+			if(keyEvent.flags == KeyEvent.FLAG_FROM_SYSTEM && keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.repeatCount <= 1)
+			{
+				if (keyEvent.keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+					_sessionCallback.onSkipToNext()
+				else if (keyEvent.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
+					_sessionCallback.onSkipToPrevious()
+			}
+		}, null)
 	}
 
 	private fun prepareNotifications()
@@ -507,6 +526,9 @@ class MediaPlaybackService : Service()
 	{
 		if(_binder.isBinderAlive)
 			_binder.listeners.onEnd()
+
+		// remove longpress listener
+		if (App.longpressPermishon) _mediaSessionManager.setOnVolumeKeyLongPressListener(null, null)
 
 		saveTrackPosition()
 

@@ -116,6 +116,8 @@ class MainActivity : AppCompatActivity()
 		setupFileList()
 
 		requestReadPermishon() // check for permissions and initial update of file list
+
+		checkLongpressPermishon()
 	}
 
 	override fun onResume()
@@ -478,6 +480,14 @@ class MainActivity : AppCompatActivity()
 		else
 		{
 			requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), App.REQUEST_READ_STORAGE)
+		}
+	}
+
+	private fun checkLongpressPermishon()
+	{
+		if (checkSelfPermission(Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) == PackageManager.PERMISSION_GRANTED)
+		{
+			App.longpressPermishon = true
 		}
 	}
 
