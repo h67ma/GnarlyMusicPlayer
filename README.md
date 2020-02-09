@@ -7,8 +7,9 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Simple directory bookmarks
 * Fixes for stock Android ROMs
 	* Configurable volume step count (in-app volume) (2020 and we _still_ only got 15 volume steps. Shame.)
-	* Pressing volume buttons actually adjusts volume, instead of just bringing up volume slider (first press, screen on, Android 9)
-* Integration with audio equalizer apps (specifically Android's built-in equalizer)
+	* Pressing volume buttons actually adjusts volume, instead of just bringing up volume slider (Android 9,  screen on, first press)
+	* Longpress volume keys to skip tracks (how is this not a default behaviour in Android? bruuuuuuuuh). For this to work, you need to grant some weird shady permission via adb - see [help](https://github.com/szycikm/GnarlyMusicPlayer/wiki/Help#granting-volume-button-longpress-permission)
+* Integration with audio equalizer apps
 * Seek current track + restore last track position
 * Media buttons support
 * Album art on lockscreen
@@ -16,9 +17,6 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Designed for convenience and simplicity
 * No ads
 * Customizable accent colour
-
-# Troubleshooting #
-* If the playback sometimes stops when a track ends with screen off, and resumes when device is awoken, this might be fault of overly aggressive power management. App uses a wakelock, but it doesn't help much. Disabling "battery optimization" for this app might help (do this in device settings).
 
 # Download #
 [Latest release .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
@@ -31,7 +29,6 @@ See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for e
 * .cue support?
 * Playlist support
 * Default media notification layout?
-* Nicer help
 * Export/import (settings, queue and bookmarks)
 * Better tag support - currently limited only to what MediaMetadataRetriever can do
 * Maybe some unit tests?
@@ -46,6 +43,11 @@ This was my first Kotlin project. I'm positively surprised with Kotlin - it has 
 I regret nothing.
 
 I think the most important thing is that I'm actually using the app daily (since 1.0).
+
+# Building #
+* This app uses "hidden APIs" to handle volume keys longpress events. A modified `android.jar` is needed. You need to replace the file in SDK files - see [Android Hidden API project](https://github.com/anggrayudi/android-hidden-api)
+* If you see weird gradle errors and the app refuses to build, try this [android.jar by daio](https://github.com/anggrayudi/android-hidden-api/issues/46#issuecomment-449929036)
+* Changing gradle version to earlier (like 3.2.1 or something) might also help
 
 # Q&A #
 
