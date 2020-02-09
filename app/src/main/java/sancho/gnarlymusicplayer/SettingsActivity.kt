@@ -126,6 +126,7 @@ class SettingsActivity : AppCompatActivity()
 
 			findPreference<Preference>("permishon")?.setOnPreferenceClickListener { _ ->
 				updatePermishonStatus()
+				Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
 				true
 			}
 
