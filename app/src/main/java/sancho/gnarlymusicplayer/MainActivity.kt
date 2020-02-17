@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity()
 					}
 				}
 				else
-					Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
+					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
 			},
 			{ item ->
 				val file = File(item.path)
@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity()
 					}
 				}
 				else
-					Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
+					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
 
 				true
 			}
@@ -435,6 +435,12 @@ class MainActivity : AppCompatActivity()
 
 	private fun playTrack(newPosition: Int)
 	{
+		if (!File(App.queue[newPosition].path).exists())
+		{
+			Toast.makeText(this, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+			return
+		}
+
 		if (App.mediaPlaybackServiceStarted && _service != null)
 			_service?.saveTrackPosition()
 
