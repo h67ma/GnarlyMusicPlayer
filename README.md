@@ -25,6 +25,8 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 
 See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for each release.
 
+Version names are : `major.minor.patch.build`, e.g. `1.2.3.4`. Debug builds have a `-debug` at the end, so for example `1.2.3.4-debug`. Releases with increased `minor` number usually contain new features. Releases with bumped up `patch` number are usually bugfixes or optimizations. `build` number never gets reset.
+
 # Backlog #
 * .cue support?
 * Playlist support
