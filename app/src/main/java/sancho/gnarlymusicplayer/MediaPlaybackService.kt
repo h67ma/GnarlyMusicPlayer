@@ -43,6 +43,8 @@ class MediaPlaybackService : Service()
 	private lateinit var _remoteViewSmall: RemoteViews
 	private lateinit var _remoteViewBig: RemoteViews
 
+	private var _volumeDivider: Float = 1f
+
 	private val _track: Track
 		get() = if (App.currentTrack < App.queue.size) App.queue[App.currentTrack] else Track("error", "error")
 
@@ -390,12 +392,17 @@ class MediaPlaybackService : Service()
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
 	}
 
+	private fun setVolumeDivider()
+	{
+		_volumeDivider = log2((App.volumeStepsTotal + 1).toFloat())
+	}
+
 	private fun setVolume(stepIdx: Int)
 	{
 		// can't just divide step/max - setVolume input needs to be logarithmically scaled
 		// at low levels grows slowly, at high levels grows rapidly
 		// something like 0, 0.05, 0.11, 0.18, 0.27, 0.37, 0.5, 0.68, 1 for 8 volume levels
-		val vol = 1 - log2((App.volumeStepsTotal - stepIdx + 1).toFloat())/log2((App.volumeStepsTotal + 1).toFloat())
+		val vol = 1 - log2((App.volumeStepsTotal - stepIdx + 1).toFloat()) / _volumeDivider
 		_player.setVolume(vol, vol)
 	}
 
@@ -421,6 +428,8 @@ class MediaPlaybackService : Service()
 				}
 			}
 			_mediaSession.setPlaybackToRemote(_volProvider)
+
+			setVolumeDivider()
 
 			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
 				setVolume(App.volumeStepIdx)
