@@ -83,7 +83,14 @@ class App: Application()
 			"mp3",
 			"mkv",
 			"wav",
-			"ogg"
+			"ogg",
+			"m3u",
+			"m3u8"
+		)
+
+		val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
+			"m3u",
+			"m3u8"
 		)
 
 		val ALBUM_ART_FILENAMES = arrayOf(

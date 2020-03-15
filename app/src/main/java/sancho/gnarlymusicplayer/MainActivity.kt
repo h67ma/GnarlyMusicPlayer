@@ -192,16 +192,23 @@ class MainActivity : AppCompatActivity()
 				val file = File(item.path)
 				if (file.exists())
 				{
-					if (file.isDirectory)
+					when
 					{
-						// navigate to directory
-
-						updateDirectoryView(file)
-						_searchResultsOpen = false // in case the dir was from search results
-					}
-					else
-					{
-						addToQueue(Track(file.absolutePath, file.nameWithoutExtension))
+						file.isDirectory ->
+						{
+							// navigate to directory
+							updateDirectoryView(file)
+							_searchResultsOpen = false // in case the dir was from search results
+						}
+						isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) ->
+						{
+							// playlist
+						}
+						else ->
+						{
+							// audio file
+							addToQueue(Track(file.absolutePath, file.nameWithoutExtension))
+						}
 					}
 				}
 				else

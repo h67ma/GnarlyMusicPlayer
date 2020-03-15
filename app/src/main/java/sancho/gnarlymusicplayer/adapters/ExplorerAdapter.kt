@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
 import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.isFileExtensionInArray
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 
 class ExplorerAdapter(
@@ -46,9 +47,14 @@ class ExplorerAdapter(
 			{
 				itemView.explorer_text.text = file.displayName
 
-				itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(
-					if (file.isDirectory) R.drawable.folder else R.drawable.note, 0, 0, 0
-				)
+				val icon = when
+				{
+					file.isDirectory -> R.drawable.folder
+					isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) -> R.drawable.playlist
+					else -> R.drawable.note
+				}
+
+				itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
 
 				itemView.setOnClickListener { clickListener(file) }
 				itemView.setOnLongClickListener { longClickListener(file) }
