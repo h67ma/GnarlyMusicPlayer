@@ -787,28 +787,21 @@ class MainActivity : AppCompatActivity()
 
 			override fun onStartTrackingTouch(seekbar: SeekBar?) {}
 
-			override fun onStopTrackingTouch(seekbar: SeekBar?) {}
+			override fun onStopTrackingTouch(seekbar: SeekBar?)
+			{
+				if (App.mediaPlaybackServiceStarted && _service != null)
+				{
+					_service?.seekAndPlay(seekView.seek_seekbar.progress)
+				}
+				else
+					Toast.makeText(applicationContext, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
+			}
 		})
 
 		_seekDialog = AlertDialog.Builder(this)
 			.setTitle(getString(R.string.seek_restore_position))
 			.setView(seekView)
-			.setPositiveButton(getString(R.string.seek)) { _, _ ->
-				if (App.mediaPlaybackServiceStarted && _service != null)
-				{
-					try
-					{
-						_service?.seekAndPlay(seekView.seek_seekbar.progress)
-					}
-					catch(ex: NumberFormatException)
-					{
-						Toast.makeText(this, ex.message, Toast.LENGTH_SHORT).show()
-					}
-				}
-				else
-					Toast.makeText(this, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
-			}
-			.setNegativeButton(android.R.string.cancel, null)
+			.setNegativeButton(R.string.close, null)
 			.create()
 
 		_seekDialog?.show()
