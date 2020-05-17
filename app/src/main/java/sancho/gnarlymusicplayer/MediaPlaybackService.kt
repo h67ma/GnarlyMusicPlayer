@@ -50,7 +50,6 @@ class MediaPlaybackService : Service()
 
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
-	private lateinit var _volProvider: VolumeProviderCompat
 	private lateinit var _audioManager: AudioManager
 	private lateinit var _mediaSessionManager: MediaSessionManager
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
@@ -415,19 +414,28 @@ class MediaPlaybackService : Service()
 	{
 		if (App.volumeInappEnabled)
 		{
-			_volProvider = object : VolumeProviderCompat(VOLUME_CONTROL_RELATIVE, App.volumeStepsTotal, App.volumeStepIdx)
+			// don't adjust system volume; change inside-app player volume instead
+			// muhahaha
+
+			_mediaSession.setPlaybackToRemote(object : VolumeProviderCompat(VOLUME_CONTROL_ABSOLUTE, App.volumeStepsTotal, App.volumeStepIdx)
 			{
+				// volume btns presses
 				override fun onAdjustVolume(direction: Int)
 				{
-					// don't adjust system volume; change inside-app player volume instead
-					// muhahaha
 					// documentation doesn't say anything about "direction", but it's 1/-1 on my phone, so I guess I'll roll with that -_-
 					App.volumeStepIdx += direction
 					setVolume(App.volumeStepIdx)
-					currentVolume = App.volumeStepIdx // necessary to keep internal VolumeProviderCompat state
+					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
 				}
-			}
-			_mediaSession.setPlaybackToRemote(_volProvider)
+
+				// slider drag/mute/unmute
+				override fun onSetVolumeTo(volume: Int)
+				{
+					App.volumeStepIdx = volume
+					setVolume(App.volumeStepIdx)
+					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
+				}
+			})
 
 			setVolumeDivider()
 
