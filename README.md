@@ -61,7 +61,7 @@ I think the most important thing is that I'm actually using the app daily (since
 **A:** I don't think it's necessary. The way I use a music player (and the way I intend this app to be used) is to keep the queue relatively short (<100 tracks or something like that) and edit it frequently. There's no point in adding hundreds of songs to queue with one tap - the list would be too long and you'd probably only listen to some part of it before changing your mind.
 
 **Q:** Why is the interface not user-friendly for new users? :(  
-**A:** I know that not every action is clearly labeled, but it's on purpose. For example the two sliding navs on left and right can be opened only by sliding from left on right, and there's no indication that they even exist when you look at main screen. Of course, I could've added some kind of button on the action menu, but this kind of thing takes up space for controls that you actually use. This approach might not be very user-friendly for new users, but I made it mostly for myself. Besides, everything is explained in the help dialog.
+**A:** I know that not every action is clearly labelled, but it's on purpose. For example the two sliding navs on left and right can be opened only by sliding from left on right, and there's no indication that they even exist when you look at main screen. Of course, I could've added some kind of button on the action menu, but this kind of thing takes up space for controls that you actually use. This approach might not be very user-friendly for new users, but I made it mostly for myself. Besides, everything is explained in the help dialog.
 
 **Q:** Why is this not on the Play Store?  
 **A:** I don't feel like paying $25 just to have like 5 people download this.
