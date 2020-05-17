@@ -148,6 +148,7 @@ class MediaPlaybackService : Service()
 						_player.setDataSource(_track.path)
 						_player.prepare()
 						_sessionCallback.onPlay()
+						setLockscreenCoverArt()
 					}
 					catch (_: IOException)
 					{
@@ -316,49 +317,11 @@ class MediaPlaybackService : Service()
 
 				if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 					_player.start()
-
+					updateNotification()
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
 					_mediaSession.setPlaybackState(playbackStateBuilder.build())
 					registerReceiver(_noisyAudioReceiver, _intentFilter)
 					_receiverRegistered = true
-				}
-
-				// set lockscreen cover art
-
-				// first try embedded artwork
-				val mmr = MediaMetadataRetriever()
-				mmr.setDataSource(_track.path)
-
-				val embeddedPic = mmr.embeddedPicture
-
-				if(embeddedPic != null)
-				{
-					val bitmap = BitmapFactory.decodeByteArray(embeddedPic, 0, embeddedPic.size)
-					setArtwork(bitmap)
-				}
-				else
-				{
-					// fallback to album art in track's dir
-
-					val dir = File(_track.path).parent
-
-					var foundCover = false
-					for (filename in App.ALBUM_ART_FILENAMES)
-					{
-						val art = File(dir, filename)
-
-						if (art.exists())
-						{
-							val bitmap = BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
-							setArtwork(bitmap)
-							foundCover = true
-							break
-						}
-					}
-
-					// remove art if no cover found
-					if (!foundCover)
-						setArtwork(null)
 				}
 			}
 
@@ -451,6 +414,45 @@ class MediaPlaybackService : Service()
 		}
 	}
 
+	private fun setLockscreenCoverArt()
+	{
+		// first try embedded artwork
+		val mmr = MediaMetadataRetriever()
+		mmr.setDataSource(_track.path)
+
+		val embeddedPic = mmr.embeddedPicture
+
+		if(embeddedPic != null)
+		{
+			val bitmap = BitmapFactory.decodeByteArray(embeddedPic, 0, embeddedPic.size)
+			setArtwork(bitmap)
+		}
+		else
+		{
+			// fallback to album art in track's dir
+
+			val dir = File(_track.path).parent
+
+			var foundCover = false
+			for (filename in App.ALBUM_ART_FILENAMES)
+			{
+				val art = File(dir, filename)
+
+				if (art.exists())
+				{
+					val bitmap = BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
+					setArtwork(bitmap)
+					foundCover = true
+					break
+				}
+			}
+
+			// remove art if no cover found
+			if (!foundCover)
+				setArtwork(null)
+		}
+	}
+
 	private fun setArtwork(art: Bitmap?)
 	{
 		val metadata = MediaMetadataCompat.Builder()
@@ -497,6 +499,7 @@ class MediaPlaybackService : Service()
 			_player.prepare()
 			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
 			updateNotification()
+			setLockscreenCoverArt()
 		}
 		catch(_: IOException)
 		{
