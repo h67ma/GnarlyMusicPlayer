@@ -770,6 +770,7 @@ class MainActivity : AppCompatActivity()
 			seekView.seek_loadbtn.visibility = View.VISIBLE
 			seekView.seek_loadbtn.setOnClickListener{
 				seekView.seek_seekbar.progress = App.savedTrackTime
+				_service?.seekAndPlay(seekView.seek_seekbar.progress)
 			}
 		}
 
