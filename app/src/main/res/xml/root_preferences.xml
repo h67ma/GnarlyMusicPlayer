@@ -66,12 +66,6 @@
         app:allowDividerAbove="true">
 
         <Preference
-            app:title="Longpress volume buttons listener permission"
-            app:key="permishon"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
-
-        <Preference
             app:title="Help"
             app:summary="Show online help"
             app:key="help"

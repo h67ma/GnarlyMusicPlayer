@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply from: 'signing.gradle'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     def versionPropsFile = file('version.properties')
     def versionBuild
@@ -40,9 +40,9 @@ android {
     defaultConfig {
         applicationId "sancho.gnarlymusicplayer"
         minSdkVersion 23
-        targetSdkVersion 28
-        versionCode 7
-        versionName "1.3.2." + versionBuild // major.minor.patch.build
+        targetSdkVersion 29
+        versionCode 8
+        versionName "1.4.0." + versionBuild // major.minor.patch.build
     }
 
     buildTypes {
@@ -72,9 +72,9 @@ android {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.media2:media2:1.0.0-alpha04'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
 }
