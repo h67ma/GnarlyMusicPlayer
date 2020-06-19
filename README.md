@@ -5,10 +5,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 * Easily editable playing queue
 * Simple context search
 * Simple directory bookmarks
-* Fixes for stock Android ROMs
-	* Configurable volume step count (in-app volume) (2020 and we _still_ only got 15 volume steps. Shame.)
-	* Pressing volume buttons actually adjusts volume, instead of just bringing up volume slider (Android 9,  screen on, first press)
-	* Longpress volume keys to skip tracks (how is this not a default behaviour in Android? bruuuuuuuuh). For this to work, you need to grant some weird shady permission via adb - see [help](https://github.com/szycikm/GnarlyMusicPlayer/wiki/Help#granting-volume-button-longpress-permission)
+* Configurable volume step count (in-app volume)
 * Integration with audio equalizer apps
 * Seek current track + restore last track position
 * Media buttons support
@@ -25,7 +22,7 @@ Gnarly Music Player is a lightweight folder music player, focused on quick, intu
 
 See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for each release.
 
-Version names are : `major.minor.patch.build`, e.g. `1.2.3.4`. Debug builds have a `-debug` at the end, so for example `1.2.3.4-debug`. Releases with increased `minor` number usually contain new features. Releases with bumped up `patch` number are usually bugfixes or optimizations. `build` number never gets reset.
+Version names are : `major.minor.patch`, e.g. `1.2.3`. Debug builds have a `-debug` at the end, so for example `1.2.3-debug`. Releases with increased `minor` number usually contain new features. Releases with bumped up `patch` number are usually bugfixes or optimizations.
 
 # Backlog #
 See [Issues](https://github.com/szycikm/GnarlyMusicPlayer/issues)
@@ -40,11 +37,6 @@ This was my first Kotlin project. I'm positively surprised with Kotlin - it has 
 I regret nothing.
 
 I think the most important thing is that I'm actually using the app daily (since 1.0).
-
-# Building #
-* This app uses "hidden APIs" to handle volume keys longpress events. A modified `android.jar` is needed. You need to replace the file in SDK files - see [Android Hidden API project](https://github.com/anggrayudi/android-hidden-api)
-* If you see weird gradle errors and the app refuses to build, try this [android.jar by daio](https://github.com/anggrayudi/android-hidden-api/issues/46#issuecomment-449929036)
-* Changing gradle version to earlier (like 3.2.1 or something) might also help
 
 # Q&A #
 
@@ -71,7 +63,3 @@ I think the most important thing is that I'm actually using the app daily (since
 
 **Q:** Why does the notification use custom layout instead of the standard media one?  
 **A:** Let's just say I don't like that "media layout". Buttons are too small and for some reason there's a timer showing how long ago the notification appeared.
-
-# Tested on #
-* wt88047/7.1.2/LineageOS 14.1
-* laurel_sprout/9.0/stock
