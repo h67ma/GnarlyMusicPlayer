@@ -6,43 +6,12 @@ apply from: 'signing.gradle'
 android {
     compileSdkVersion 29
 
-    def versionPropsFile = file('version.properties')
-    def versionBuild
-
-    // set versionBuild (read from file)
-    if (versionPropsFile.canRead())
-    {
-        Properties versionProps = new Properties()
-        versionProps.load(new FileInputStream(versionPropsFile))
-        versionBuild = versionProps['VERSION_BUILD'].toInteger()
-    }
-    else
-    {
-        throw new FileNotFoundException("Could not read version.properties")
-    }
-
-    // increment version number, only runs on build
-    ext.autoIncrementBuildNumber = {
-        if (versionPropsFile.canRead())
-        {
-            Properties versionProps = new Properties()
-            versionProps.load(new FileInputStream(versionPropsFile))
-            versionBuild = versionProps['VERSION_BUILD'].toInteger() + 1
-            versionProps['VERSION_BUILD'] = versionBuild.toString()
-            versionProps.store(versionPropsFile.newWriter(), null)
-        }
-        else
-        {
-            throw new FileNotFoundException("Could not read version.properties")
-        }
-    }
-
     defaultConfig {
         applicationId "sancho.gnarlymusicplayer"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 8
-        versionName "1.4.0." + versionBuild // major.minor.patch.build
+        versionName "1.4.0" // major.minor.patch
     }
 
     buildTypes {
@@ -54,19 +23,6 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-        }
-    }
-
-    gradle.taskGraph.whenReady {taskGraph ->
-        if (taskGraph.hasTask(assembleDebug))
-        {
-            // debug task
-            autoIncrementBuildNumber()
-        }
-        else if (taskGraph.hasTask(assembleRelease))
-        {
-            // release task
-            autoIncrementBuildNumber()
         }
     }
 }
