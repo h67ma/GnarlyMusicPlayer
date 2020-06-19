@@ -723,7 +723,7 @@ class MainActivity : AppCompatActivity()
 		val dir = File(App.queue[App.currentTrack].path)
 		if (dir.parentFile?.exists() == true)
 		{
-			updateDirectoryView(dir)
+			updateDirectoryView(dir.parentFile)
 		}
 		else
 			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
