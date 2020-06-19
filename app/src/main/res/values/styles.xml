@@ -12,6 +12,12 @@
         <item name="android:colorPrimaryDark">#388E3C</item>
     </style>
 
+    <style name="AppThemeLime" parent="AppThemeBlack">
+        <item name="android:colorPrimary">#AAED39</item>
+        <item name="android:colorAccent">#AAED39</item>
+        <item name="android:colorPrimaryDark">#88D13B</item>
+    </style>
+
     <style name="AppThemeBlu" parent="AppThemeBlack">
         <item name="android:colorPrimary">#2196F3</item>
         <item name="android:colorAccent">#2196F3</item>
@@ -28,6 +34,12 @@
         <item name="android:colorPrimary">#F4292C</item>
         <item name="android:colorAccent">#F4292C</item>
         <item name="android:colorPrimaryDark">#D32F2F</item>
+    </style>
+
+    <style name="AppThemeCherri" parent="AppThemeBlack">
+        <item name="android:colorPrimary">#BB2A57</item>
+        <item name="android:colorAccent">#BB2A57</item>
+        <item name="android:colorPrimaryDark">#982345</item>
     </style>
 
     <style name="AppThemeOrang" parent="AppThemeBlack">

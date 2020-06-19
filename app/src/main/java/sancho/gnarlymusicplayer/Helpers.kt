@@ -9,10 +9,12 @@ fun getStyleFromPreference(colorKey: String): Int
 {
 	val resources = mapOf(
 		"green" to R.style.AppThemeGreen,
+		"lime" to R.style.AppThemeLime,
 		"blu" to R.style.AppThemeBlu,
 		"cyan" to R.style.AppThemeCyan,
 		"red" to R.style.AppThemeRed,
 		"orang" to R.style.AppThemeOrang,
+		"cherri" to R.style.AppThemeCherri,
 		"purpl" to R.style.AppThemePurpl,
 		"pink" to R.style.AppThemePink,
 		"macintosh" to R.style.AppThemeMacintoshPlus)
