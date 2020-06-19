@@ -1,10 +1,12 @@
 <resources>
     <string-array name="color_names">
+        <item>Into the Green</item>
         <item>I got the poison, I got the remedy</item>
         <item>Blu Monday</item>
         <item>Cool as an ice cube</item>
         <item>Red Planet Rock</item>
         <item>Orange Colored Sky</item>
+        <item>Cheri Cheri Lady</item>
         <item>Deep Purple</item>
         <item>Pinkie\'s Lie</item>
         <item>Lisa Frank 420/Modern Computing</item>
@@ -12,10 +14,12 @@
 
     <string-array name="color_values">
         <item>green</item>
+        <item>lime</item>
         <item>blu</item>
         <item>cyan</item>
         <item>red</item>
         <item>orang</item>
+        <item>cherri</item>
         <item>purpl</item>
         <item>pink</item>
         <item>macintosh</item>

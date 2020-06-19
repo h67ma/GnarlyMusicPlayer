@@ -16,11 +16,9 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.view.KeyEvent
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -30,6 +28,7 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.media.VolumeProviderCompat
+import androidx.preference.PreferenceManager
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 import java.io.IOException
@@ -129,8 +128,6 @@ class MediaPlaybackService : Service()
 				{
 					// first service call
 
-					if (App.longpressPermishon) setupLongpress()
-
 					// set media volume
 					if (App.volumeSystemSet)
 					{
@@ -198,19 +195,6 @@ class MediaPlaybackService : Service()
 		_player.isLooping = false
 		_player.setOnCompletionListener { nextTrack(true) }
 		_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
-	}
-
-	private fun setupLongpress()
-	{
-		_mediaSessionManager.setOnVolumeKeyLongPressListener({ keyEvent ->
-			if(keyEvent.flags == KeyEvent.FLAG_FROM_SYSTEM && keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.repeatCount <= 1)
-			{
-				if (keyEvent.keyCode == KeyEvent.KEYCODE_VOLUME_UP)
-					_sessionCallback.onSkipToNext()
-				else if (keyEvent.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
-					_sessionCallback.onSkipToPrevious()
-			}
-		}, null)
 	}
 
 	private fun prepareNotifications()
@@ -546,9 +530,6 @@ class MediaPlaybackService : Service()
 	{
 		if(_binder.isBinderAlive)
 			_binder.listeners.onEnd()
-
-		// remove longpress listener
-		if (App.longpressPermishon) _mediaSessionManager.setOnVolumeKeyLongPressListener(null, null)
 
 		saveTrackPosition()
 

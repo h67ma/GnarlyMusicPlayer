@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.os.IBinder
-import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -18,6 +17,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -116,8 +116,6 @@ class MainActivity : AppCompatActivity()
 		setupFileList()
 
 		requestReadPermishon() // check for permissions and initial update of file list
-
-		checkLongpressPermishon()
 	}
 
 	override fun onResume()
@@ -146,7 +144,7 @@ class MainActivity : AppCompatActivity()
 		val queuePref = sharedPref.getString(App.PREFERENCE_QUEUE, "[]")
 		App.queue = gson.fromJson(queuePref, collectionType)
 
-		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, ""))
+		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, "") ?: "") // again: what's your problem kotlin? isn't ONE default value enough for you?
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
 		_accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
@@ -489,14 +487,6 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	private fun checkLongpressPermishon()
-	{
-		if (checkSelfPermission(Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) == PackageManager.PERMISSION_GRANTED)
-		{
-			App.longpressPermishon = true
-		}
-	}
-
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
 	{
 		if(requestCode == App.REQUEST_READ_STORAGE)
@@ -730,10 +720,10 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
-		val dir = File(App.queue[App.currentTrack].path).parentFile
-		if (dir.exists())
+		val dir = File(App.queue[App.currentTrack].path)
+		if (dir.parentFile?.exists() == true)
 		{
-			updateDirectoryView(dir)
+			updateDirectoryView(dir.parentFile)
 		}
 		else
 			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()

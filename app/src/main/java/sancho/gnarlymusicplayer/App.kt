@@ -24,8 +24,6 @@ class App: Application()
 		var volumeSystemSet: Boolean = false
 		var volumeSystemLevel: Int = 7
 
-		var longpressPermishon: Boolean = false
-
 		// needs to be global because is used in service and in settings activity
 		// let's set it to error when session doesn't exist, shall we?
 		var audioSessionId: Int = AudioManager.ERROR

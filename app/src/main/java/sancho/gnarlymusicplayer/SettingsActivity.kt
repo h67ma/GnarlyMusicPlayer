@@ -8,13 +8,9 @@ import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.CheckBoxPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SeekBarPreference
+import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
 
 
@@ -42,8 +38,6 @@ class SettingsActivity : AppCompatActivity()
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?)
 		{
 			setPreferencesFromResource(R.xml.root_preferences, rootKey)
-
-			updatePermishonStatus()
 
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
@@ -124,12 +118,6 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
-			findPreference<Preference>("permishon")?.setOnPreferenceClickListener { _ ->
-				updatePermishonStatus()
-				Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
-				true
-			}
-
 			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
 				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer/wiki/Help"))
 				startActivity(browserIntent)
@@ -140,20 +128,6 @@ class SettingsActivity : AppCompatActivity()
 				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
 				startActivity(browserIntent)
 				true
-			}
-		}
-
-		private fun updatePermishonStatus()
-		{
-			if (activity?.checkSelfPermission(Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) == PackageManager.PERMISSION_GRANTED)
-			{
-				App.longpressPermishon = true
-				findPreference<Preference>("permishon")?.summary = "Granted"
-			}
-			else
-			{
-				App.longpressPermishon = false
-				findPreference<Preference>("permishon")?.summary = "Not granted. Tap to check"
 			}
 		}
 
