@@ -1,7 +1,7 @@
 <resources>
     <string-array name="color_names">
-        <item>Into the Green</item>
         <item>I got the poison, I got the remedy</item>
+        <item>Into the Green</item>
         <item>Blu Monday</item>
         <item>Cool as an ice cube</item>
         <item>Red Planet Rock</item>
@@ -13,8 +13,8 @@
     </string-array>
 
     <string-array name="color_values">
-        <item>green</item>
         <item>lime</item>
+        <item>green</item>
         <item>blu</item>
         <item>cyan</item>
         <item>red</item>

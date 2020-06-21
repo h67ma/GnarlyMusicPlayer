@@ -45,7 +45,7 @@ class App: Application()
 		const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
 		const val PREFERENCE_VOLUME_SYSTEM_TO_SET = "sancho.gnarlymusicplayer.preference.volume.setsystem"
 
-		const val DEFAULT_ACCENTCOLOR = "green"
+		const val DEFAULT_ACCENTCOLOR = "lime"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 
