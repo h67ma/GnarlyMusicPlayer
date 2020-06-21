@@ -6,16 +6,16 @@
         <item name="android:textColor">#FFFFFF</item>
     </style>
 
-    <style name="AppThemeGreen" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#4CAF50</item>
-        <item name="android:colorAccent">#4CAF50</item>
-        <item name="android:colorPrimaryDark">#388E3C</item>
-    </style>
-
     <style name="AppThemeLime" parent="AppThemeBlack">
         <item name="android:colorPrimary">#AAED39</item>
         <item name="android:colorAccent">#AAED39</item>
         <item name="android:colorPrimaryDark">#88D13B</item>
+    </style>
+
+    <style name="AppThemeGreen" parent="AppThemeBlack">
+        <item name="android:colorPrimary">#4CAF50</item>
+        <item name="android:colorAccent">#4CAF50</item>
+        <item name="android:colorPrimaryDark">#388E3C</item>
     </style>
 
     <style name="AppThemeBlu" parent="AppThemeBlack">

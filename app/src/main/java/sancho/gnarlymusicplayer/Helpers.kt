@@ -8,8 +8,8 @@ fun isFileExtensionInArray(extension: String, extensions : Array<String>): Boole
 fun getStyleFromPreference(colorKey: String): Int
 {
 	val resources = mapOf(
-		"green" to R.style.AppThemeGreen,
 		"lime" to R.style.AppThemeLime,
+		"green" to R.style.AppThemeGreen,
 		"blu" to R.style.AppThemeBlu,
 		"cyan" to R.style.AppThemeCyan,
 		"red" to R.style.AppThemeRed,
@@ -19,5 +19,5 @@ fun getStyleFromPreference(colorKey: String): Int
 		"pink" to R.style.AppThemePink,
 		"macintosh" to R.style.AppThemeMacintoshPlus)
 
-	return resources[colorKey] ?: R.style.AppThemeGreen
+	return resources[colorKey] ?: R.style.AppThemeLime
 }
