@@ -10,8 +10,8 @@ android {
         applicationId "sancho.gnarlymusicplayer"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 8
-        versionName "1.4.0" // major.minor.patch
+        versionCode 9
+        versionName "1.4.1" // major.minor.patch
     }
 
     buildTypes {
