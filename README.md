@@ -24,9 +24,6 @@ See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for e
 
 Version names are : `major.minor.patch`, e.g. `1.2.3`. Debug builds have a `-debug` at the end, so for example `1.2.3-debug`. Releases with increased `minor` number usually contain new features. Releases with bumped up `patch` number are usually bugfixes or optimizations.
 
-# Backlog #
-See [Issues](https://github.com/szycikm/GnarlyMusicPlayer/issues)
-
 # Description #
 This music player is highly inspired by [Folder Music Player](https://play.google.com/store/apps/details?id=com.suphi.foldermusicplayerunlocker) by Suphi (free version no longer available on Play Store). It lacked a few essential (in my opinion) features to become perfect - search, bookmarks and saving scroll position of previous dir. I used it for a few years, because I couldn't find any better app. You see, I don't like library-based music players, and the ones based on folder structure were... not sufficient (no offense :)). Finally I decided to make my own music player.
 
