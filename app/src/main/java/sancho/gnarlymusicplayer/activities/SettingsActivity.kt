@@ -1,9 +1,7 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.activities
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.net.Uri
@@ -12,6 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
+import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.MediaPlaybackService
+import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.getStyleFromPreference
 
 
 class SettingsActivity : AppCompatActivity()

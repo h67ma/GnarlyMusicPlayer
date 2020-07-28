@@ -1,4 +1,4 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.activities
 import android.Manifest
 import android.app.AlertDialog
 import android.content.ComponentName
@@ -25,6 +25,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_seek.view.*
+import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter

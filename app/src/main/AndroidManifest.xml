@@ -18,12 +18,12 @@
         android:requestLegacyExternalStorage="true">
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="@string/settings"
-            android:parentActivityName="sancho.gnarlymusicplayer.MainActivity">
+            android:parentActivityName="sancho.gnarlymusicplayer.activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="sancho.gnarlymusicplayer.MainActivity" />
+                android:value="sancho.gnarlymusicplayer.activities.MainActivity" />
         </activity>
 
         <service
@@ -31,7 +31,7 @@
             android:enabled="true" />
 
         <activity
-            android:name=".MainActivity">
+            android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

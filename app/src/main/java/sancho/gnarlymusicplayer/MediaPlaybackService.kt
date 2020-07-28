@@ -29,6 +29,7 @@ import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.media.VolumeProviderCompat
 import androidx.preference.PreferenceManager
+import sancho.gnarlymusicplayer.activities.MainActivity
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 import java.io.IOException
