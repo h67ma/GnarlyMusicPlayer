@@ -17,6 +17,7 @@
     <string name="play_pause">Play/pause</string>
     <string name="next">Next</string>
     <string name="close">Close</string>
+    <string name="media_notification">Media notification</string>
     <string name="cant_play_track">Can\'t play track</string>
     <string name="playback_service_not_running">Playback service not running</string>
     <string name="seek_restore_position">Seek/Restore position</string>

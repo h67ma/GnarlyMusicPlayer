@@ -1,37 +1,27 @@
 package sancho.gnarlymusicplayer
 
-import android.app.*
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.AudioManager
-import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.media.audiofx.AudioEffect
 import android.media.session.MediaSessionManager
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.RemoteViews
 import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.media.VolumeProviderCompat
 import androidx.preference.PreferenceManager
-import sancho.gnarlymusicplayer.activities.MainActivity
+import sancho.gnarlymusicplayer.models.QueueItem
 import sancho.gnarlymusicplayer.models.Track
-import java.io.File
 import java.io.IOException
 import kotlin.math.log2
 
@@ -39,14 +29,14 @@ class MediaPlaybackService : Service()
 {
 	private lateinit var _player: MediaPlayer
 
-	private lateinit var _notification: NotificationCompat.Builder
-	private lateinit var _remoteViewSmall: RemoteViews
-	private lateinit var _remoteViewBig: RemoteViews
+	private lateinit var _notificationMaker: NotificationMaker
 
 	private var _volumeDivider: Float = 1f
 
-	private val _track: Track
-		get() = if (App.currentTrack < App.queue.size) App.queue[App.currentTrack] else Track("error", "error")
+	private val _track: Track = Track()
+
+	private val _queueItem: QueueItem
+		get() = if (App.currentTrack < App.queue.size) App.queue[App.currentTrack] else QueueItem("error", "error")
 
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
@@ -114,7 +104,9 @@ class MediaPlaybackService : Service()
 		_audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 		_mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
-		prepareNotifications()
+		prepareMediaSession()
+
+		_notificationMaker = NotificationMaker(this, _mediaSession)
 
 		// can't rely on onCreate to prepare important stuff as it only gets called for first service creation
 	}
@@ -138,15 +130,14 @@ class MediaPlaybackService : Service()
 						_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
 					}
 
-					prepareMediaSession()
 					prepareMediaPlayer()
 
 					try
 					{
-						_player.setDataSource(_track.path)
+						_player.setDataSource(_queueItem.path)
 						_player.prepare()
 						_sessionCallback.onPlay()
-						setLockscreenCoverArt()
+						setTrackMeta(_queueItem, _track)
 					}
 					catch (_: IOException)
 					{
@@ -156,7 +147,7 @@ class MediaPlaybackService : Service()
 					if (App.volumeInappEnabled)
 						setVolume(App.volumeStepIdx)
 
-					startForeground(App.NOTIFICATION_ID, makeNotification())
+					startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
 
 					App.mediaPlaybackServiceStarted = true
 				}
@@ -198,79 +189,6 @@ class MediaPlaybackService : Service()
 		_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
 	}
 
-	private fun prepareNotifications()
-	{
-		val pcontentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
-
-		val replayIntent = Intent(this, MediaPlaybackService::class.java)
-		replayIntent.action = App.ACTION_REPLAY_TRACK
-		val preplayIntent = PendingIntent.getService(this, 0, replayIntent, 0)
-
-		val previousIntent = Intent(this, MediaPlaybackService::class.java)
-		previousIntent.action = App.ACTION_PREV_TRACK
-		val ppreviousIntent = PendingIntent.getService(this, 0, previousIntent, 0)
-
-		val playIntent = Intent(this, MediaPlaybackService::class.java)
-		playIntent.action = App.ACTION_PLAYPAUSE
-		val pplayIntent = PendingIntent.getService(this, 0, playIntent, 0)
-
-		val nextIntent = Intent(this, MediaPlaybackService::class.java)
-		nextIntent.action = App.ACTION_NEXT_TRACK
-		val pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0)
-
-		val closeIntent = Intent(this, MediaPlaybackService::class.java)
-		closeIntent.action = App.ACTION_STOP_PLAYBACK_SERVICE
-		val pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0)
-
-		_remoteViewSmall = RemoteViews(packageName, R.layout.notification_small)
-		_remoteViewSmall.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
-		_remoteViewSmall.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
-		_remoteViewSmall.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
-
-		_remoteViewBig = RemoteViews(packageName, R.layout.notification_big)
-		_remoteViewBig.setOnClickPendingIntent(R.id.action_reset_btn, preplayIntent)
-		_remoteViewBig.setOnClickPendingIntent(R.id.action_prev_btn, ppreviousIntent)
-		_remoteViewBig.setOnClickPendingIntent(R.id.action_playpause_btn, pplayIntent)
-		_remoteViewBig.setOnClickPendingIntent(R.id.action_next_btn, pnextIntent)
-		_remoteViewBig.setOnClickPendingIntent(R.id.action_close_btn, pcloseIntent)
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-			createNotificationChannel()
-
-		_notification = NotificationCompat.Builder(this, App.NOTIFICATION_CHANNEL_ID)
-			.setContentIntent(pcontentIntent)
-			.setOngoing(true)
-			.setCustomContentView(_remoteViewSmall)
-			.setCustomBigContentView(_remoteViewBig)
-	}
-
-	private fun makeNotification(): Notification
-	{
-		_remoteViewSmall.setTextViewText(R.id.track_title, _track.name)
-		_remoteViewBig.setTextViewText(R.id.track_title, _track.name)
-		if (_player.isPlaying)
-		{
-			_remoteViewSmall.setImageViewResource(R.id.action_playpause_btn, R.drawable.pause)
-			_remoteViewBig.setImageViewResource(R.id.action_playpause_btn, R.drawable.pause)
-			_notification.setSmallIcon(R.drawable.play)
-		}
-		else
-		{
-			_remoteViewSmall.setImageViewResource(R.id.action_playpause_btn, R.drawable.play)
-			_remoteViewBig.setImageViewResource(R.id.action_playpause_btn, R.drawable.play)
-			_notification.setSmallIcon(R.drawable.pause)
-		}
-
-		return _notification.build()
-	}
-
-	private fun updateNotification()
-	{
-		with(NotificationManagerCompat.from(this)) {
-			notify(App.NOTIFICATION_ID, makeNotification())
-		}
-	}
-
 	private fun prepareMediaSession()
 	{
 		val playbackStateBuilder = PlaybackStateCompat.Builder()
@@ -279,7 +197,7 @@ class MediaPlaybackService : Service()
 						PlaybackStateCompat.ACTION_PAUSE or
 						PlaybackStateCompat.ACTION_STOP or
 						PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-						PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) // or??? are you fckn kidding me kotlin???????
+						PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
 			.setState(PlaybackStateCompat.STATE_STOPPED, 0L, 0f)
 
 		_mediaSession = MediaSessionCompat(this, "shirley")
@@ -302,7 +220,7 @@ class MediaPlaybackService : Service()
 
 				if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 					_player.start()
-					updateNotification()
+					_notificationMaker.updateNotification(_player.isPlaying)
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
 					_mediaSession.setPlaybackState(playbackStateBuilder.build())
 					registerReceiver(_noisyAudioReceiver, _intentFilter)
@@ -313,7 +231,7 @@ class MediaPlaybackService : Service()
 			override fun onPause()
 			{
 				_player.pause()
-				updateNotification()
+				_notificationMaker.updateNotification(_player.isPlaying)
 				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
 				_mediaSession.setPlaybackState(playbackStateBuilder.build())
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
@@ -399,54 +317,6 @@ class MediaPlaybackService : Service()
 		}
 	}
 
-	private fun setLockscreenCoverArt()
-	{
-		// first try embedded artwork
-		val mmr = MediaMetadataRetriever()
-		mmr.setDataSource(_track.path)
-
-		val embeddedPic = mmr.embeddedPicture
-
-		if(embeddedPic != null)
-		{
-			val bitmap = BitmapFactory.decodeByteArray(embeddedPic, 0, embeddedPic.size)
-			setArtwork(bitmap)
-		}
-		else
-		{
-			// fallback to album art in track's dir
-
-			val dir = File(_track.path).parent
-
-			var foundCover = false
-			for (filename in App.ALBUM_ART_FILENAMES)
-			{
-				val art = File(dir, filename)
-
-				if (art.exists())
-				{
-					val bitmap = BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
-					setArtwork(bitmap)
-					foundCover = true
-					break
-				}
-			}
-
-			// remove art if no cover found
-			if (!foundCover)
-				setArtwork(null)
-		}
-	}
-
-	private fun setArtwork(art: Bitmap?)
-	{
-		val metadata = MediaMetadataCompat.Builder()
-			.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, art)
-			.build()
-
-		_mediaSession.setMetadata(metadata)
-	}
-
 	private fun nextTrack(trackFinished: Boolean)
 	{
 		if (!trackFinished) saveTrackPosition()
@@ -480,11 +350,11 @@ class MediaPlaybackService : Service()
 		{
 			val wasPlaying = _player.isPlaying
 			_player.reset()
-			_player.setDataSource(_track.path)
+			_player.setDataSource(_queueItem.path)
 			_player.prepare()
 			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
-			updateNotification()
-			setLockscreenCoverArt()
+			setTrackMeta(_queueItem, _track)
+			_notificationMaker.updateNotification(_player.isPlaying, _track)
 		}
 		catch(_: IOException)
 		{
@@ -495,7 +365,7 @@ class MediaPlaybackService : Service()
 	private fun playAndUpdateNotification()
 	{
 		_sessionCallback.onPlay()
-		updateNotification()
+		_notificationMaker.updateNotification(_player.isPlaying, _track) // TODO check if _track is needed here
 	}
 
 	fun playPause()
@@ -521,7 +391,7 @@ class MediaPlaybackService : Service()
 	{
 		val currTime = getCurrentTime()
 		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE || getTotalTime() - currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
-		App.savedTrackPath = _track.path
+		App.savedTrackPath = _queueItem.path
 		App.savedTrackTime = currTime
 	}
 
@@ -569,14 +439,5 @@ class MediaPlaybackService : Service()
 		App.mediaPlaybackServiceStarted = false
 		stopForeground(true)
 		stopSelf()
-	}
-
-	@RequiresApi(Build.VERSION_CODES.O)
-	private fun createNotificationChannel()
-	{
-		val chan = NotificationChannel(App.NOTIFICATION_CHANNEL_ID, "Media notification", NotificationManager.IMPORTANCE_LOW)
-		chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-		val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		service.createNotificationChannel(chan)
 	}
 }

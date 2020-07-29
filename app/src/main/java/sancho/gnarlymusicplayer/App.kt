@@ -4,7 +4,7 @@ import android.app.Application
 import android.media.AudioManager
 import androidx.recyclerview.widget.RecyclerView
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
-import sancho.gnarlymusicplayer.models.Track
+import sancho.gnarlymusicplayer.models.QueueItem
 import java.io.File
 
 class App: Application()
@@ -12,7 +12,7 @@ class App: Application()
 	companion object
 	{
 		var currentTrack: Int = RecyclerView.NO_POSITION
-		lateinit var queue: MutableList<Track>
+		lateinit var queue: MutableList<QueueItem>
 		var mediaPlaybackServiceStarted: Boolean = false
 
 		var savedTrackPath: String = ""

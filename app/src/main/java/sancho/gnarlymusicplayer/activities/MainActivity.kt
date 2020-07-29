@@ -33,7 +33,7 @@ import sancho.gnarlymusicplayer.adapters.QueueAdapter
 import sancho.gnarlymusicplayer.models.ExplorerHeader
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
-import sancho.gnarlymusicplayer.models.Track
+import sancho.gnarlymusicplayer.models.QueueItem
 import java.io.File
 import java.util.*
 
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity()
 	private var _queueChanged = false
 	private var _lastSelectedTrack: Int = RecyclerView.NO_POSITION
 
-	private lateinit var _bookmarks: MutableList<Track>
+	private lateinit var _bookmarks: MutableList<QueueItem>
 	private var _bookmarksChanged = false
 
 	private var _accentColorKey: String = App.DEFAULT_ACCENTCOLOR
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity()
 		val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
 		val bookmarksPref = sharedPref.getString(App.PREFERENCE_BOOKMARKS, "[]")
-		val collectionType = object : TypeToken<Collection<Track>>() {}.type
+		val collectionType = object : TypeToken<Collection<QueueItem>>() {}.type
 		_bookmarks = gson.fromJson(bookmarksPref, collectionType)
 
 		val queuePref = sharedPref.getString(App.PREFERENCE_QUEUE, "[]")
@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity()
 					}
 					else
 					{
-						addToQueue(Track(file.absolutePath, file.nameWithoutExtension))
+						addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
 					}
 				}
 				else
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity()
 						{
 							Arrays.sort(files, App.filesComparator)
 							addToQueue(files.map { track ->
-								Track(track.absolutePath, track.nameWithoutExtension)
+								QueueItem(track.absolutePath, track.nameWithoutExtension)
 							})
 
 							Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity()
 					}
 					else
 					{
-						addToQueue(Track(file.absolutePath, file.nameWithoutExtension))
+						addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
 						playTrack(App.queue.size - 1)
 					}
 				}
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity()
 				}
 
 				// also add to bookmark menu
-				adapter.onItemAdded(Track(path, label))
+				adapter.onItemAdded(QueueItem(path, label))
 				_bookmarksChanged = true
 				adapter.notifyItemInserted(_bookmarks.size - 1)
 			}
@@ -418,14 +418,14 @@ class MainActivity : AppCompatActivity()
 		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
-	private fun addToQueue(track: Track)
+	private fun addToQueue(queueItem: QueueItem)
 	{
-		App.queue.add(track)
+		App.queue.add(queueItem)
 		_queueAdapter.notifyItemInserted(App.queue.size - 1)
 		_queueChanged = true
 	}
 
-	private fun addToQueue(trackList: List<Track>)
+	private fun addToQueue(trackList: List<QueueItem>)
 	{
 		App.queue.addAll(trackList)
 		_queueAdapter.notifyItemRangeInserted(App.queue.size - trackList.size, trackList.size)
