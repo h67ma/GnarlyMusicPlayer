@@ -34,6 +34,8 @@ class NotificationMaker(private val _context: Context, private val _session: Med
 
 		val style = object : androidx.media.app.NotificationCompat.MediaStyle() {}
 		style.setMediaSession(_session.sessionToken)
+			.setShowActionsInCompactView(1, 2, 3)
+			.setCancelButtonIntent(closeIntent)
 
 		_builder = NotificationCompat.Builder(_context, App.NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
@@ -51,7 +53,7 @@ class NotificationMaker(private val _context: Context, private val _session: Med
 
 	fun makeNotification(playing: Boolean, track: Track): Notification
 	{
-		updateNotificationIcon(playing)
+		updateNotificationStatus(playing)
 
 		_builder.setContentTitle(track.title)
 			.setContentText(track.artist)
@@ -67,7 +69,7 @@ class NotificationMaker(private val _context: Context, private val _session: Med
 
 	fun updateNotification(playing: Boolean)
 	{
-		updateNotificationIcon(playing)
+		updateNotificationStatus(playing)
 
 		with(NotificationManagerCompat.from(_context))
 		{
@@ -90,11 +92,12 @@ class NotificationMaker(private val _context: Context, private val _session: Med
 		return PendingIntent.getService(_context, 0, intent, 0)
 	}
 
-	private fun updateNotificationIcon(playing: Boolean)
+	private fun updateNotificationStatus(playing: Boolean)
 	{
-		_builder.setSmallIcon(if (playing) R.drawable.play else R.drawable.pause)
 		_playPauseAction.icon = if (playing) R.drawable.pause else R.drawable.play
 		_builder.addAction(_playPauseAction)
+			.setSmallIcon(if (playing) R.drawable.play else R.drawable.pause)
+			// .setOngoing(playing) // doesn't work as notification was started with startForeground, would have to stop service to make it dismissible
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)

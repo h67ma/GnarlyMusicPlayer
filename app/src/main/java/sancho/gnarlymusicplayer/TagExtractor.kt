@@ -58,10 +58,7 @@ fun setTrackMeta(queueItem: QueueItem, track: Track)
 
 	// cover
 	// first try embedded artwork
-	val mmr = MediaMetadataRetriever()
-	mmr.setDataSource(queueItem.path)
-
-	val embeddedPic = mmr.embeddedPicture
+	val embeddedPic = mediaInfo.embeddedPicture
 
 	if(embeddedPic != null)
 	{
