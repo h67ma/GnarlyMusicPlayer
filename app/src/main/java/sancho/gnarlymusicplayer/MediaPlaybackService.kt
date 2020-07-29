@@ -20,7 +20,6 @@ import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.media.VolumeProviderCompat
 import androidx.preference.PreferenceManager
-import sancho.gnarlymusicplayer.models.QueueItem
 import sancho.gnarlymusicplayer.models.Track
 import java.io.IOException
 import kotlin.math.log2
@@ -34,9 +33,6 @@ class MediaPlaybackService : Service()
 	private var _volumeDivider: Float = 1f
 
 	private val _track: Track = Track()
-
-	private val _queueItem: QueueItem
-		get() = if (App.currentTrack < App.queue.size) App.queue[App.currentTrack] else QueueItem("error", "error")
 
 	private lateinit var _mediaSession: MediaSessionCompat
 	private lateinit var _sessionCallback: MediaSessionCompat.Callback
@@ -134,10 +130,10 @@ class MediaPlaybackService : Service()
 
 					try
 					{
-						_player.setDataSource(_queueItem.path)
+						setTrackMeta(App.queue[App.currentTrack], _track)
+						_player.setDataSource(_track.path)
 						_player.prepare()
 						_sessionCallback.onPlay()
-						setTrackMeta(_queueItem, _track)
 					}
 					catch (_: IOException)
 					{
@@ -348,13 +344,21 @@ class MediaPlaybackService : Service()
 	{
 		try
 		{
-			val wasPlaying = _player.isPlaying
-			_player.reset()
-			_player.setDataSource(_queueItem.path)
-			_player.prepare()
-			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
-			setTrackMeta(_queueItem, _track)
-			_notificationMaker.updateNotification(_player.isPlaying, _track)
+			if (App.currentTrack < App.queue.size)
+			{
+				setTrackMeta(App.queue[App.currentTrack], _track)
+				val wasPlaying = _player.isPlaying
+				_player.reset()
+				_player.setDataSource(_track.path)
+				_player.prepare()
+				if (forcePlay || wasPlaying) _sessionCallback.onPlay()
+
+				_notificationMaker.updateNotification(_player.isPlaying, _track)
+			}
+			else
+			{
+				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			}
 		}
 		catch(_: IOException)
 		{
@@ -365,7 +369,7 @@ class MediaPlaybackService : Service()
 	private fun playAndUpdateNotification()
 	{
 		_sessionCallback.onPlay()
-		_notificationMaker.updateNotification(_player.isPlaying, _track) // TODO check if _track is needed here
+		_notificationMaker.updateNotification(_player.isPlaying)
 	}
 
 	fun playPause()
@@ -391,7 +395,7 @@ class MediaPlaybackService : Service()
 	{
 		val currTime = getCurrentTime()
 		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE || getTotalTime() - currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
-		App.savedTrackPath = _queueItem.path
+		App.savedTrackPath = _track.path
 		App.savedTrackTime = currTime
 	}
 
