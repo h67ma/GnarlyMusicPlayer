@@ -33,6 +33,8 @@ This was my first Kotlin project. I'm positively surprised with Kotlin - it has 
 
 I regret nothing.
 
+Obviously this app is far from perfect. Code is messy, some functionality is missing, etc. What *is* perfect though, is the ideas behind UI, which, in my opinion, can't get much better. Phonograph comes pretty close, but still I find it a bit painful to use (the playing queue is hard to control).
+
 I think the most important thing is that I'm actually using the app daily (since 1.0).
 
 # Q&A #
@@ -57,6 +59,3 @@ I think the most important thing is that I'm actually using the app daily (since
 
 **Q:** Why there are no media buttons in main app interface?  
 **A:** All buttons are in the notification, so you can access them everywhere in the system. There's no reason to have a copy of them taking space in the main app interface.
-
-**Q:** Why does the notification use custom layout instead of the standard media one?  
-**A:** Let's just say I don't like that "media layout". Buttons are too small and for some reason there's a timer showing how long ago the notification appeared.
