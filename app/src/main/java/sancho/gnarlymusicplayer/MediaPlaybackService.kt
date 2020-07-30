@@ -28,7 +28,7 @@ class MediaPlaybackService : Service()
 {
 	private lateinit var _player: MediaPlayer
 
-	private lateinit var _notificationMaker: NotificationMaker
+	private lateinit var _notificationMaker: MediaNotificationMaker
 
 	private var _volumeDivider: Float = 1f
 
@@ -102,7 +102,7 @@ class MediaPlaybackService : Service()
 
 		prepareMediaSession()
 
-		_notificationMaker = NotificationMaker(this, _mediaSession)
+		_notificationMaker = MediaNotificationMaker(this, _mediaSession)
 
 		// can't rely on onCreate to prepare important stuff as it only gets called for first service creation
 	}

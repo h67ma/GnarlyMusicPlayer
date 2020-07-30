@@ -15,7 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import sancho.gnarlymusicplayer.activities.MainActivity
 import sancho.gnarlymusicplayer.models.Track
 
-class NotificationMaker(private val _context: Context, private val _session: MediaSessionCompat)
+class MediaNotificationMaker(private val _context: Context, private val _session: MediaSessionCompat)
 {
 	private val _builder: NotificationCompat.Builder
 	private val _playPauseAction: NotificationCompat.Action
