@@ -6,10 +6,12 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.audiofx.AudioEffect
 import android.os.PowerManager
+import android.support.v4.media.session.MediaSessionCompat
+import androidx.media.VolumeProviderCompat
 import sancho.gnarlymusicplayer.App
 import kotlin.math.log2
 
-class AudioPlayer(context: Context, completionCallback: (Boolean) -> Unit ): MediaPlayer()
+class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompat, completionCallback: (Boolean) -> Unit): MediaPlayer()
 {
 	private var _volumeDivider: Float = 1f
 
@@ -32,7 +34,7 @@ class AudioPlayer(context: Context, completionCallback: (Boolean) -> Unit ): Med
 		setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK)
 	}
 
-	fun setVolumeDivider()
+	private fun setVolumeDivider()
 	{
 		_volumeDivider = log2((App.volumeStepsTotal + 1).toFloat())
 	}
@@ -46,8 +48,49 @@ class AudioPlayer(context: Context, completionCallback: (Boolean) -> Unit ): Med
 		setVolume(vol, vol)
 	}
 
-	fun setMaxVolume()
+	private fun setMaxVolume()
 	{
 		setVolume(1f, 1f)
+	}
+
+	fun setVolumeProvider()
+	{
+		if (App.volumeInappEnabled)
+		{
+			// don't adjust system volume - change inside-app player volume instead
+
+			_mediaSession.setPlaybackToRemote(object : VolumeProviderCompat(VOLUME_CONTROL_ABSOLUTE, App.volumeStepsTotal, App.volumeStepIdx)
+			{
+				// volume btns presses
+				override fun onAdjustVolume(direction: Int)
+				{
+					// documentation doesn't say anything about "direction", but it's 1/-1 on my phone, so I guess I'll roll with that -_-
+					App.volumeStepIdx += direction
+					setVolume(App.volumeStepIdx)
+					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
+				}
+
+				// volume slider drag/mute/unmute
+				override fun onSetVolumeTo(volume: Int)
+				{
+					App.volumeStepIdx = volume
+					setVolume(App.volumeStepIdx)
+					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
+				}
+			})
+
+			setVolumeDivider()
+
+			if (App.mediaPlaybackServiceStarted)
+				setVolume(App.volumeStepIdx) // player already initialized
+		}
+		else
+		{
+			// normal volume control
+			_mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC) // removes remote volume thing
+
+			if (App.mediaPlaybackServiceStarted)
+				setMaxVolume() // player already initialized
+		}
 	}
 }

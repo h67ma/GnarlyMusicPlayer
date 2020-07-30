@@ -16,11 +16,10 @@ import android.widget.Toast
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
-import androidx.media.VolumeProviderCompat
 import androidx.preference.PreferenceManager
-import sancho.gnarlymusicplayer.models.Track
 import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.models.Track
 import sancho.gnarlymusicplayer.setTrackMeta
 import java.io.IOException
 
@@ -102,9 +101,11 @@ class MediaPlaybackService : Service()
 		_audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 		_mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
-		_player = AudioPlayer(this, ::nextTrack) // now this is a weird lookin operator
-
 		prepareMediaSession()
+
+		_player = AudioPlayer(this, _mediaSession, ::nextTrack) // now this is a weird lookin operator
+
+		_player.setVolumeProvider()
 
 		_notificationMaker = MediaNotificationMaker(this, _mediaSession)
 	}
@@ -119,7 +120,7 @@ class MediaPlaybackService : Service()
 			App.ACTION_PLAYPAUSE -> playPause()
 			App.ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
 			App.ACTION_STOP_PLAYBACK_SERVICE ->	_sessionCallback.onStop()
-			App.ACTION_UPDATE_MAX_VOLUME -> setVolumeProvider()
+			App.ACTION_UPDATE_MAX_VOLUME -> _player.setVolumeProvider()
 		}
 
 		return START_STICKY
@@ -225,54 +226,12 @@ class MediaPlaybackService : Service()
 				end(true)
 			}
 		}
-		_mediaSession.setCallback(_sessionCallback)
 
-		setVolumeProvider()
+		_mediaSession.setCallback(_sessionCallback)
 
 		_mediaSession.isActive = true
 
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
-	}
-
-	private fun setVolumeProvider()
-	{
-		if (App.volumeInappEnabled)
-		{
-			// don't adjust system volume; change inside-app player volume instead
-			// muhahaha
-
-			_mediaSession.setPlaybackToRemote(object : VolumeProviderCompat(VOLUME_CONTROL_ABSOLUTE, App.volumeStepsTotal, App.volumeStepIdx)
-			{
-				// volume btns presses
-				override fun onAdjustVolume(direction: Int)
-				{
-					// documentation doesn't say anything about "direction", but it's 1/-1 on my phone, so I guess I'll roll with that -_-
-					App.volumeStepIdx += direction
-					_player.setVolume(App.volumeStepIdx)
-					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
-				}
-
-				// slider drag/mute/unmute
-				override fun onSetVolumeTo(volume: Int)
-				{
-					App.volumeStepIdx = volume
-					_player.setVolume(App.volumeStepIdx)
-					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
-				}
-			})
-
-			_player.setVolumeDivider()
-
-			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
-				_player.setVolume(App.volumeStepIdx)
-		}
-		else
-		{
-			_mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC) // removes remote volume thing
-
-			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
-				_player.setMaxVolume()
-		}
 	}
 
 	private fun nextTrack(trackFinished: Boolean)
