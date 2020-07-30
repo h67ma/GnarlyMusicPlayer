@@ -520,7 +520,7 @@ class MainActivity : AppCompatActivity()
 		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
 		{
 			// list storage devices
-			toolbar_title.text = getString(R.string.root_dir_name)
+			toolbar_title.text = getString(R.string.storage_devices)
 			_dirList.clear()
 			_dirList.addAll(_mountedDevices)
 			_explorerAdapter.notifyDataSetChanged()
