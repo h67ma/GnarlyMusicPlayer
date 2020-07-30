@@ -113,47 +113,8 @@ class MediaPlaybackService : Service()
 	{
 		when (intent.action)
 		{
-			App.ACTION_START_PLAYBACK_SERVICE ->
-			{
-				if(!App.mediaPlaybackServiceStarted)
-				{
-					// first service call
-
-					// set media volume
-					if (App.volumeSystemSet)
-					{
-						val max = _audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-						if (App.volumeSystemLevel > max) App.volumeSystemLevel = max
-
-						_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
-					}
-
-					try
-					{
-						setTrackMeta(App.queue[App.currentTrack], _track)
-						_player.setDataSource(_track.path)
-						_player.prepare()
-						_sessionCallback.onPlay()
-					}
-					catch (_: IOException)
-					{
-						Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
-					}
-
-					if (App.volumeInappEnabled)
-						_player.setVolume(App.volumeStepIdx)
-
-					startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
-
-					App.mediaPlaybackServiceStarted = true
-				}
-				else
-				{
-					// service already running
-					playAndUpdateNotification()
-				}
-			}
-			App.ACTION_REPLAY_TRACK -> setTrack(true) // seekTo(0) doesn't actually return to start of track :()
+			App.ACTION_START_PLAYBACK_SERVICE -> start()
+			App.ACTION_REPLAY_TRACK -> _player.seekTo(0)
 			App.ACTION_PREV_TRACK -> _sessionCallback.onSkipToPrevious()
 			App.ACTION_PLAYPAUSE -> playPause()
 			App.ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
@@ -162,6 +123,47 @@ class MediaPlaybackService : Service()
 		}
 
 		return START_STICKY
+	}
+
+	private fun start()
+	{
+		if(!App.mediaPlaybackServiceStarted)
+		{
+			// first service call
+
+			// set media volume
+			if (App.volumeSystemSet)
+			{
+				val max = _audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+				if (App.volumeSystemLevel > max) App.volumeSystemLevel = max
+
+				_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
+			}
+
+			try
+			{
+				setTrackMeta(App.queue[App.currentTrack], _track)
+				_player.setDataSource(_track.path)
+				_player.prepare()
+				_sessionCallback.onPlay()
+			}
+			catch (_: IOException)
+			{
+				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			}
+
+			if (App.volumeInappEnabled)
+				_player.setVolume(App.volumeStepIdx)
+
+			startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
+
+			App.mediaPlaybackServiceStarted = true
+		}
+		else
+		{
+			// service already running
+			playAndUpdateNotification()
+		}
 	}
 
 	private fun prepareMediaSession()
@@ -316,9 +318,7 @@ class MediaPlaybackService : Service()
 				_notificationMaker.updateNotification(_player.isPlaying, _track)
 			}
 			else
-			{
 				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
-			}
 		}
 		catch(_: IOException)
 		{
