@@ -64,34 +64,7 @@ class MainActivity : AppCompatActivity()
 	private var _seekDialog: AlertDialog? = null
 
 	private var _service: MediaPlaybackService? = null
-	private val _serviceConn = object : ServiceConnection
-	{
-		override fun onServiceConnected(className: ComponentName, service: IBinder)
-		{
-			_service = (service as MediaPlaybackService.LocalBinder).getService(object : BoundServiceListeners
-			{
-				override fun onTrackChanged(oldPos: Int)
-				{
-					_queueAdapter.notifyItemChanged(oldPos)
-					_queueAdapter.notifyItemChanged(App.currentTrack)
-
-					if (_seekDialog?.isShowing == true)
-						_seekDialog?.dismiss()
-				}
-
-				override fun onEnd()
-				{
-					if (_seekDialog?.isShowing == true)
-						_seekDialog?.dismiss()
-				}
-			})
-		}
-
-		override fun onServiceDisconnected(className: ComponentName)
-		{
-			_service = null
-		}
-	}
+	private lateinit var _serviceConn: ServiceConnection
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -108,6 +81,8 @@ class MainActivity : AppCompatActivity()
 		setContentView(R.layout.activity_main)
 		setSupportActionBar(toolbar)
 		title = ""
+
+		setupServiceConnection()
 
 		getStorageDevices() // prepare list with storage devices
 
@@ -463,6 +438,40 @@ class MainActivity : AppCompatActivity()
 				_service?.playPause()
 			else
 				_service?.setTrack(true)
+		}
+	}
+
+	private fun setupServiceConnection()
+	{
+		_serviceConn = object : ServiceConnection
+		{
+			override fun onServiceConnected(className: ComponentName, service: IBinder)
+			{
+				_service = (service as MediaPlaybackService.LocalBinder).getService(object : BoundServiceListeners
+				{
+					override fun onTrackChanged(oldPos: Int)
+					{
+						_queueAdapter.notifyItemChanged(oldPos)
+						_queueAdapter.notifyItemChanged(App.currentTrack)
+
+						if (_seekDialog?.isShowing == true)
+							_seekDialog?.dismiss()
+					}
+
+					override fun onEnd()
+					{
+						if (_seekDialog?.isShowing == true)
+							_seekDialog?.dismiss()
+
+						unbindService(_serviceConn)
+					}
+				})
+			}
+
+			override fun onServiceDisconnected(className: ComponentName)
+			{
+				_service = null
+			}
 		}
 	}
 

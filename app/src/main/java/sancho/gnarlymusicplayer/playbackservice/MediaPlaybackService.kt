@@ -95,7 +95,6 @@ class MediaPlaybackService : Service()
 		return _binder
 	}
 
-	// only gets called for first service creation
 	override fun onCreate()
 	{
 		super.onCreate()
