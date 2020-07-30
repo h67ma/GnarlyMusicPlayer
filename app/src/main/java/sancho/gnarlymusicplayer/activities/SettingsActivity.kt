@@ -57,7 +57,7 @@ class SettingsActivity : AppCompatActivity()
 			findPreference<Preference>("eq")?.setOnPreferenceClickListener { _ ->
 				val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
 
-				val pm = activity?.packageManager
+				val pm = context?.packageManager
 				if (pm != null && eqIntent.resolveActivity(pm) != null)
 				{
 					// don't pass value if not set - eq app will do some magic and save settings for next time
@@ -139,13 +139,13 @@ class SettingsActivity : AppCompatActivity()
 			{
 				val intent = Intent(context, MediaPlaybackService::class.java)
 				intent.action = App.ACTION_UPDATE_MAX_VOLUME
-				activity?.startService(intent)
+				context?.startService(intent)
 			}
 		}
 
 		private fun getAppVersion(): String
 		{
-			return activity?.packageManager?.getPackageInfo(activity?.packageName, 0)?.versionName ?: "Unknown"
+			return context?.packageManager?.getPackageInfo(context?.packageName ?: "", 0)?.versionName ?: "Unknown"
 		}
 	}
 }
