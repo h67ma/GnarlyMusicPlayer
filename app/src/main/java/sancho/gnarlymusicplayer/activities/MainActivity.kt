@@ -25,7 +25,6 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_seek.view.*
 import sancho.gnarlymusicplayer.*
-import sancho.gnarlymusicplayer.MediaPlaybackService.LocalBinder
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
@@ -33,6 +32,8 @@ import sancho.gnarlymusicplayer.models.ExplorerHeader
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.QueueItem
+import sancho.gnarlymusicplayer.playbackservice.BoundServiceListeners
+import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import java.io.File
 import java.util.*
 
@@ -67,7 +68,8 @@ class MainActivity : AppCompatActivity()
 	{
 		override fun onServiceConnected(className: ComponentName, service: IBinder)
 		{
-			_service = (service as LocalBinder).getService(object : BoundServiceListeners{
+			_service = (service as MediaPlaybackService.LocalBinder).getService(object : BoundServiceListeners
+			{
 				override fun onTrackChanged(oldPos: Int)
 				{
 					_queueAdapter.notifyItemChanged(oldPos)

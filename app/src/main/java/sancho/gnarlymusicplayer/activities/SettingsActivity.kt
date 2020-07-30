@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
 import sancho.gnarlymusicplayer.App
-import sancho.gnarlymusicplayer.MediaPlaybackService
+import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.getStyleFromPreference
 

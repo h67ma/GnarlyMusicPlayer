@@ -1,4 +1,4 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.playbackservice
 
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -19,7 +19,9 @@ import androidx.media.AudioManagerCompat
 import androidx.media.VolumeProviderCompat
 import androidx.preference.PreferenceManager
 import sancho.gnarlymusicplayer.models.Track
-import sancho.gnarlymusicplayer.playbackservice.AudioPlayer
+import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.setTrackMeta
 import java.io.IOException
 
 class MediaPlaybackService : Service()

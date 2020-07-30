@@ -27,7 +27,7 @@
         </activity>
 
         <service
-            android:name=".MediaPlaybackService"
+            android:name=".playbackservice.MediaPlaybackService"
             android:enabled="true" />
 
         <activity

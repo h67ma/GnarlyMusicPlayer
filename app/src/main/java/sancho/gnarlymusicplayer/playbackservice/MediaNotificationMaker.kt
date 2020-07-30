@@ -1,4 +1,4 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.playbackservice
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -12,6 +12,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.activities.MainActivity
 import sancho.gnarlymusicplayer.models.Track
 

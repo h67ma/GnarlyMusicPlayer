@@ -1,4 +1,4 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.playbackservice
 
 interface BoundServiceListeners
 {
