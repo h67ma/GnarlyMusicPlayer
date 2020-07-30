@@ -34,13 +34,14 @@ class NotificationMaker(private val _context: Context, private val _session: Med
 
 		val style = object : androidx.media.app.NotificationCompat.MediaStyle() {}
 		style.setMediaSession(_session.sessionToken)
-			.setShowActionsInCompactView(1, 2, 3)
+			.setShowActionsInCompactView(2, 3, 4)
 			.setCancelButtonIntent(closeIntent)
 
 		_builder = NotificationCompat.Builder(_context, App.NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
 			.setStyle(style)
+			.setShowWhen(false)
 			.addAction(R.drawable.replay, _context.getString(R.string.reset), replayIntent)
 			.addAction(R.drawable.prev, _context.getString(R.string.previous), prevIntent)
 			.addAction(_playPauseAction)
