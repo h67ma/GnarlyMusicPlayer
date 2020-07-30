@@ -6,12 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.audiofx.AudioEffect
 import android.media.session.MediaSessionManager
 import android.os.Binder
 import android.os.IBinder
-import android.os.PowerManager
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
@@ -21,16 +19,14 @@ import androidx.media.AudioManagerCompat
 import androidx.media.VolumeProviderCompat
 import androidx.preference.PreferenceManager
 import sancho.gnarlymusicplayer.models.Track
+import sancho.gnarlymusicplayer.playbackservice.AudioPlayer
 import java.io.IOException
-import kotlin.math.log2
 
 class MediaPlaybackService : Service()
 {
-	private lateinit var _player: MediaPlayer
-
 	private lateinit var _notificationMaker: MediaNotificationMaker
 
-	private var _volumeDivider: Float = 1f
+	private lateinit var _player: AudioPlayer
 
 	private val _track: Track = Track()
 
@@ -39,6 +35,7 @@ class MediaPlaybackService : Service()
 	private lateinit var _audioManager: AudioManager
 	private lateinit var _mediaSessionManager: MediaSessionManager
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+
 	private val _noisyAudioReceiver = object : BroadcastReceiver()
 	{
 		override fun onReceive(context: Context?, intent: Intent?)
@@ -46,7 +43,9 @@ class MediaPlaybackService : Service()
 			_sessionCallback.onPause()
 		}
 	}
+
 	private var _receiverRegistered = false
+
 	private val _afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
 		when (focusChange) {
 			AudioManager.AUDIOFOCUS_LOSS -> {
@@ -64,6 +63,7 @@ class MediaPlaybackService : Service()
 			}
 		}
 	}
+
 	private val _focusRequest = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).run {
 		setOnAudioFocusChangeListener(_afChangeListener)
 		setAudioAttributes(AudioAttributesCompat.Builder().run {
@@ -93,6 +93,7 @@ class MediaPlaybackService : Service()
 		return _binder
 	}
 
+	// only gets called for first service creation
 	override fun onCreate()
 	{
 		super.onCreate()
@@ -100,11 +101,11 @@ class MediaPlaybackService : Service()
 		_audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 		_mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
+		_player = AudioPlayer(this, ::nextTrack) // now this is a weird lookin operator
+
 		prepareMediaSession()
 
 		_notificationMaker = MediaNotificationMaker(this, _mediaSession)
-
-		// can't rely on onCreate to prepare important stuff as it only gets called for first service creation
 	}
 
 	override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
@@ -126,8 +127,6 @@ class MediaPlaybackService : Service()
 						_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
 					}
 
-					prepareMediaPlayer()
-
 					try
 					{
 						setTrackMeta(App.queue[App.currentTrack], _track)
@@ -141,7 +140,7 @@ class MediaPlaybackService : Service()
 					}
 
 					if (App.volumeInappEnabled)
-						setVolume(App.volumeStepIdx)
+						_player.setVolume(App.volumeStepIdx)
 
 					startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
 
@@ -162,27 +161,6 @@ class MediaPlaybackService : Service()
 		}
 
 		return START_STICKY
-	}
-
-	private fun prepareMediaPlayer()
-	{
-		_player = MediaPlayer()
-
-		App.audioSessionId = _player.audioSessionId
-
-		if (App.audioSessionId != AudioManager.ERROR)
-		{
-			// send broadcast to equalizer thing so audio effects can are applied
-			val eqIntent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
-			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
-			eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
-			eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-			sendBroadcast(eqIntent)
-		}
-
-		_player.isLooping = false
-		_player.setOnCompletionListener { nextTrack(true) }
-		_player.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK)
 	}
 
 	private fun prepareMediaSession()
@@ -253,25 +231,6 @@ class MediaPlaybackService : Service()
 		_mediaSession.setPlaybackState(playbackStateBuilder.build())
 	}
 
-	private fun setVolumeDivider()
-	{
-		_volumeDivider = log2((App.volumeStepsTotal + 1).toFloat())
-	}
-
-	private fun setVolume(stepIdx: Int)
-	{
-		// can't just divide step/max - setVolume input needs to be logarithmically scaled
-		// at low levels grows slowly, at high levels grows rapidly
-		// something like 0, 0.05, 0.11, 0.18, 0.27, 0.37, 0.5, 0.68, 1 for 8 volume levels
-		val vol = 1 - log2((App.volumeStepsTotal - stepIdx + 1).toFloat()) / _volumeDivider
-		_player.setVolume(vol, vol)
-	}
-
-	private fun setMaxVolume()
-	{
-		_player.setVolume(1f, 1f)
-	}
-
 	private fun setVolumeProvider()
 	{
 		if (App.volumeInappEnabled)
@@ -286,7 +245,7 @@ class MediaPlaybackService : Service()
 				{
 					// documentation doesn't say anything about "direction", but it's 1/-1 on my phone, so I guess I'll roll with that -_-
 					App.volumeStepIdx += direction
-					setVolume(App.volumeStepIdx)
+					_player.setVolume(App.volumeStepIdx)
 					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
 				}
 
@@ -294,22 +253,22 @@ class MediaPlaybackService : Service()
 				override fun onSetVolumeTo(volume: Int)
 				{
 					App.volumeStepIdx = volume
-					setVolume(App.volumeStepIdx)
+					_player.setVolume(App.volumeStepIdx)
 					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
 				}
 			})
 
-			setVolumeDivider()
+			_player.setVolumeDivider()
 
 			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
-				setVolume(App.volumeStepIdx)
+				_player.setVolume(App.volumeStepIdx)
 		}
 		else
 		{
 			_mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC) // removes remote volume thing
 
 			if (App.mediaPlaybackServiceStarted) // don't do it when the player wasn't initialized
-				setMaxVolume()
+				_player.setMaxVolume()
 		}
 	}
 
