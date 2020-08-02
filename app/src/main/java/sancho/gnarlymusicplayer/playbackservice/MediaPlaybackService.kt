@@ -115,7 +115,7 @@ class MediaPlaybackService : Service()
 		when (intent.action)
 		{
 			App.ACTION_START_PLAYBACK_SERVICE -> start()
-			App.ACTION_REPLAY_TRACK -> _player.seekTo(0)
+			App.ACTION_REPLAY_TRACK -> replay()
 			App.ACTION_PREV_TRACK -> _sessionCallback.onSkipToPrevious()
 			App.ACTION_PLAYPAUSE -> playPause()
 			App.ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
@@ -165,6 +165,13 @@ class MediaPlaybackService : Service()
 			// service already running
 			playAndUpdateNotification()
 		}
+	}
+
+	private fun replay()
+	{
+		_player.seekTo(0)
+		if (!_player.isPlaying)
+			_sessionCallback.onPlay()
 	}
 
 	private fun prepareMediaSession()
