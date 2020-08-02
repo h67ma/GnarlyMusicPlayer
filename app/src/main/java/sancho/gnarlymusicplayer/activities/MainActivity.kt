@@ -463,7 +463,11 @@ class MainActivity : AppCompatActivity()
 						if (_seekDialog?.isShowing == true)
 							_seekDialog?.dismiss()
 
-						unbindService(_serviceConn)
+						if(App.mediaPlaybackServiceStarted && _service != null)
+						{
+							unbindService(_serviceConn)
+							_service = null
+						}
 					}
 				})
 			}
@@ -846,7 +850,10 @@ class MainActivity : AppCompatActivity()
 	{
 		// unbind service
 		if(App.mediaPlaybackServiceStarted && _service != null)
+		{
 			unbindService(_serviceConn)
+			_service = null
+		}
 
 		_lastSelectedTrack = App.currentTrack
 

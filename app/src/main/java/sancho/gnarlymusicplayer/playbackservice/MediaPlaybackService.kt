@@ -79,7 +79,7 @@ class MediaPlaybackService : Service()
 
 	inner class LocalBinder : Binder()
 	{
-		lateinit var listeners: BoundServiceListeners
+		var listeners: BoundServiceListeners? = null
 			private set
 
 		fun getService(listeners: BoundServiceListeners): MediaPlaybackService
@@ -249,7 +249,7 @@ class MediaPlaybackService : Service()
 		App.currentTrack = (App.currentTrack + 1) % App.queue.size
 
 		if(_binder.isBinderAlive)
-			_binder.listeners.onTrackChanged(oldPos)
+			_binder.listeners?.onTrackChanged(oldPos)
 
 		setTrack(trackFinished)
 	}
@@ -263,7 +263,7 @@ class MediaPlaybackService : Service()
 		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
 
 		if(_binder.isBinderAlive)
-			_binder.listeners.onTrackChanged(oldPos)
+			_binder.listeners?.onTrackChanged(oldPos)
 
 		setTrack(false)
 	}
@@ -330,7 +330,7 @@ class MediaPlaybackService : Service()
 	fun end(saveTrack: Boolean)
 	{
 		if(_binder.isBinderAlive)
-			_binder.listeners.onEnd()
+			_binder.listeners?.onEnd()
 
 		saveTrackPosition()
 
