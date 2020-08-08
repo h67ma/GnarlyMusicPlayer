@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _explorerAdapter: ExplorerAdapter
 
 	private lateinit var _queueAdapter: QueueAdapter
-	private var _queueChanged = false
 	private var _lastSelectedTrack: Int = RecyclerView.NO_POSITION
 
 	private lateinit var _bookmarks: MutableList<QueueItem>
@@ -70,7 +69,6 @@ class MainActivity : AppCompatActivity()
 	{
 		restoreFromPrefs()
 		_bookmarksChanged = false
-		_queueChanged = false
 
 		setTheme(getStyleFromPreference(_accentColorKey))
 
@@ -118,13 +116,19 @@ class MainActivity : AppCompatActivity()
 		val collectionType = object : TypeToken<Collection<QueueItem>>() {}.type
 		_bookmarks = gson.fromJson(bookmarksPref, collectionType)
 
-		val queuePref = sharedPref.getString(App.PREFERENCE_QUEUE, "[]")
-		App.queue = gson.fromJson(queuePref, collectionType)
+		// if it changed, it means that service modified the queue, so it's already initialized and overwriting it would be bad
+		if (!App.queueChanged)
+		{
+			val queuePref = sharedPref.getString(App.PREFERENCE_QUEUE, "[]")
+			App.queue = gson.fromJson(queuePref, collectionType)
+		}
 
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, "") ?: "") // again: what's your problem kotlin? isn't ONE default value enough for you?
 		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
 
 		_accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
+
+		App.autoCleanQueue = sharedPref.getBoolean(getString(R.string.pref_autoclean), false)
 
 		App.volumeStepsTotal = sharedPref.getInt(getString(R.string.pref_totalsteps), 30)
 		App.volumeInappEnabled = sharedPref.getBoolean(getString(R.string.pref_inappenabled), false)
@@ -325,7 +329,7 @@ class MainActivity : AppCompatActivity()
 				val toPosition = target.adapterPosition
 				_queueAdapter.onItemMoved(fromPosition, toPosition)
 
-				_queueChanged = true
+				App.queueChanged = true
 
 				if (fromPosition == App.currentTrack)
 				{
@@ -346,7 +350,7 @@ class MainActivity : AppCompatActivity()
 			{
 				val position = viewHolder.adapterPosition
 				App.queue.removeAt(position)
-				_queueChanged = true
+				App.queueChanged = true
 				_queueAdapter.notifyItemRemoved(position)
 
 				if (position < App.currentTrack)
@@ -398,14 +402,14 @@ class MainActivity : AppCompatActivity()
 	{
 		App.queue.add(queueItem)
 		_queueAdapter.notifyItemInserted(App.queue.size - 1)
-		_queueChanged = true
+		App.queueChanged = true
 	}
 
 	private fun addToQueue(trackList: List<QueueItem>)
 	{
 		App.queue.addAll(trackList)
 		_queueAdapter.notifyItemRangeInserted(App.queue.size - trackList.size, trackList.size)
-		_queueChanged = true
+		App.queueChanged = true
 	}
 
 	private fun playTrack(newPosition: Int)
@@ -449,9 +453,16 @@ class MainActivity : AppCompatActivity()
 			{
 				_service = (service as MediaPlaybackService.LocalBinder).getService(object : BoundServiceListeners
 				{
-					override fun onTrackChanged(oldPos: Int)
+					override fun onTrackChanged(oldPos: Int, trackFinished: Boolean)
 					{
-						_queueAdapter.notifyItemChanged(oldPos)
+						if (trackFinished && App.autoCleanQueue)
+						{
+							App.queueChanged = true
+							_queueAdapter.notifyItemRemoved(oldPos) // autoremove
+						}
+						else
+							_queueAdapter.notifyItemChanged(oldPos) // just unselect track
+
 						_queueAdapter.notifyItemChanged(App.currentTrack)
 
 						if (_seekDialog?.isShowing == true)
@@ -798,7 +809,7 @@ class MainActivity : AppCompatActivity()
 			val removedCnt = App.currentTrack
 			App.currentTrack = 0
 			_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
-			_queueChanged = true
+			App.queueChanged = true
 		}
 	}
 
@@ -816,7 +827,7 @@ class MainActivity : AppCompatActivity()
 
 			App.currentTrack = RecyclerView.NO_POSITION
 			_queueAdapter.notifyItemRangeRemoved(0, removedCnt)
-			_queueChanged = true
+			App.queueChanged = true
 		}
 	}
 
@@ -835,7 +846,7 @@ class MainActivity : AppCompatActivity()
 
 			App.currentTrack = App.queue.size - 1
 			_queueAdapter.notifyItemRangeRemoved(removedFromIdx, removedCnt)
-			_queueChanged = true
+			App.queueChanged = true
 		}
 	}
 
@@ -862,14 +873,17 @@ class MainActivity : AppCompatActivity()
 		// save to shared prefs
 		with(PreferenceManager.getDefaultSharedPreferences(this).edit())
 		{
-			if(_bookmarksChanged || _queueChanged)
+			if(_bookmarksChanged || App.queueChanged)
 			{
 				val gson = Gson()
 				if(_bookmarksChanged)
 					putString(App.PREFERENCE_BOOKMARKS, gson.toJson(_bookmarks))
 
-				if(_queueChanged)
+				if(App.queueChanged)
+				{
 					putString(App.PREFERENCE_QUEUE, gson.toJson(App.queue))
+					App.queueChanged = false
+				}
 			}
 			putString(App.PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)

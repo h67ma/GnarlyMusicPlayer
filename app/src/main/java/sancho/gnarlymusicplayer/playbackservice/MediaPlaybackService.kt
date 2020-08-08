@@ -17,6 +17,8 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.Track
@@ -243,13 +245,34 @@ class MediaPlaybackService : Service()
 
 	private fun nextTrack(trackFinished: Boolean)
 	{
-		if (!trackFinished) saveTrackPosition()
+		if (!trackFinished)
+			saveTrackPosition()
 
 		val oldPos = App.currentTrack
-		App.currentTrack = (App.currentTrack + 1) % App.queue.size
+
+		if (trackFinished && App.autoCleanQueue) // autoremove if playback ended "naturally" (no skip)
+		{
+			App.queue.removeAt(oldPos)
+			App.queueChanged = true
+
+			// we've removed currently selected track
+			if (App.queue.size <= 0)
+			{
+				// no other track available
+				App.currentTrack = RecyclerView.NO_POSITION
+				end(false)
+			}
+			else if (oldPos >= App.queue.size)
+			{
+				// removed track was last - select first track in queue (if any tracks exist)
+				App.currentTrack = 0
+			}
+		}
+		else
+			App.currentTrack = (oldPos + 1) % App.queue.size // just calculate next track index
 
 		if(_binder.isBinderAlive)
-			_binder.listeners?.onTrackChanged(oldPos)
+			_binder.listeners?.onTrackChanged(oldPos, trackFinished)
 
 		setTrack(trackFinished)
 	}
@@ -263,7 +286,7 @@ class MediaPlaybackService : Service()
 		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
 
 		if(_binder.isBinderAlive)
-			_binder.listeners?.onTrackChanged(oldPos)
+			_binder.listeners?.onTrackChanged(oldPos, false)
 
 		setTrack(false)
 	}
@@ -349,6 +372,13 @@ class MediaPlaybackService : Service()
 		// save last volume setting
 		if (App.volumeInappEnabled)
 			editor.putInt(App.PREFERENCE_VOLUME_STEP_IDX, App.volumeStepIdx)
+
+		if(App.queueChanged)
+		{
+			val gson = Gson()
+			editor.putString(App.PREFERENCE_QUEUE, gson.toJson(App.queue))
+			App.queueChanged = false
+		}
 
 		editor.apply()
 

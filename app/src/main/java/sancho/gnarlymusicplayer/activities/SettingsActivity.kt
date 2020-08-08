@@ -54,6 +54,12 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			findPreference<CheckBoxPreference>(getString(R.string.pref_autoclean))?.setOnPreferenceChangeListener { _, newValue ->
+				App.autoCleanQueue = (newValue as Boolean) == true
+
+				true
+			}
+
 			findPreference<Preference>("eq")?.setOnPreferenceClickListener { _ ->
 				val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
 

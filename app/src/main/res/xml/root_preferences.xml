@@ -14,6 +14,12 @@
             app:useSimpleSummaryProvider="true"
             app:iconSpaceReserved="false"/>
 
+        <CheckBoxPreference
+            app:title="Auto-clean queue"
+            app:summary="Auto-remove tracks from queue when they finish playing"
+            app:key="@string/pref_autoclean"
+            app:iconSpaceReserved="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

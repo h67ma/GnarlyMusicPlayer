@@ -15,8 +15,12 @@ class App: Application()
 		lateinit var queue: MutableList<QueueItem>
 		var mediaPlaybackServiceStarted: Boolean = false
 
+		var queueChanged: Boolean = false
+
 		var savedTrackPath: String = ""
 		var savedTrackTime: Int = 0
+
+		var autoCleanQueue: Boolean = false
 
 		var volumeInappEnabled: Boolean = false
 		var volumeStepsTotal: Int = 30
