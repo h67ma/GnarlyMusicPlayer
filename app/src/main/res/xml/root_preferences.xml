@@ -6,7 +6,7 @@
         app:iconSpaceReserved="false">
 
         <ListPreference
-            app:defaultValue="green"
+            app:defaultValue="lime"
             app:entries="@array/color_names"
             app:entryValues="@array/color_values"
             app:key="@string/pref_accentcolor"
