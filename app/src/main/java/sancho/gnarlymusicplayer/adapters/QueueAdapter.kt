@@ -8,24 +8,23 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
-import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.QueueItem
 import java.util.Collections.swap
 
 class QueueAdapter(
 	private val context: Context,
-	private val items: MutableList<QueueItem>,
 	private val cliccListener: (Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
-		holder.bind(items[position], cliccListener, touchHelper)
+		holder.bind(PlaybackQueue.queue[position], cliccListener, touchHelper)
 	}
 
-	override fun getItemCount() = items.size
+	override fun getItemCount() = PlaybackQueue.queue.size
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackHolder
 	{
@@ -38,7 +37,7 @@ class QueueAdapter(
 		{
 			itemView.queue_text.text = bookmark.name
 
-			itemView.isSelected = App.currentTrack == adapterPosition
+			itemView.isSelected = PlaybackQueue.currentIdx == adapterPosition
 
 			itemView.setOnClickListener {cliccListener(adapterPosition)}
 
@@ -61,14 +60,14 @@ class QueueAdapter(
 		{
 			for (i in fromPosition until toPosition)
 			{
-				swap(items, i, i + 1)
+				swap(PlaybackQueue.queue, i, i + 1)
 			}
 		}
 		else
 		{
 			for (i in fromPosition downTo toPosition + 1)
 			{
-				swap(items, i, i - 1)
+				swap(PlaybackQueue.queue, i, i - 1)
 			}
 		}
 		notifyItemMoved(fromPosition, toPosition)

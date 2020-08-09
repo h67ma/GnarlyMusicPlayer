@@ -5,26 +5,24 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.widget.Toast
-import androidx.recyclerview.widget.RecyclerView
-import sancho.gnarlymusicplayer.models.QueueItem
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 
 fun showCurrTrackInfo(context: Context)
 {
-	if (App.queue.size < 1 || App.currentTrack == RecyclerView.NO_POSITION)
+	if (!PlaybackQueue.trackSelected())
 	{
 		Toast.makeText(context, context.getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
 		return
 	}
 
 	val mediaInfo = MediaMetadataRetriever()
-	mediaInfo.setDataSource(App.queue[App.currentTrack].path)
+	mediaInfo.setDataSource(PlaybackQueue.getCurrentTrackPath())
 	val durationSS = (mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: "0").toInt() / 1000
 	val kbps = (mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) ?: "0").toInt() / 1000
 
 	AlertDialog.Builder(context)
-		.setTitle(App.queue[App.currentTrack].name)
+		.setTitle(PlaybackQueue.getCurrentTrackName())
 		.setMessage(context.getString(R.string.about_track,
 			mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "",
 			mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "",
@@ -37,15 +35,27 @@ fun showCurrTrackInfo(context: Context)
 			mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) ?: "",
 			kbps,
 			mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "",
-			App.queue[App.currentTrack].path
+			PlaybackQueue.getCurrentTrackPath()
 		))
 		.setPositiveButton(context.getString(R.string.close), null)
 		.create()
 		.show()
 }
 
-fun setTrackMeta(queueItem: QueueItem, track: Track)
+// sets track meta from current track in queue
+fun setTrackMeta(track: Track)
 {
+	val queueItem = PlaybackQueue.getCurrentTrack()
+
+	if (queueItem == null)
+	{
+		track.path = ""
+		track.title = ""
+		track.artist = ""
+		track.cover = null
+		return
+	}
+
 	// first for the obvious
 	track.path = queueItem.path
 

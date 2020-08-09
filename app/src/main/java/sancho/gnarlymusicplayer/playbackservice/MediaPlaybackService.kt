@@ -17,9 +17,9 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.Track
 import sancho.gnarlymusicplayer.setTrackMeta
@@ -145,7 +145,7 @@ class MediaPlaybackService : Service()
 
 			try
 			{
-				setTrackMeta(App.queue[App.currentTrack], _track)
+				setTrackMeta(_track)
 				_player.setDataSource(_track.path)
 				_player.prepare()
 				_sessionCallback.onPlay()
@@ -248,28 +248,17 @@ class MediaPlaybackService : Service()
 		if (!trackFinished)
 			saveTrackPosition()
 
-		val oldPos = App.currentTrack
+		val oldPos = PlaybackQueue.currentIdx
 
-		if (trackFinished && App.autoCleanQueue) // autoremove if playback ended "naturally" (no skip)
+		if (trackFinished && PlaybackQueue.autoClean) // autoremove if playback ended "naturally" (no skip)
 		{
-			App.queue.removeAt(oldPos)
-			App.queueChanged = true
-
-			// we've removed currently selected track
-			if (App.queue.size <= 0)
-			{
-				// no other track available
-				App.currentTrack = RecyclerView.NO_POSITION
+			if (PlaybackQueue.removeCurrent())
 				end(false)
-			}
-			else if (oldPos >= App.queue.size)
-			{
-				// removed track was last - select first track in queue (if any tracks exist)
-				App.currentTrack = 0
-			}
+
+			// TODO why are we not changing track index here? in case removed track was last in queue (then next should be 0)
 		}
 		else
-			App.currentTrack = (oldPos + 1) % App.queue.size // just calculate next track index
+			PlaybackQueue.setNextTrackIdx(oldPos) // just calculate next track index
 
 		if(_binder.isBinderAlive)
 			_binder.listeners?.onTrackChanged(oldPos, trackFinished)
@@ -281,9 +270,9 @@ class MediaPlaybackService : Service()
 	{
 		saveTrackPosition()
 
-		val oldPos = App.currentTrack
-		App.currentTrack--
-		if (App.currentTrack < 0) App.currentTrack = App.queue.size - 1
+		val oldPos = PlaybackQueue.currentIdx
+
+		PlaybackQueue.setPrevTrackIdx()
 
 		if(_binder.isBinderAlive)
 			_binder.listeners?.onTrackChanged(oldPos, false)
@@ -295,9 +284,9 @@ class MediaPlaybackService : Service()
 	{
 		try
 		{
-			if (App.currentTrack < App.queue.size)
+			if (PlaybackQueue.trackSelected())
 			{
-				setTrackMeta(App.queue[App.currentTrack], _track)
+				setTrackMeta(_track)
 				val wasPlaying = _player.isPlaying
 				_player.reset()
 				_player.setDataSource(_track.path)
@@ -364,7 +353,7 @@ class MediaPlaybackService : Service()
 		if (saveTrack)
 		{
 			// not needed when all tracks have been cleared
-			editor.putInt(App.PREFERENCE_CURRENTTRACK, App.currentTrack)
+			editor.putInt(App.PREFERENCE_CURRENTTRACK, PlaybackQueue.currentIdx)
 			editor.putString(App.PREFERENCE_SAVEDTRACK_PATH, App.savedTrackPath)
 			editor.putInt(App.PREFERENCE_SAVEDTRACK_TIME, App.savedTrackTime)
 		}
@@ -373,11 +362,11 @@ class MediaPlaybackService : Service()
 		if (App.volumeInappEnabled)
 			editor.putInt(App.PREFERENCE_VOLUME_STEP_IDX, App.volumeStepIdx)
 
-		if(App.queueChanged)
+		if(PlaybackQueue.hasChanged)
 		{
 			val gson = Gson()
-			editor.putString(App.PREFERENCE_QUEUE, gson.toJson(App.queue))
-			App.queueChanged = false
+			editor.putString(App.PREFERENCE_QUEUE, gson.toJson(PlaybackQueue.queue))
+			PlaybackQueue.hasChanged = false
 		}
 
 		editor.apply()

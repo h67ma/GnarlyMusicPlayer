@@ -2,25 +2,17 @@ package sancho.gnarlymusicplayer
 
 import android.app.Application
 import android.media.AudioManager
-import androidx.recyclerview.widget.RecyclerView
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
-import sancho.gnarlymusicplayer.models.QueueItem
 import java.io.File
 
 class App: Application()
 {
 	companion object
 	{
-		var currentTrack: Int = RecyclerView.NO_POSITION
-		lateinit var queue: MutableList<QueueItem>
 		var mediaPlaybackServiceStarted: Boolean = false
-
-		var queueChanged: Boolean = false
 
 		var savedTrackPath: String = ""
 		var savedTrackTime: Int = 0
-
-		var autoCleanQueue: Boolean = false
 
 		var volumeInappEnabled: Boolean = false
 		var volumeStepsTotal: Int = 30
