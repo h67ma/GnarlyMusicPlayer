@@ -238,7 +238,11 @@ class MediaPlaybackService : Service()
 			override fun onStop()
 			{
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
-				if (_receiverRegistered) unregisterReceiver(_noisyAudioReceiver)
+				if (_receiverRegistered)
+				{
+					unregisterReceiver(_noisyAudioReceiver)
+					_receiverRegistered = false
+				}
 				_mediaSession.isActive = false
 
 				end(true)
