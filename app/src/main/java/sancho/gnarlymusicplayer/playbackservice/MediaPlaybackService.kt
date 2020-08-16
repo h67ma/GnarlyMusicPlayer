@@ -219,8 +219,7 @@ class MediaPlaybackService : Service()
 					_notificationMaker.updateNotification(_player.isPlaying)
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
 					_mediaSession.setPlaybackState(playbackStateBuilder.build())
-					registerReceiver(_noisyAudioReceiver, _intentFilter)
-					_receiverRegistered = true
+					registerNoisyReceiver()
 				}
 			}
 
@@ -231,20 +230,11 @@ class MediaPlaybackService : Service()
 				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
 				_mediaSession.setPlaybackState(playbackStateBuilder.build())
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
-				unregisterReceiver(_noisyAudioReceiver)
-				_receiverRegistered = false
+				unregisterNoisyReceiver()
 			}
 
 			override fun onStop()
 			{
-				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
-				if (_receiverRegistered)
-				{
-					unregisterReceiver(_noisyAudioReceiver)
-					_receiverRegistered = false
-				}
-				_mediaSession.isActive = false
-
 				end(true)
 			}
 		}
@@ -363,10 +353,32 @@ class MediaPlaybackService : Service()
 		App.savedTrackTime = currTime
 	}
 
+	fun registerNoisyReceiver()
+	{
+		if (!_receiverRegistered)
+		{
+			registerReceiver(_noisyAudioReceiver, _intentFilter)
+			_receiverRegistered = true
+		}
+	}
+
+	fun unregisterNoisyReceiver()
+	{
+		if (_receiverRegistered)
+		{
+			unregisterReceiver(_noisyAudioReceiver)
+			_receiverRegistered = false
+		}
+	}
+
 	// called by MainActivity when all tracks get removed
 	// also called when notification is closed
 	fun end(saveTrack: Boolean)
 	{
+		AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
+		unregisterNoisyReceiver()
+		_mediaSession.isActive = false
+
 		if(App.serviceBound)
 			_binder.listeners?.onEnd()
 
