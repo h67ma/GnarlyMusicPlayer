@@ -265,7 +265,7 @@ class MediaPlaybackService : Service()
 
 		if (trackFinished && PlaybackQueue.autoClean) // autoremove if playback ended "naturally" (no skip)
 		{
-			if (PlaybackQueue.removeCurrent())
+			if (PlaybackQueue.removeCurrent()) // remove takes care of idx change in case track was at the bottom of queue
 			{
 				end(false)
 				if(_binder.isBinderAlive)
@@ -273,7 +273,7 @@ class MediaPlaybackService : Service()
 				return
 			}
 
-			// TODO why are we not changing track index here? in case removed track was last in queue (then next should be 0)
+			Toast.makeText(this, PlaybackQueue.currentIdx.toString(), Toast.LENGTH_SHORT).show()
 		}
 		else
 			PlaybackQueue.setNextTrackIdx(oldPos) // just calculate next track index
