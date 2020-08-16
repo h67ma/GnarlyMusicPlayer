@@ -10,6 +10,7 @@ class App: Application()
 	companion object
 	{
 		var mediaPlaybackServiceStarted: Boolean = false
+		var serviceBound: Boolean = false
 
 		var savedTrackPath: String = ""
 		var savedTrackTime: Int = 0

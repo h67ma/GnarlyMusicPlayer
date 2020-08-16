@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity()
 		super.onResume()
 
 		if(App.mediaPlaybackServiceStarted)
-			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+			bindService()
 
 		if (PlaybackQueue.currentIdx != _lastSelectedTrack)
 		{
@@ -393,7 +393,7 @@ class MainActivity : AppCompatActivity()
 			intent.action = App.ACTION_START_PLAYBACK_SERVICE
 			startService(intent)
 
-			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+			bindService()
 		}
 		else
 		{
@@ -433,11 +433,7 @@ class MainActivity : AppCompatActivity()
 						if (_seekDialog?.isShowing == true)
 							_seekDialog?.dismiss()
 
-						if(App.mediaPlaybackServiceStarted && _service != null)
-						{
-							unbindService(_serviceConn)
-							_service = null
-						}
+						unbindService()
 					}
 				})
 			}
@@ -797,14 +793,28 @@ class MainActivity : AppCompatActivity()
 
 	//endregion
 
-	override fun onPause()
+	private fun bindService()
 	{
-		// unbind service
-		if(App.mediaPlaybackServiceStarted && _service != null)
+		if (!App.serviceBound)
+		{
+			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+			App.serviceBound = true
+		}
+	}
+
+	private fun unbindService()
+	{
+		if(App.serviceBound && App.mediaPlaybackServiceStarted && _service != null)
 		{
 			unbindService(_serviceConn)
 			_service = null
+			App.serviceBound = false
 		}
+	}
+
+	override fun onPause()
+	{
+		unbindService()
 
 		_lastSelectedTrack = PlaybackQueue.currentIdx
 

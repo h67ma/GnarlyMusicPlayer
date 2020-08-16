@@ -268,7 +268,7 @@ class MediaPlaybackService : Service()
 			if (PlaybackQueue.removeCurrent()) // remove takes care of idx change in case track was at the bottom of queue
 			{
 				end(false)
-				if(_binder.isBinderAlive)
+				if(App.serviceBound)
 					_binder.listeners?.onTrackChanged(oldPos, trackFinished)
 				return
 			}
@@ -278,7 +278,7 @@ class MediaPlaybackService : Service()
 		else
 			PlaybackQueue.setNextTrackIdx(oldPos) // just calculate next track index
 
-		if(_binder.isBinderAlive)
+		if(App.serviceBound)
 			_binder.listeners?.onTrackChanged(oldPos, trackFinished)
 
 		setTrack(trackFinished)
@@ -292,7 +292,7 @@ class MediaPlaybackService : Service()
 
 		PlaybackQueue.setPrevTrackIdx()
 
-		if(_binder.isBinderAlive)
+		if(App.serviceBound)
 			_binder.listeners?.onTrackChanged(oldPos, false)
 
 		setTrack(false)
@@ -367,7 +367,7 @@ class MediaPlaybackService : Service()
 	// also called when notification is closed
 	fun end(saveTrack: Boolean)
 	{
-		if(_binder.isBinderAlive)
+		if(App.serviceBound)
 			_binder.listeners?.onEnd()
 
 		saveTrackPosition()
