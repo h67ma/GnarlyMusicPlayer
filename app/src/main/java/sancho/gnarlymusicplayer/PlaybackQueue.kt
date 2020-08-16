@@ -119,18 +119,22 @@ object PlaybackQueue
 		return 0
 	}
 
-	fun moveItem(fromPosition: Int, toPosition: Int)
+	fun updateIdxAfterItemMoved(fromPosition: Int, toPosition: Int)
 	{
+		if (fromPosition == toPosition)
+			return
+
 		if (fromPosition == currentIdx)
 		{
 			currentIdx = toPosition
 		}
-		else if (toPosition == currentIdx) // TODO does this really work?
+		else if (toPosition >= currentIdx && fromPosition < currentIdx)
 		{
-			if (fromPosition < currentIdx)
-				currentIdx--
-			else if (fromPosition > currentIdx)
-				currentIdx++
+			currentIdx--
+		}
+		else if (toPosition <= currentIdx && fromPosition > currentIdx)
+		{
+			currentIdx++
 		}
 
 		hasChanged = true
@@ -179,9 +183,9 @@ object PlaybackQueue
 		return size > 0 && currentIdx < size && currentIdx != NO_TRACK
 	}
 
-	fun setNextTrackIdx(oldIdx: Int)
+	fun setNextTrackIdx()
 	{
-		currentIdx = (oldIdx + 1) % size
+		currentIdx = (currentIdx + 1) % size
 	}
 
 	fun setPrevTrackIdx()

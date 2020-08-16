@@ -27,6 +27,12 @@ class PlaybackQueueTest
 	}
 
 	@Test
+	fun lastIdx()
+	{
+		assertEquals(4, PlaybackQueue.lastIdx)
+	}
+
+	@Test
 	fun addSize()
 	{
 		PlaybackQueue.add(QueueItem("f", "6"))
@@ -130,7 +136,7 @@ class PlaybackQueueTest
 	@Test
 	fun moveHasChanged()
 	{
-		PlaybackQueue.moveItem(0, 2)
+		PlaybackQueue.updateIdxAfterItemMoved(0, 2)
 		assertTrue(PlaybackQueue.hasChanged)
 	}
 
@@ -274,67 +280,88 @@ class PlaybackQueueTest
 	}
 
 	@Test
-	fun moveFromBeforeToBefore()
+	fun moveFromBeforeToBeforeIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(0, 1)
+		assertEquals(2, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveFromBeforeToCurrent()
+	fun moveFromBeforeToCurrentIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(0, 2)
+		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveFromBeforeToAfter()
+	fun moveFromBeforeToAfterIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(0, 3)
+		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveFromAfterToAfter()
+	fun moveFromAfterToAfterIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(4, 3)
+		assertEquals(2, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveFromAfterToCurrent()
+	fun moveFromAfterToCurrentIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(4, 2)
+		assertEquals(3, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveFromAfterToBefore()
+	fun moveFromAfterToBeforeIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(4, 0)
+		assertEquals(3, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveCurrentUp()
+	fun moveCurrentUpIdx()
 	{
+		PlaybackQueue.updateIdxAfterItemMoved(2, 4)
+		assertEquals(4, PlaybackQueue.currentIdx)
 	}
 
 	@Test
-	fun moveCurrentDown()
+	fun moveCurrentDownIdx()
 	{
-	}
-
-	@Test
-	fun trackSelected()
-	{
+		PlaybackQueue.updateIdxAfterItemMoved(2, 1)
+		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun setNextTrackIdxNormal()
 	{
+		PlaybackQueue.setNextTrackIdx()
+		assertEquals(3, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun setNextTrackIdxLast()
 	{
+		PlaybackQueue.currentIdx = 4
+		PlaybackQueue.setNextTrackIdx()
+		assertEquals(0, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun setPrevTrackIdxNormal()
 	{
+		PlaybackQueue.setPrevTrackIdx()
+		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun setPrevTrackIdxFirst()
 	{
+		PlaybackQueue.currentIdx = 0
+		PlaybackQueue.setPrevTrackIdx()
+		assertEquals(4, PlaybackQueue.currentIdx)
 	}
 }

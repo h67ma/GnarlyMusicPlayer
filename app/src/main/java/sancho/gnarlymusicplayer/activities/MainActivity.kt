@@ -328,7 +328,7 @@ class MainActivity : AppCompatActivity()
 				val fromPosition = viewHolder.adapterPosition
 				val toPosition = target.adapterPosition
 				_queueAdapter.onItemMoved(fromPosition, toPosition)
-				PlaybackQueue.moveItem(fromPosition, toPosition)
+				PlaybackQueue.updateIdxAfterItemMoved(fromPosition, toPosition)
 
 				return true
 			}
