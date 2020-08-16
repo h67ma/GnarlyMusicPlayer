@@ -32,7 +32,7 @@ object PlaybackQueue
 		hasChanged = true
 	}
 
-	// returns if the queue is empty after removing
+	// returns true if the queue is empty after removing
 	fun removeCurrent(): Boolean
 	{
 		return removeAt(currentIdx)
@@ -41,7 +41,11 @@ object PlaybackQueue
 	// returns true if the queue is empty after removing
 	fun removeAt(pos: Int): Boolean
 	{
-		queue.removeAt(pos)
+		if (pos in 0..lastIdx)
+		{
+			queue.removeAt(pos)
+			hasChanged = true
+		}
 
 		if (pos < currentIdx)
 		{
@@ -61,8 +65,6 @@ object PlaybackQueue
 				currentIdx = 0
 			}
 		}
-
-		hasChanged = true
 
 		return size <= 0
 	}
@@ -86,14 +88,17 @@ object PlaybackQueue
 	}
 
 	// returns number of cleared items
-	// check if size > 0 before this!
 	fun removeAll(): Int
 	{
-		val removedCnt = size
-		queue.clear()
-		currentIdx = NO_TRACK
-		hasChanged = true
-		return removedCnt
+		if (size > 0)
+		{
+			val removedCnt = size
+			queue.clear()
+			currentIdx = NO_TRACK
+			hasChanged = true
+			return removedCnt
+		}
+		return 0
 	}
 
 	// returns number of cleared items
@@ -103,7 +108,7 @@ object PlaybackQueue
 		{
 			// there are items to clear at the end
 
-			val removedCnt = size - currentIdx
+			val removedCnt = lastIdx - currentIdx
 			for (i in lastIdx downTo currentIdx + 1)
 				queue.removeAt(i)
 
