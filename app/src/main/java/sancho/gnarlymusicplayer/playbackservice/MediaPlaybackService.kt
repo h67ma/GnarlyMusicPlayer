@@ -24,6 +24,7 @@ import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.Track
 import sancho.gnarlymusicplayer.setTrackMeta
 import java.io.IOException
+import java.lang.IllegalStateException
 
 class MediaPlaybackService : Service()
 {
@@ -150,7 +151,15 @@ class MediaPlaybackService : Service()
 				_player.prepare()
 				_sessionCallback.onPlay()
 			}
-			catch (_: IOException)
+			catch (ex: IOException)
+			{
+				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			}
+			catch (ex: IllegalArgumentException)
+			{
+				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			}
+			catch (ex: IllegalStateException)
 			{
 				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 			}
@@ -298,7 +307,15 @@ class MediaPlaybackService : Service()
 			else
 				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 		}
-		catch(_: IOException)
+		catch(ex: IOException)
+		{
+			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+		}
+		catch (ex: IllegalArgumentException)
+		{
+			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+		}
+		catch (ex: IllegalStateException)
 		{
 			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 		}
