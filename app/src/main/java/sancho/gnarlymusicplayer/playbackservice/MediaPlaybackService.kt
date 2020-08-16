@@ -266,7 +266,12 @@ class MediaPlaybackService : Service()
 		if (trackFinished && PlaybackQueue.autoClean) // autoremove if playback ended "naturally" (no skip)
 		{
 			if (PlaybackQueue.removeCurrent())
+			{
 				end(false)
+				if(_binder.isBinderAlive)
+					_binder.listeners?.onTrackChanged(oldPos, trackFinished)
+				return
+			}
 
 			// TODO why are we not changing track index here? in case removed track was last in queue (then next should be 0)
 		}
