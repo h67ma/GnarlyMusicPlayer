@@ -389,7 +389,7 @@ class MainActivity : AppCompatActivity()
 
 		if (!App.mediaPlaybackServiceStarted || _service == null)
 		{
-			val intent = Intent(this, MediaPlaybackService::class.java) // excuse me, WHAT IN THE GODDAMN. why not ..-::class::..kt..*java*::-.. while we're at it?
+			val intent = Intent(this, MediaPlaybackService::class.java)
 			intent.action = App.ACTION_START_PLAYBACK_SERVICE
 			startService(intent)
 
