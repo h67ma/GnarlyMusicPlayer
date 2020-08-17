@@ -97,6 +97,8 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onResume()
 
+		_queueAdapter.notifyDataSetChanged() // in case service modified queue and we didn't go through onCreate() (e.g. screen off/on)
+
 		if(App.mediaPlaybackServiceStarted)
 			bindService()
 
