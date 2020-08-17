@@ -262,8 +262,6 @@ class MediaPlaybackService : Service()
 					_binder.listeners?.onTrackChanged(oldPos, trackFinished)
 				return
 			}
-
-			Toast.makeText(this, PlaybackQueue.currentIdx.toString(), Toast.LENGTH_SHORT).show()
 		}
 		else
 			PlaybackQueue.setNextTrackIdx() // just calculate next track index
