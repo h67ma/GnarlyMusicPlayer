@@ -134,10 +134,10 @@ class PlaybackQueueTest
 	}
 
 	@Test
-	fun moveHasChanged()
+	fun moveHasntChanged()
 	{
 		PlaybackQueue.updateIdxAfterItemMoved(0, 2)
-		assertTrue(PlaybackQueue.hasChanged)
+		assertFalse(PlaybackQueue.hasChanged)
 	}
 
 	@Test
@@ -363,5 +363,21 @@ class PlaybackQueueTest
 		PlaybackQueue.currentIdx = 0
 		PlaybackQueue.setPrevTrackIdx()
 		assertEquals(4, PlaybackQueue.currentIdx)
+	}
+
+	@Test
+	fun setNextIdxHasntChanged()
+	{
+		PlaybackQueue.hasChanged = false
+		PlaybackQueue.setNextTrackIdx()
+		assertFalse(PlaybackQueue.hasChanged)
+	}
+
+	@Test
+	fun setPrevIdxHasntChanged()
+	{
+		PlaybackQueue.hasChanged = false
+		PlaybackQueue.setPrevTrackIdx()
+		assertFalse(PlaybackQueue.hasChanged)
 	}
 }

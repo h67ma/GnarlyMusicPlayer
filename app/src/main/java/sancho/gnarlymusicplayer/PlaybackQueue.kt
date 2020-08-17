@@ -119,6 +119,7 @@ object PlaybackQueue
 		return 0
 	}
 
+	// changing idx doesn't mean queue has changed
 	fun updateIdxAfterItemMoved(fromPosition: Int, toPosition: Int)
 	{
 		if (fromPosition == toPosition)
@@ -136,8 +137,6 @@ object PlaybackQueue
 		{
 			currentIdx++
 		}
-
-		hasChanged = true
 	}
 
 	fun trackExists(pos: Int): Boolean
@@ -183,11 +182,13 @@ object PlaybackQueue
 		return size > 0 && currentIdx < size && currentIdx != NO_TRACK
 	}
 
+	// changing idx doesn't mean queue has changed
 	fun setNextTrackIdx()
 	{
 		currentIdx = (currentIdx + 1) % size
 	}
 
+	// changing idx doesn't mean queue has changed
 	fun setPrevTrackIdx()
 	{
 		currentIdx = (currentIdx - 1 + size) % size
