@@ -417,14 +417,11 @@ class MainActivity : AppCompatActivity()
 					override fun onTrackChanged(oldPos: Int, trackFinished: Boolean)
 					{
 						if (trackFinished && PlaybackQueue.autoClean)
-						{
-							PlaybackQueue.hasChanged = true
-							_queueAdapter.notifyItemRemoved(oldPos) // autoremove
-						}
+							_queueAdapter.notifyItemRemoved(oldPos) // track just got autoremoved
 						else
-							_queueAdapter.notifyItemChanged(oldPos) // just unselect track
+							_queueAdapter.notifyItemChanged(oldPos) // unselect track
 
-						_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx)
+						_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx) // select new current track
 
 						if (_seekDialog?.isShowing == true)
 							_seekDialog?.dismiss()
