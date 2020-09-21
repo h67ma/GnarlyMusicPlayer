@@ -60,6 +60,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 
 		_builder.setContentTitle(track.title)
 			.setContentText(track.artist)
+			.setSubText(track.year?.toString()) // aka header (next to app name)
 			.setLargeIcon(track.cover) // won't hurt if it's null
 
 		// also update cover in media session (for lockscreen)

@@ -52,6 +52,7 @@ fun setTrackMeta(track: Track)
 		track.path = ""
 		track.title = ""
 		track.artist = ""
+		track.year = null
 		track.cover = null
 		return
 	}
@@ -65,6 +66,7 @@ fun setTrackMeta(track: Track)
 
 	track.title = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
 	track.artist = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
+	track.year = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)?.toIntOrNull() // I won't accept some weird timestamps, only year
 
 	// cover
 	// first try embedded artwork
