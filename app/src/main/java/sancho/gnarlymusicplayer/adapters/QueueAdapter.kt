@@ -1,5 +1,6 @@
 package sancho.gnarlymusicplayer.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -33,9 +34,10 @@ class QueueAdapter(
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: QueueItem, cliccListener: (Int) -> Unit, touchHelper: ItemTouchHelper?)
+		@SuppressLint("ClickableViewAccessibility") // we don't want to click the track, only drag
+		fun bind(item: QueueItem, cliccListener: (Int) -> Unit, touchHelper: ItemTouchHelper?)
 		{
-			itemView.queue_text.text = bookmark.name
+			itemView.queue_text.text = item.name
 
 			itemView.isSelected = PlaybackQueue.currentIdx == adapterPosition
 
