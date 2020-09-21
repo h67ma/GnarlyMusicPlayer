@@ -84,7 +84,8 @@ class App: Application()
 		val ALBUM_ART_FILENAMES = arrayOf(
 			"Folder.png",
 			"Folder.jpg",
-			"Folder.jpeg"
+			"Folder.jpeg",
+			"Folder.jfif"
 		)
 
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
