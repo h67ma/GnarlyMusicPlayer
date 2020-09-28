@@ -60,7 +60,7 @@ class App: Application()
 		const val MIN_TRACK_TIME_S_TO_SAVE = 30
 
 		// from https://developer.android.com/guide/topics/media/media-formats
-		val SUPPORTED_FILE_EXTENSIONS = arrayOf(
+		val SUPPORTED_AUDIO_EXTENSIONS = arrayOf(
 			"3gp",
 			"mp4",
 			"m4a",
@@ -78,15 +78,15 @@ class App: Application()
 			"mp3",
 			"mkv",
 			"wav",
-			"ogg",
-			"m3u",
-			"m3u8"
+			"ogg"
 		)
 
 		val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
 			"m3u",
 			"m3u8"
 		)
+
+		val SUPPORTED_EXTENSIONS = SUPPORTED_PLAYLIST_EXTENSIONS + SUPPORTED_AUDIO_EXTENSIONS
 
 		val ALBUM_ART_FILENAMES = arrayOf(
 			"Folder.png",

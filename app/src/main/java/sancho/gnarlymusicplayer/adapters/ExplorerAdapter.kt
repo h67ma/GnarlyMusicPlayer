@@ -16,7 +16,7 @@ class ExplorerAdapter(
 	private val context: Context,
 	private val files: MutableList<ExplorerViewItem>,
 	private val cliccListener: (ExplorerViewItem) -> Unit,
-	private val longCliccListener: (ExplorerViewItem) -> Boolean) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
+	private val longCliccListener: (ExplorerViewItem) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	override fun onBindViewHolder(holder: FileHolder, position: Int)
 	{
@@ -37,7 +37,7 @@ class ExplorerAdapter(
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem) -> Unit, longClickListener: (ExplorerViewItem) -> Boolean)
+		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem) -> Unit, longClickListener: (ExplorerViewItem) -> Unit)
 		{
 			if (file.isHeader)
 			{
@@ -57,7 +57,10 @@ class ExplorerAdapter(
 				itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
 
 				itemView.setOnClickListener { clickListener(file) }
-				itemView.setOnLongClickListener { longClickListener(file) }
+				itemView.setOnLongClickListener {
+					longClickListener(file)
+					true // callback consumed long press
+				}
 			}
 		}
 	}

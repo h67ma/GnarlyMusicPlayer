@@ -171,39 +171,47 @@ class MainActivity : AppCompatActivity()
 		_explorerAdapter = ExplorerAdapter(this, _dirList,
 			{ item ->
 				val file = File(item.path)
-				if (file.exists())
+
+				if (!file.exists())
 				{
-					when
+					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+				}
+
+				when
+				{
+					file.isDirectory ->
 					{
-						file.isDirectory ->
-						{
-							// navigate to directory
-							updateDirectoryView(file)
-							_searchResultsOpen = false // in case the dir was from search results
-						}
-						isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) ->
-						{
-							// playlist
-						}
-						else ->
-						{
-							// audio file
-							addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
-						}
+						// navigate to directory
+						updateDirectoryView(file)
+						_searchResultsOpen = false // in case the dir was from search results
+					}
+					isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) ->
+					{
+						// playlist
+					}
+					else ->
+					{
+						// audio file
+						addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
 					}
 				}
-				else
-					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
 			},
 			{ item ->
 				val file = File(item.path)
-				if (file.exists())
+
+				if (!file.exists())
 				{
-					if (file.isDirectory)
+					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+					return@ExplorerAdapter
+				}
+
+				when
+				{
+					file.isDirectory ->
 					{
 						// add all tracks in dir (not recursive)
-						val files = file.listFiles{fileFromDir ->
-							isFileExtensionInArray(fileFromDir.name, App.SUPPORTED_FILE_EXTENSIONS)
+						val files = file.listFiles { fileFromDir ->
+							isFileExtensionInArray(fileFromDir.name, App.SUPPORTED_AUDIO_EXTENSIONS)
 						}
 						if (files != null)
 						{
@@ -217,16 +225,17 @@ class MainActivity : AppCompatActivity()
 						else
 							Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 					}
-					else
+					isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) ->
 					{
+						// playlist
+					}
+					else ->
+					{
+						// audio file
 						addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
 						playTrack(PlaybackQueue.lastIdx)
 					}
 				}
-				else
-					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
-
-				true
 			}
 		)
 		library_list_view.adapter = _explorerAdapter
@@ -506,7 +515,7 @@ class MainActivity : AppCompatActivity()
 			// list current dir
 			toolbar_title.text = newDir.absolutePath
 			val list = newDir.listFiles{file ->
-				file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_FILE_EXTENSIONS)
+				file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_EXTENSIONS)
 			}
 
 			if (list != null)
@@ -611,7 +620,7 @@ class MainActivity : AppCompatActivity()
 
 					val results = dir
 						.listFiles{file ->
-							(file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_FILE_EXTENSIONS))
+							(file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_EXTENSIONS))
 									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
 						.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
