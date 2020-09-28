@@ -175,6 +175,7 @@ class MainActivity : AppCompatActivity()
 				if (!file.exists())
 				{
 					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+					return@ExplorerAdapter
 				}
 
 				if (file.isDirectory || isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
