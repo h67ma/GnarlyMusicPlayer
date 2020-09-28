@@ -7,6 +7,7 @@ import android.media.MediaMetadataRetriever
 import android.widget.Toast
 import sancho.gnarlymusicplayer.models.Track
 import java.io.File
+import java.lang.RuntimeException
 
 fun showCurrTrackInfo(context: Context)
 {
@@ -42,6 +43,15 @@ fun showCurrTrackInfo(context: Context)
 		.show()
 }
 
+fun resetTrackMeta(track: Track)
+{
+	track.path = ""
+	track.title = ""
+	track.artist = ""
+	track.year = null
+	track.cover = null
+}
+
 // sets track meta from current track in queue
 fun setTrackMeta(track: Track)
 {
@@ -49,11 +59,7 @@ fun setTrackMeta(track: Track)
 
 	if (queueItem == null)
 	{
-		track.path = ""
-		track.title = ""
-		track.artist = ""
-		track.year = null
-		track.cover = null
+		resetTrackMeta(track)
 		return
 	}
 
@@ -62,7 +68,20 @@ fun setTrackMeta(track: Track)
 
 	// title and artist
 	val mediaInfo = MediaMetadataRetriever()
-	mediaInfo.setDataSource(queueItem.path)
+	try
+	{
+		mediaInfo.setDataSource(queueItem.path)
+	}
+	catch(_: RuntimeException) // invalid file
+	{
+		resetTrackMeta(track)
+		return
+	}
+	catch(_: IllegalArgumentException) // invalid file path
+	{
+		resetTrackMeta(track)
+		return
+	}
 
 	track.title = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
 	track.artist = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
