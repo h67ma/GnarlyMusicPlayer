@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity()
 
 	private val _dirList = mutableListOf<ExplorerViewItem>()
 	private var _prevDirList = mutableListOf<ExplorerViewItem>() // store "real" dir listing, for re-searching ability. because _dirList contains search results
-	private var _currentDir: File? = null
+	private var _currentExplorerPath: File? = null
 	private var _lastDir: File? = null // from shared preferences
 
 	private lateinit var _explorerAdapter: ExplorerAdapter
@@ -177,23 +177,16 @@ class MainActivity : AppCompatActivity()
 					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
 				}
 
-				when
+				if (file.isDirectory || isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
 				{
-					file.isDirectory ->
-					{
-						// navigate to directory
-						updateDirectoryView(file)
-						_searchResultsOpen = false // in case the dir was from search results
-					}
-					isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) ->
-					{
-						// playlist
-					}
-					else ->
-					{
-						// audio file
-						addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
-					}
+					// navigate to directory or open playlist
+					updateDirectoryView(file)
+					_searchResultsOpen = false // in case the dir was from search results
+				}
+				else
+				{
+					// audio file
+					addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
 				}
 			},
 			{ item ->
@@ -205,36 +198,31 @@ class MainActivity : AppCompatActivity()
 					return@ExplorerAdapter
 				}
 
-				when
+				if (file.isDirectory || isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
 				{
-					file.isDirectory ->
-					{
-						// add all tracks in dir (not recursive)
-						val files = file.listFiles { fileFromDir ->
-							isFileExtensionInArray(fileFromDir.name, App.SUPPORTED_AUDIO_EXTENSIONS)
-						}
-						if (files != null)
-						{
-							Arrays.sort(files, App.filesComparator)
-							addToQueue(files.map { track ->
-								QueueItem(track.absolutePath, track.nameWithoutExtension)
-							})
+					// add all tracks in dir or playlist (not recursive)
+					val files = if (file.isDirectory)
+						listDir(file, true)
+					else
+						listPlaylist(file)
 
-							Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
-						}
-						else
-							Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
-					}
-					isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS) ->
+					if (files != null)
 					{
-						// playlist
+						files.sortWith(App.filesComparator)
+						addToQueue(files.map { track ->
+							QueueItem(track.absolutePath, track.nameWithoutExtension)
+						})
+
+						Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
 					}
-					else ->
-					{
-						// audio file
-						addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
-						playTrack(PlaybackQueue.lastIdx)
-					}
+					else
+						Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+				}
+				else
+				{
+					// audio file
+					addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
+					playTrack(PlaybackQueue.lastIdx)
 				}
 			}
 		)
@@ -246,7 +234,7 @@ class MainActivity : AppCompatActivity()
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
 		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 
-			if (bookmark.path == _currentDir?.absolutePath)
+			if (bookmark.path == _currentExplorerPath?.absolutePath)
 			{
 				drawer_layout.closeDrawer(GravityCompat.END)
 				return@BookmarksAdapter // already open
@@ -295,8 +283,8 @@ class MainActivity : AppCompatActivity()
 		touchHelper.attachToRecyclerView(bookmark_list_view)
 
 		bookmark_add_btn.setOnClickListener {
-			val path = _currentDir?.absolutePath
-			val label = _currentDir?.name
+			val path = _currentExplorerPath?.absolutePath
+			val label = _currentExplorerPath?.name
 			if (path != null && label != null)
 			{
 				// check if bookmark already exists
@@ -499,37 +487,39 @@ class MainActivity : AppCompatActivity()
 	}
 
 	// assuming the read permission is granted
-	private fun updateDirectoryView(newDir: File?, oldPath: String? = null)
+	private fun updateDirectoryView(newPath: File?, oldPath: String? = null)
 	{
-		_currentDir = newDir
-		if(newDir == null || !newDir.exists() || !newDir.isDirectory)
+		_currentExplorerPath = newPath
+
+		if(newPath == null || !newPath.exists())
 		{
 			// list storage devices
 			toolbar_title.text = getString(R.string.storage_devices)
 			_dirList.clear()
 			_dirList.addAll(_mountedDevices)
 			_explorerAdapter.notifyDataSetChanged()
+			return
+		}
+
+		toolbar_title.text = newPath.absolutePath
+
+		val list = if (newPath.isDirectory)
+			listDir(newPath, false)
+		else
+			listPlaylist(newPath)
+
+		if (list != null)
+		{
+			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
+			viewList.sortWith(App.explorerViewFilesAndDirsComparator)
+			_dirList.clear()
+			_dirList.addAll(viewList)
+			_explorerAdapter.notifyDataSetChanged()
 		}
 		else
-		{
-			// list current dir
-			toolbar_title.text = newDir.absolutePath
-			val list = newDir.listFiles{file ->
-				file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_EXTENSIONS)
-			}
+			Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 
-			if (list != null)
-			{
-				val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
-				viewList.sortWith(App.explorerViewFilesAndDirsComparator)
-				_dirList.clear()
-				_dirList.addAll(viewList)
-				_explorerAdapter.notifyDataSetChanged()
-			}
-			else
-				Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
-		}
-
+		// scroll to position when returning to parent dir
 		if (oldPath != null)
 		{
 			// find previous dir (child) in current dir list, scroll to it
@@ -578,7 +568,7 @@ class MainActivity : AppCompatActivity()
 			{
 				menuElementsToToggle.forEach{elem -> elem.isVisible = true}
 
-				updateDirectoryView(_currentDir)
+				updateDirectoryView(_currentExplorerPath)
 				_searchResultsOpen = false
 				return true
 			}
@@ -850,7 +840,7 @@ class MainActivity : AppCompatActivity()
 					PlaybackQueue.hasChanged = false
 				}
 			}
-			putString(App.PREFERENCE_LASTDIR, _currentDir?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
+			putString(App.PREFERENCE_LASTDIR, _currentExplorerPath?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
 			putInt(App.PREFERENCE_CURRENTTRACK, PlaybackQueue.currentIdx)
 			apply()
 		}
@@ -866,10 +856,10 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
 			_searchResultsOpen ->
 			{
-				updateDirectoryView(_currentDir)
+				updateDirectoryView(_currentExplorerPath)
 				_searchResultsOpen = false
 			}
-			_currentDir != null -> updateDirectoryView(_currentDir?.parentFile, _currentDir?.path)
+			_currentExplorerPath != null -> updateDirectoryView(_currentExplorerPath?.parentFile, _currentExplorerPath?.path)
 			else -> super.onBackPressed() // exit app
 		}
 	}
