@@ -6,32 +6,32 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
 
     <application
         android:name=".App"
         android:allowBackup="false"
-        android:icon="@drawable/launcher_rounded"
+        android:icon="@mipmap/launcher_adaptive"
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppThemeBlack"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:requestLegacyExternalStorage="true">
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="@string/settings"
-            android:parentActivityName="sancho.gnarlymusicplayer.MainActivity">
+            android:parentActivityName="sancho.gnarlymusicplayer.activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="sancho.gnarlymusicplayer.MainActivity" />
+                android:value="sancho.gnarlymusicplayer.activities.MainActivity" />
         </activity>
 
         <service
-            android:name=".MediaPlaybackService"
+            android:name=".playbackservice.MediaPlaybackService"
             android:enabled="true" />
 
         <activity
-            android:name=".MainActivity">
+            android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

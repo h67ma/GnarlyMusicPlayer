@@ -7,21 +7,21 @@
 
     <TextView
         android:id="@+id/queue_text"
-        android:layout_width="match_parent"
-        android:layout_marginRight="35dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:textSize="18sp"
         android:padding="10dp"
         android:ellipsize="end"
+        android:layout_weight="1"
         android:maxLines="1"/>
 
     <ImageView
         android:id="@+id/queue_reorder"
         android:layout_width="30dp"
+        android:layout_marginRight="5dp"
         android:layout_height="match_parent"
         android:src="@drawable/reorder"
-        android:translationX="-35dp"
         android:tint="?android:textColor"/>
 
 </LinearLayout>

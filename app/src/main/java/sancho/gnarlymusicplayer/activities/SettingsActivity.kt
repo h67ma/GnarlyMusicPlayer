@@ -1,21 +1,20 @@
-package sancho.gnarlymusicplayer
+package sancho.gnarlymusicplayer.activities
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.CheckBoxPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SeekBarPreference
+import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
+import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.PlaybackQueue
+import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
+import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.getStyleFromPreference
 
 
 class SettingsActivity : AppCompatActivity()
@@ -43,8 +42,6 @@ class SettingsActivity : AppCompatActivity()
 		{
 			setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-			updatePermishonStatus()
-
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
 			findPreference<Preference>("version")?.setOnPreferenceClickListener { _ ->
@@ -58,10 +55,16 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			findPreference<CheckBoxPreference>(getString(R.string.pref_autoclean))?.setOnPreferenceChangeListener { _, newValue ->
+				PlaybackQueue.autoClean = (newValue as Boolean) == true
+
+				true
+			}
+
 			findPreference<Preference>("eq")?.setOnPreferenceClickListener { _ ->
 				val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
 
-				val pm = activity?.packageManager
+				val pm = context?.packageManager
 				if (pm != null && eqIntent.resolveActivity(pm) != null)
 				{
 					// don't pass value if not set - eq app will do some magic and save settings for next time
@@ -124,12 +127,6 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
-			findPreference<Preference>("permishon")?.setOnPreferenceClickListener { _ ->
-				updatePermishonStatus()
-				Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
-				true
-			}
-
 			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
 				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer/wiki/Help"))
 				startActivity(browserIntent)
@@ -143,33 +140,19 @@ class SettingsActivity : AppCompatActivity()
 			}
 		}
 
-		private fun updatePermishonStatus()
-		{
-			if (activity?.checkSelfPermission(Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) == PackageManager.PERMISSION_GRANTED)
-			{
-				App.longpressPermishon = true
-				findPreference<Preference>("permishon")?.summary = "Granted"
-			}
-			else
-			{
-				App.longpressPermishon = false
-				findPreference<Preference>("permishon")?.summary = "Not granted. Tap to check"
-			}
-		}
-
 		private fun updateAudioService()
 		{
 			if (App.mediaPlaybackServiceStarted)
 			{
 				val intent = Intent(context, MediaPlaybackService::class.java)
 				intent.action = App.ACTION_UPDATE_MAX_VOLUME
-				activity?.startService(intent)
+				context?.startService(intent)
 			}
 		}
 
 		private fun getAppVersion(): String
 		{
-			return activity?.packageManager?.getPackageInfo(activity?.packageName, 0)?.versionName ?: "Unknown"
+			return context?.packageManager?.getPackageInfo(context?.packageName ?: "", 0)?.versionName ?: "Unknown"
 		}
 	}
 }

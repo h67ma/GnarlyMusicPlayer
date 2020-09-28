@@ -1,5 +1,6 @@
 package sancho.gnarlymusicplayer.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -8,24 +9,23 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.queue_item.view.*
-import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.models.Track
+import sancho.gnarlymusicplayer.models.QueueItem
 import java.util.Collections.swap
 
 class QueueAdapter(
 	private val context: Context,
-	private val tracks: MutableList<Track>,
 	private val cliccListener: (Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
-		holder.bind(tracks[position], cliccListener, touchHelper)
+		holder.bind(PlaybackQueue.queue[position], cliccListener, touchHelper)
 	}
 
-	override fun getItemCount() = tracks.size
+	override fun getItemCount() = PlaybackQueue.queue.size
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackHolder
 	{
@@ -34,11 +34,12 @@ class QueueAdapter(
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Track, cliccListener: (Int) -> Unit, touchHelper: ItemTouchHelper?)
+		@SuppressLint("ClickableViewAccessibility") // we don't want to click the track, only drag
+		fun bind(item: QueueItem, cliccListener: (Int) -> Unit, touchHelper: ItemTouchHelper?)
 		{
-			itemView.queue_text.text = bookmark.name
+			itemView.queue_text.text = item.name
 
-			itemView.isSelected = App.currentTrack == adapterPosition
+			itemView.isSelected = PlaybackQueue.currentIdx == adapterPosition
 
 			itemView.setOnClickListener {cliccListener(adapterPosition)}
 
@@ -61,14 +62,14 @@ class QueueAdapter(
 		{
 			for (i in fromPosition until toPosition)
 			{
-				swap(tracks, i, i + 1)
+				swap(PlaybackQueue.queue, i, i + 1)
 			}
 		}
 		else
 		{
 			for (i in fromPosition downTo toPosition + 1)
 			{
-				swap(tracks, i, i - 1)
+				swap(PlaybackQueue.queue, i, i - 1)
 			}
 		}
 		notifyItemMoved(fromPosition, toPosition)

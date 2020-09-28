@@ -2,18 +2,15 @@ package sancho.gnarlymusicplayer
 
 import android.app.Application
 import android.media.AudioManager
-import androidx.recyclerview.widget.RecyclerView
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
-import sancho.gnarlymusicplayer.models.Track
 import java.io.File
 
 class App: Application()
 {
 	companion object
 	{
-		var currentTrack: Int = RecyclerView.NO_POSITION
-		lateinit var queue: MutableList<Track>
 		var mediaPlaybackServiceStarted: Boolean = false
+		var serviceBound: Boolean = false
 
 		var savedTrackPath: String = ""
 		var savedTrackTime: Int = 0
@@ -23,8 +20,6 @@ class App: Application()
 		var volumeStepIdx: Int = 15
 		var volumeSystemSet: Boolean = false
 		var volumeSystemLevel: Int = 7
-
-		var longpressPermishon: Boolean = false
 
 		// needs to be global because is used in service and in settings activity
 		// let's set it to error when session doesn't exist, shall we?
@@ -47,7 +42,7 @@ class App: Application()
 		const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
 		const val PREFERENCE_VOLUME_SYSTEM_TO_SET = "sancho.gnarlymusicplayer.preference.volume.setsystem"
 
-		const val DEFAULT_ACCENTCOLOR = "green"
+		const val DEFAULT_ACCENTCOLOR = "lime"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 
@@ -96,7 +91,8 @@ class App: Application()
 		val ALBUM_ART_FILENAMES = arrayOf(
 			"Folder.png",
 			"Folder.jpg",
-			"Folder.jpeg"
+			"Folder.jpeg",
+			"Folder.jfif"
 		)
 
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->

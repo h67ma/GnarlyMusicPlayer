@@ -9,13 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.bookmark_item.view.*
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.models.Track
+import sancho.gnarlymusicplayer.models.QueueItem
 import java.util.Collections.swap
 
 class BookmarksAdapter(
 	private val context: Context,
-	private val bookmarks: MutableList<Track>,
-	private val cliccListener: (Track) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
+	private val bookmarks: MutableList<QueueItem>,
+	private val cliccListener: (QueueItem) -> Unit) : RecyclerView.Adapter<BookmarksAdapter.BookmarkHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
 
@@ -33,7 +33,7 @@ class BookmarksAdapter(
 
 	class BookmarkHolder(view: View) : RecyclerView.ViewHolder(view)
 	{
-		fun bind(bookmark: Track, clickListener: (Track) -> Unit, touchHelper: ItemTouchHelper?)
+		fun bind(bookmark: QueueItem, clickListener: (QueueItem) -> Unit, touchHelper: ItemTouchHelper?)
 		{
 			itemView.bookmark_text.text = bookmark.name
 			itemView.setOnClickListener { clickListener(bookmark)}
@@ -55,7 +55,7 @@ class BookmarksAdapter(
 		bookmarks.removeAt(position)
 	}
 
-	fun onItemAdded(bookmark: Track)
+	fun onItemAdded(bookmark: QueueItem)
 	{
 		bookmarks.add(bookmark)
 	}

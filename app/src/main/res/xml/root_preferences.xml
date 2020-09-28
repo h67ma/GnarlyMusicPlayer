@@ -6,12 +6,18 @@
         app:iconSpaceReserved="false">
 
         <ListPreference
-            app:defaultValue="green"
+            app:defaultValue="lime"
             app:entries="@array/color_names"
             app:entryValues="@array/color_values"
             app:key="@string/pref_accentcolor"
             app:title="Theme"
             app:useSimpleSummaryProvider="true"
+            app:iconSpaceReserved="false"/>
+
+        <CheckBoxPreference
+            app:title="Auto-clean queue"
+            app:summary="Auto-remove tracks from queue when they finish playing"
+            app:key="@string/pref_autoclean"
             app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
@@ -64,12 +70,6 @@
         app:title="@string/about"
         app:iconSpaceReserved="false"
         app:allowDividerAbove="true">
-
-        <Preference
-            app:title="Longpress volume buttons listener permission"
-            app:key="permishon"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
 
         <Preference
             app:title="Help"
