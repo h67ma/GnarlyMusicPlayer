@@ -66,6 +66,7 @@ class App: Application()
 			"m4a",
 			"aac",
 			"ts",
+			"amr",
 			"flac",
 			"gsm",
 			"mid",
