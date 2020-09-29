@@ -178,11 +178,19 @@ class MainActivity : AppCompatActivity()
 					return@ExplorerAdapter
 				}
 
-				if (file.isDirectory || isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
+				if (file.isDirectory)
 				{
-					// navigate to directory or open playlist
-					updateDirectoryView(file)
+					// navigate to directory
+					updateDirectoryViewDir(file)
+					scrollToTop()
 					_searchResultsOpen = false // in case the dir was from search results
+				}
+				else if (isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
+				{
+					// open playlist
+					updateDirectoryViewPlaylist(file)
+					scrollToTop()
+					_searchResultsOpen = false // in case the playlist was from search results
 				}
 				else
 				{
@@ -241,10 +249,12 @@ class MainActivity : AppCompatActivity()
 				return@BookmarksAdapter // already open
 			}
 
-			val dir = File(bookmark.path)
-			if (dir.exists())
+			val item = File(bookmark.path)
+			if (item.exists())
 			{
-				updateDirectoryView(dir)
+				updateDirectoryView(item)
+				scrollToTop()
+
 				drawer_layout.closeDrawer(GravityCompat.END)
 				_actionSearch?.collapseActionView() // collapse searchbar thing
 			}
@@ -305,7 +315,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener {
-			updateDirectoryView(null)
+			updateDirectoryViewShowStorage()
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 	}
@@ -455,8 +465,8 @@ class MainActivity : AppCompatActivity()
 		val externalStorageFiles = getExternalFilesDirs(null)
 		for(f in externalStorageFiles)
 		{
-			val device = f.parentFile.parentFile.parentFile.parentFile // srsl?
-			_mountedDevices.add(ExplorerItem(device.path, device.name, device.isDirectory))
+			val device = f?.parentFile?.parentFile?.parentFile?.parentFile // srsl?
+			_mountedDevices.add(ExplorerItem(device?.path ?: "", device?.name ?: "", device?.isDirectory ?: false))
 		}
 	}
 
@@ -487,27 +497,42 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	// assuming the read permission is granted
-	private fun updateDirectoryView(newPath: File?, oldPath: String? = null)
+	private fun updateDirectoryViewShowStorage()
+	{
+		_currentExplorerPath = null
+		toolbar_title.text = getString(R.string.storage_devices)
+		_dirList.clear()
+		_dirList.addAll(_mountedDevices)
+		_explorerAdapter.notifyDataSetChanged()
+	}
+
+	private fun updateDirectoryView(newPath: File?)
+	{
+		if(newPath == null || !newPath.exists())
+		{
+			updateDirectoryViewShowStorage()
+			return
+		}
+
+		if (newPath.isDirectory)
+			updateDirectoryViewDir(newPath)
+		else
+			updateDirectoryViewPlaylist(newPath)
+	}
+
+	private fun updateDirectoryViewDir(newPath: File?)
 	{
 		_currentExplorerPath = newPath
 
 		if(newPath == null || !newPath.exists())
 		{
-			// list storage devices
-			toolbar_title.text = getString(R.string.storage_devices)
-			_dirList.clear()
-			_dirList.addAll(_mountedDevices)
-			_explorerAdapter.notifyDataSetChanged()
+			updateDirectoryViewShowStorage()
 			return
 		}
 
 		toolbar_title.text = newPath.absolutePath
 
-		val list = if (newPath.isDirectory)
-			listDir(newPath, false)
-		else
-			listPlaylist(newPath)
+		val list = listDir(newPath, false)
 
 		if (list != null)
 		{
@@ -519,8 +544,10 @@ class MainActivity : AppCompatActivity()
 		}
 		else
 			Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+	}
 
-		// scroll to position when returning to parent dir
+	private fun restoreListScrollPos(oldPath: String?)
+	{
 		if (oldPath != null)
 		{
 			// find previous dir (child) in current dir list, scroll to it
@@ -528,10 +555,37 @@ class MainActivity : AppCompatActivity()
 			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 200)
 		}
 		else
+			scrollToTop()
+	}
+
+	private fun scrollToTop()
+	{
+		(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+	}
+
+	private fun updateDirectoryViewPlaylist(newPath: File?)
+	{
+		_currentExplorerPath = newPath
+
+		if(newPath == null || !newPath.exists())
 		{
-			// scroll to top
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+			updateDirectoryViewShowStorage()
+			return
 		}
+
+		toolbar_title.text = newPath.absolutePath
+
+		val list = listPlaylist(newPath)
+
+		if (list != null)
+		{
+			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
+			_dirList.clear()
+			_dirList.addAll(viewList)
+			_explorerAdapter.notifyDataSetChanged()
+		}
+		else
+			Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 	}
 
 	//region MENU
@@ -851,17 +905,23 @@ class MainActivity : AppCompatActivity()
 
 	override fun onBackPressed()
 	{
-		when
+		if (drawer_layout.isDrawerOpen(GravityCompat.START))
+			drawer_layout.closeDrawer(GravityCompat.START)
+		else if (drawer_layout.isDrawerOpen(GravityCompat.END))
+			drawer_layout.closeDrawer(GravityCompat.END)
+		else if (_searchResultsOpen)
 		{
-			drawer_layout.isDrawerOpen(GravityCompat.START) -> drawer_layout.closeDrawer(GravityCompat.START)
-			drawer_layout.isDrawerOpen(GravityCompat.END) -> drawer_layout.closeDrawer(GravityCompat.END)
-			_searchResultsOpen ->
-			{
-				updateDirectoryView(_currentExplorerPath)
-				_searchResultsOpen = false
-			}
-			_currentExplorerPath != null -> updateDirectoryView(_currentExplorerPath?.parentFile, _currentExplorerPath?.path)
-			else -> super.onBackPressed() // exit app
+			updateDirectoryView(_currentExplorerPath)
+			scrollToTop()
+			_searchResultsOpen = false
 		}
+		else if (_currentExplorerPath != null)
+		{
+			val oldPath = _currentExplorerPath?.path
+			updateDirectoryViewDir(_currentExplorerPath?.parentFile)
+			restoreListScrollPos(oldPath)
+		}
+		else
+			super.onBackPressed() // exit app
 	}
 }
