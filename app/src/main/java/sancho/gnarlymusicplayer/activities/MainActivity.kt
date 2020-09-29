@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, "") ?: "") // again: what's your problem kotlin? isn't ONE default value enough for you?
-		if (lastDir.exists() && lastDir.isDirectory) _lastDir = lastDir
+		if (lastDir.exists() && (lastDir.isDirectory || isFileSupportedAndPlaylist(lastDir.absolutePath))) _lastDir = lastDir
 
 		_accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
 
@@ -185,7 +185,7 @@ class MainActivity : AppCompatActivity()
 					scrollToTop()
 					_searchResultsOpen = false // in case the dir was from search results
 				}
-				else if (isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
+				else if (isFileSupportedAndPlaylist(file.path))
 				{
 					// open playlist
 					updateDirectoryViewPlaylist(file)
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity()
 					return@ExplorerAdapter
 				}
 
-				if (file.isDirectory || isFileExtensionInArray(file.path, App.SUPPORTED_PLAYLIST_EXTENSIONS))
+				if (file.isDirectory || isFileSupportedAndPlaylist(file.path))
 				{
 					// add all tracks in dir or playlist (not recursive)
 					val files = if (file.isDirectory)
@@ -665,13 +665,13 @@ class MainActivity : AppCompatActivity()
 
 					val results = dir
 						.listFiles{file ->
-							(file.isDirectory || isFileExtensionInArray(file.name, App.SUPPORTED_EXTENSIONS))
+							(file.isDirectory || isFileSupported(file.name))
 									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
-						.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
-						.sortedWith(App.explorerViewFilesComparator)
+						?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
+						?.sortedWith(App.explorerViewFilesComparator)
 
-					if (results.isNotEmpty())
+					if (results?.isNotEmpty() == true)
 					{
 						// add subdir header
 						searchResultList.add(ExplorerHeader(elem.displayName))
@@ -734,9 +734,7 @@ class MainActivity : AppCompatActivity()
 
 		val dir = PlaybackQueue.getCurrentTrackDir()
 		if (dir != null)
-		{
-			updateDirectoryView(dir)
-		}
+			updateDirectoryViewDir(dir)
 		else
 			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 	}

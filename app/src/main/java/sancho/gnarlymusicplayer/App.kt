@@ -97,8 +97,8 @@ class App: Application()
 		)
 
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
-			val aIsPlaylist = isFileExtensionInArray(a.path, App.SUPPORTED_PLAYLIST_EXTENSIONS)
-			val bIsPlaylist = isFileExtensionInArray(b.path, App.SUPPORTED_PLAYLIST_EXTENSIONS)
+			val aIsPlaylist = isFileSupportedAndPlaylist(a.path)
+			val bIsPlaylist = isFileSupportedAndPlaylist(b.path)
 			when
 			{
 				!a.isDirectory && b.isDirectory -> 1
