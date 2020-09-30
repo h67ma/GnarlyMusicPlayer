@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Gnarly Music Player</string>
     <string name="search_bar_hint">Search</string>
-    <string name="add_current_dir">Add current dir</string>
+    <string name="add_current_dir">Add current path</string>
     <string name="bookmark_exists">Bookmark already exists</string>
     <string name="cant_add_root_dir">Can\'t add root dir</string>
     <string name="file_list_error">Can\'t list files</string>
