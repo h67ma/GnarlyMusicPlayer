@@ -25,6 +25,9 @@ import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
+import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesAndDirsComparator
+import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
+import sancho.gnarlymusicplayer.comparators.FilesComparator
 import sancho.gnarlymusicplayer.models.ExplorerHeader
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
@@ -170,7 +173,7 @@ class MainActivity : AppCompatActivity()
 
 					if (files != null)
 					{
-						files.sortWith(App.filesComparator)
+						files.sortWith(FilesComparator())
 						addToQueue(files.map { track ->
 							QueueItem(track.absolutePath, track.nameWithoutExtension)
 						})
@@ -506,7 +509,7 @@ class MainActivity : AppCompatActivity()
 		if (list != null)
 		{
 			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
-			viewList.sortWith(App.explorerViewFilesAndDirsComparator)
+			viewList.sortWith(ExplorerViewFilesAndDirsComparator())
 			_dirList.clear()
 			_dirList.addAll(viewList)
 			_explorerAdapter.notifyDataSetChanged()
@@ -624,11 +627,11 @@ class MainActivity : AppCompatActivity()
 					.filter { file ->
 						file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
 					}
-					.sortedWith(App.explorerViewFilesComparator)
+					.sortedWith(ExplorerViewFilesComparator())
 				)
 
 				// add results from first level dirs (grouped by subdir name)
-				for (elem in _prevDirList.filter{file -> file.isDirectory}.sortedWith(App.explorerViewFilesComparator))
+				for (elem in _prevDirList.filter{file -> file.isDirectory}.sortedWith(ExplorerViewFilesComparator()))
 				{
 					val dir = File(elem.path)
 
@@ -638,7 +641,7 @@ class MainActivity : AppCompatActivity()
 									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
 						?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
-						?.sortedWith(App.explorerViewFilesComparator)
+						?.sortedWith(ExplorerViewFilesComparator())
 
 					if (results?.isNotEmpty() == true)
 					{
