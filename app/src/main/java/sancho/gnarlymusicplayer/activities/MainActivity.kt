@@ -207,17 +207,30 @@ class MainActivity : AppCompatActivity()
 					return@ExplorerAdapter
 				}
 
-				if (file.isDirectory || isFileSupportedAndPlaylist(file.path))
+				if (file.isDirectory)
 				{
-					// add all tracks in dir or playlist (not recursive)
-					val files = if (file.isDirectory)
-						listDir(file, true)
-					else
-						listPlaylist(file)
+					// add all tracks in dir (not recursive)
+					val files = listDir(file, true)
 
 					if (files != null)
 					{
 						files.sortWith(App.filesComparator)
+						addToQueue(files.map { track ->
+							QueueItem(track.absolutePath, track.nameWithoutExtension)
+						})
+
+						Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
+					}
+					else
+						Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+				}
+				else if (isFileSupportedAndPlaylist(file.path))
+				{
+					// add all tracks in playlist (not recursive)
+					val files = listPlaylist(file)
+
+					if (files != null)
+					{
 						addToQueue(files.map { track ->
 							QueueItem(track.absolutePath, track.nameWithoutExtension)
 						})
