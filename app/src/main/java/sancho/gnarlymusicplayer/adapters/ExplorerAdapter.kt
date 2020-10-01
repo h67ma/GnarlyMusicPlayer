@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
 import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.Helpers
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.isFileSupportedAndPlaylist
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 
 class ExplorerAdapter(
@@ -50,7 +50,7 @@ class ExplorerAdapter(
 				val icon = when
 				{
 					file.isDirectory -> R.drawable.folder
-					isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
+					Helpers.isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
 					else -> R.drawable.note
 				}
 

@@ -9,6 +9,7 @@ import android.os.PowerManager
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.media.VolumeProviderCompat
 import sancho.gnarlymusicplayer.App
+import sancho.gnarlymusicplayer.AppSettingsManager
 import kotlin.math.log2
 
 class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompat, completionCallback: (Boolean) -> Unit): MediaPlayer()
@@ -36,7 +37,7 @@ class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompa
 
 	private fun setVolumeDivider()
 	{
-		_volumeDivider = log2((App.volumeStepsTotal + 1).toFloat())
+		_volumeDivider = log2((AppSettingsManager.volumeStepsTotal + 1).toFloat())
 	}
 
 	fun setVolume(stepIdx: Int)
@@ -44,7 +45,7 @@ class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompa
 		// can't just divide step/max - setVolume input needs to be logarithmically scaled
 		// at low levels grows slowly, at high levels grows rapidly
 		// something like 0, 0.05, 0.11, 0.18, 0.27, 0.37, 0.5, 0.68, 1 for 8 volume levels
-		val vol = 1 - log2((App.volumeStepsTotal - stepIdx + 1).toFloat()) / _volumeDivider
+		val vol = 1 - log2((AppSettingsManager.volumeStepsTotal - stepIdx + 1).toFloat()) / _volumeDivider
 		setVolume(vol, vol)
 	}
 
@@ -55,34 +56,34 @@ class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompa
 
 	fun setVolumeProvider()
 	{
-		if (App.volumeInappEnabled)
+		if (AppSettingsManager.volumeInappEnabled)
 		{
 			// don't adjust system volume - change inside-app player volume instead
 
-			_mediaSession.setPlaybackToRemote(object : VolumeProviderCompat(VOLUME_CONTROL_ABSOLUTE, App.volumeStepsTotal, App.volumeStepIdx)
+			_mediaSession.setPlaybackToRemote(object : VolumeProviderCompat(VOLUME_CONTROL_ABSOLUTE, AppSettingsManager.volumeStepsTotal, AppSettingsManager.volumeStepIdx)
 			{
 				// volume btns presses
 				override fun onAdjustVolume(direction: Int)
 				{
 					// documentation doesn't say anything about "direction", but it's 1/-1 on my phone, so I guess I'll roll with that -_-
-					App.volumeStepIdx += direction
-					setVolume(App.volumeStepIdx)
-					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
+					AppSettingsManager.volumeStepIdx += direction
+					setVolume(AppSettingsManager.volumeStepIdx)
+					currentVolume = AppSettingsManager.volumeStepIdx // update internal VolumeProviderCompat state
 				}
 
 				// volume slider drag/mute/unmute
 				override fun onSetVolumeTo(volume: Int)
 				{
-					App.volumeStepIdx = volume
-					setVolume(App.volumeStepIdx)
-					currentVolume = App.volumeStepIdx // update internal VolumeProviderCompat state
+					AppSettingsManager.volumeStepIdx = volume
+					setVolume(AppSettingsManager.volumeStepIdx)
+					currentVolume = AppSettingsManager.volumeStepIdx // update internal VolumeProviderCompat state
 				}
 			})
 
 			setVolumeDivider()
 
 			if (App.mediaPlaybackServiceStarted)
-				setVolume(App.volumeStepIdx) // player already initialized
+				setVolume(AppSettingsManager.volumeStepIdx) // player already initialized
 		}
 		else
 		{

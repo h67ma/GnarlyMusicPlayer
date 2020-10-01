@@ -12,18 +12,15 @@ import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
 import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.PlaybackQueue
+import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.getStyleFromPreference
-
 
 class SettingsActivity : AppCompatActivity()
 {
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
-		val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-		val accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
-		setTheme(getStyleFromPreference(accentColorKey))
+		setTheme(AppSettingsManager.restoreAndGetStyleFromPrefs(this))
 
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_settings)
@@ -50,7 +47,7 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			// relaunch parent activity after changing style
-			findPreference<androidx.preference.ListPreference>(getString(R.string.pref_accentcolor))?.setOnPreferenceChangeListener { _, _ ->
+			findPreference<ListPreference>(getString(R.string.pref_accentcolor))?.setOnPreferenceChangeListener { _, _ ->
 				activity?.recreate()
 				true
 			}
@@ -82,7 +79,7 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			findPreference<CheckBoxPreference>(getString(R.string.pref_inappenabled))?.setOnPreferenceChangeListener { _, newValue ->
-				App.volumeInappEnabled = (newValue as Boolean) == true
+				AppSettingsManager.volumeInappEnabled = (newValue as Boolean) == true
 
 				updateAudioService()
 
@@ -91,13 +88,13 @@ class SettingsActivity : AppCompatActivity()
 
 			findPreference<SeekBarPreference>(getString(R.string.pref_totalsteps))?.setOnPreferenceChangeListener { _, newValue ->
 				val newTotal = newValue as Int
-				App.volumeStepIdx = App.volumeStepIdx * newTotal / App.volumeStepsTotal // scale to about the same relative level
-				App.volumeStepsTotal = newTotal
+				AppSettingsManager.volumeStepIdx = AppSettingsManager.volumeStepIdx * newTotal / AppSettingsManager.volumeStepsTotal // scale to about the same relative level
+				AppSettingsManager.volumeStepsTotal = newTotal
 
 				// also save volumestepidx to preference (so MainActivity won't overwrite it if the service is not running)
 				with (PreferenceManager.getDefaultSharedPreferences(context).edit())
 				{
-					putInt(App.PREFERENCE_VOLUME_STEP_IDX, App.volumeStepIdx)
+					putInt(AppSettingsManager.PREFERENCE_VOLUME_STEP_IDX, AppSettingsManager.volumeStepIdx)
 					apply()
 				}
 
@@ -107,7 +104,7 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			findPreference<CheckBoxPreference>(getString(R.string.pref_lockvolume))?.setOnPreferenceChangeListener { _, newValue ->
-				App.volumeSystemSet = (newValue as Boolean) == true
+				AppSettingsManager.volumeSystemSet = (newValue as Boolean) == true
 
 				true
 			}
@@ -118,7 +115,7 @@ class SettingsActivity : AppCompatActivity()
 
 				with (PreferenceManager.getDefaultSharedPreferences(context).edit())
 				{
-					putInt(App.PREFERENCE_VOLUME_SYSTEM_TO_SET, current)
+					putInt(AppSettingsManager.PREFERENCE_VOLUME_SYSTEM_TO_SET, current)
 					apply()
 				}
 

@@ -16,12 +16,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_seek.view.*
 import sancho.gnarlymusicplayer.*
@@ -44,7 +41,6 @@ class MainActivity : AppCompatActivity()
 	private val _dirList = mutableListOf<ExplorerViewItem>()
 	private var _prevDirList = mutableListOf<ExplorerViewItem>() // store "real" dir listing, for re-searching ability. because _dirList contains search results
 	private var _currentExplorerPath: File? = null
-	private var _lastDir: File? = null // from shared preferences
 
 	private lateinit var _explorerAdapter: ExplorerAdapter
 
@@ -53,8 +49,6 @@ class MainActivity : AppCompatActivity()
 
 	private lateinit var _bookmarks: MutableList<QueueItem>
 	private var _bookmarksChanged = false
-
-	private var _accentColorKey: String = App.DEFAULT_ACCENTCOLOR
 
 	private var _actionSearch: MenuItem? = null
 
@@ -67,10 +61,11 @@ class MainActivity : AppCompatActivity()
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
-		restoreFromPrefs()
+		AppSettingsManager.restoreFromPrefs(this)
+		_bookmarks = AppSettingsManager.restoreBookmarks(this)
 		_bookmarksChanged = false
 
-		setTheme(getStyleFromPreference(_accentColorKey))
+		setTheme(AppSettingsManager.getStyleFromPreference())
 
 		if(savedInstanceState != null)
 			_lastSelectedTrack = savedInstanceState.getInt(App.BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
@@ -109,46 +104,7 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	private fun restoreFromPrefs()
-	{
-		val gson = Gson()
-		val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
-		val bookmarksPref = sharedPref.getString(App.PREFERENCE_BOOKMARKS, "[]")
-		val collectionType = object : TypeToken<Collection<QueueItem>>() {}.type
-		_bookmarks = gson.fromJson(bookmarksPref, collectionType)
-
-		// if it changed, it means that service modified the queue, so it's already initialized and overwriting it would be bad
-		if (!PlaybackQueue.hasChanged)
-		{
-			val queuePref = sharedPref.getString(App.PREFERENCE_QUEUE, "[]")
-			PlaybackQueue.queue = gson.fromJson(queuePref, collectionType)
-		}
-
-		val lastDir = File(sharedPref.getString(App.PREFERENCE_LASTDIR, "") ?: "") // again: what's your problem kotlin? isn't ONE default value enough for you?
-		if (lastDir.exists() && (lastDir.isDirectory || isFileSupportedAndPlaylist(lastDir.absolutePath))) _lastDir = lastDir
-
-		_accentColorKey = sharedPref.getString(getString(R.string.pref_accentcolor), App.DEFAULT_ACCENTCOLOR) ?: App.DEFAULT_ACCENTCOLOR // what's your problem kotlin?
-
-		PlaybackQueue.autoClean = sharedPref.getBoolean(getString(R.string.pref_autoclean), false)
-
-		App.volumeStepsTotal = sharedPref.getInt(getString(R.string.pref_totalsteps), 30)
-		App.volumeInappEnabled = sharedPref.getBoolean(getString(R.string.pref_inappenabled), false)
-		App.volumeSystemSet = sharedPref.getBoolean(getString(R.string.pref_lockvolume), false)
-		App.volumeSystemLevel = sharedPref.getInt(App.PREFERENCE_VOLUME_SYSTEM_TO_SET, 7)
-
-		// settings that playback service can change
-		// don't load from preferences if playback service is running - will overwrite its settings
-		if (!App.mediaPlaybackServiceStarted)
-		{
-			PlaybackQueue.currentIdx = sharedPref.getInt(App.PREFERENCE_CURRENTTRACK, 0)
-			App.savedTrackPath = sharedPref.getString(App.PREFERENCE_SAVEDTRACK_PATH, "") ?: "" // what's your problem kotlin?
-			App.savedTrackTime = sharedPref.getInt(App.PREFERENCE_SAVEDTRACK_TIME, 0)
-
-			if (App.volumeInappEnabled)
-				App.volumeStepIdx = sharedPref.getInt(App.PREFERENCE_VOLUME_STEP_IDX, 15)
-		}
-	}
 
 	override fun onSaveInstanceState(outState: Bundle)
 	{
@@ -185,7 +141,7 @@ class MainActivity : AppCompatActivity()
 					scrollToTop()
 					_searchResultsOpen = false // in case the dir was from search results
 				}
-				else if (isFileSupportedAndPlaylist(file.path))
+				else if (Helpers.isFileSupportedAndPlaylist(file.path))
 				{
 					// open playlist
 					updateDirectoryViewPlaylist(file)
@@ -210,7 +166,7 @@ class MainActivity : AppCompatActivity()
 				if (file.isDirectory)
 				{
 					// add all tracks in dir (not recursive)
-					val files = listDir(file, true)
+					val files = Helpers.listDir(file, true)
 
 					if (files != null)
 					{
@@ -224,10 +180,10 @@ class MainActivity : AppCompatActivity()
 					else
 						Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 				}
-				else if (isFileSupportedAndPlaylist(file.path))
+				else if (Helpers.isFileSupportedAndPlaylist(file.path))
 				{
 					// add all tracks in playlist (not recursive)
-					val files = listPlaylist(file)
+					val files = Helpers.listPlaylist(file)
 
 					if (files != null)
 					{
@@ -487,7 +443,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView(_lastDir)
+			updateDirectoryView(AppSettingsManager.lastDir)
 		}
 		else
 		{
@@ -501,7 +457,7 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView(_lastDir)
+				updateDirectoryView(AppSettingsManager.lastDir)
 			}
 			else
 			{
@@ -545,7 +501,7 @@ class MainActivity : AppCompatActivity()
 
 		toolbar_title.text = newPath.absolutePath
 
-		val list = listDir(newPath, false)
+		val list = Helpers.listDir(newPath, false)
 
 		if (list != null)
 		{
@@ -588,7 +544,7 @@ class MainActivity : AppCompatActivity()
 
 		toolbar_title.text = newPath.absolutePath
 
-		val list = listPlaylist(newPath)
+		val list = Helpers.listPlaylist(newPath)
 
 		if (list != null)
 		{
@@ -678,7 +634,7 @@ class MainActivity : AppCompatActivity()
 
 					val results = dir
 						.listFiles{file ->
-							(file.isDirectory || isFileSupported(file.name))
+							(file.isDirectory || Helpers.isFileSupported(file.name))
 									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 						}
 						?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
@@ -734,7 +690,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun showCurrTrackInfo()
 	{
-		showCurrTrackInfo(this)
+		TagExtractor.showCurrTrackInfo(this)
 	}
 
 	private fun gotoCurrentTrackDir()
@@ -777,12 +733,12 @@ class MainActivity : AppCompatActivity()
 			totalTimeSeconds
 		)
 
-		val savedTrack = File(App.savedTrackPath)
-		if (savedTrack.exists() && PlaybackQueue.getCurrentTrackPath() == App.savedTrackPath)
+		val savedTrack = File(AppSettingsManager.savedTrackPath)
+		if (savedTrack.exists() && PlaybackQueue.getCurrentTrackPath() == AppSettingsManager.savedTrackPath)
 		{
 			seekView.seek_loadbtn.visibility = View.VISIBLE
 			seekView.seek_loadbtn.setOnClickListener{
-				seekView.seek_seekbar.progress = App.savedTrackTime
+				seekView.seek_seekbar.progress = AppSettingsManager.savedTrackTime
 				_service?.seekAndPlay(seekView.seek_seekbar.progress)
 			}
 		}
@@ -892,25 +848,7 @@ class MainActivity : AppCompatActivity()
 
 		_actionSearch?.collapseActionView() // collapse searchbar thing
 
-		// save to shared prefs
-		with(PreferenceManager.getDefaultSharedPreferences(this).edit())
-		{
-			if(_bookmarksChanged || PlaybackQueue.hasChanged)
-			{
-				val gson = Gson()
-				if(_bookmarksChanged)
-					putString(App.PREFERENCE_BOOKMARKS, gson.toJson(_bookmarks))
-
-				if(PlaybackQueue.hasChanged)
-				{
-					putString(App.PREFERENCE_QUEUE, gson.toJson(PlaybackQueue.queue))
-					PlaybackQueue.hasChanged = false
-				}
-			}
-			putString(App.PREFERENCE_LASTDIR, _currentExplorerPath?.absolutePath) // _currentDir is null -> preference is going to get deleted - no big deal
-			putInt(App.PREFERENCE_CURRENTTRACK, PlaybackQueue.currentIdx)
-			apply()
-		}
+		AppSettingsManager.saveToPrefs(this, _bookmarksChanged, _currentExplorerPath?.absolutePath, _bookmarks)
 
 		super.onPause()
 	}

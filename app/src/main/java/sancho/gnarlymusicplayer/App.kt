@@ -12,17 +12,8 @@ class App: Application()
 		var mediaPlaybackServiceStarted: Boolean = false
 		var serviceBound: Boolean = false
 
-		var savedTrackPath: String = ""
-		var savedTrackTime: Int = 0
-
-		var volumeInappEnabled: Boolean = false
-		var volumeStepsTotal: Int = 30
-		var volumeStepIdx: Int = 15
-		var volumeSystemSet: Boolean = false
-		var volumeSystemLevel: Int = 7
-
 		// needs to be global because is used in service and in settings activity
-		// let's set it to error when session doesn't exist, shall we?
+		// when session doesn't exist set it to error value
 		var audioSessionId: Int = AudioManager.ERROR
 
 		const val REQUEST_READ_STORAGE = 42
@@ -32,17 +23,6 @@ class App: Application()
 
 		const val EXPLORER_NORMAL_ITEM = 0
 		const val EXPLORER_GROUP_ITEM = 1
-
-		const val PREFERENCE_BOOKMARKS = "sancho.gnarlymusicplayer.preference.bookmarks"
-		const val PREFERENCE_QUEUE = "sancho.gnarlymusicplayer.preference.queue"
-		const val PREFERENCE_LASTDIR = "sancho.gnarlymusicplayer.preference.lastdir"
-		const val PREFERENCE_CURRENTTRACK = "sancho.gnarlymusicplayer.preference.currenttrack"
-		const val PREFERENCE_SAVEDTRACK_PATH = "sancho.gnarlymusicplayer.preference.savedtrack.path"
-		const val PREFERENCE_SAVEDTRACK_TIME = "sancho.gnarlymusicplayer.preference.savedtrack.time"
-		const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
-		const val PREFERENCE_VOLUME_SYSTEM_TO_SET = "sancho.gnarlymusicplayer.preference.volume.setsystem"
-
-		const val DEFAULT_ACCENTCOLOR = "lime"
 
 		const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 
@@ -58,43 +38,6 @@ class App: Application()
 		const val NOTIFICATION_ID = 420
 
 		const val MIN_TRACK_TIME_S_TO_SAVE = 30
-
-		// from https://developer.android.com/guide/topics/media/media-formats
-		val SUPPORTED_AUDIO_EXTENSIONS = arrayOf(
-			"3gp",
-			"mp4",
-			"m4a",
-			"aac",
-			"ts",
-			"amr",
-			"flac",
-			"gsm",
-			"mid",
-			"xmf",
-			"mxmf",
-			"rtttl",
-			"rtx",
-			"ota",
-			"imy",
-			"mp3",
-			"mkv",
-			"wav",
-			"ogg"
-		)
-
-		val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
-			"m3u",
-			"m3u8"
-		)
-
-		val SUPPORTED_EXTENSIONS = SUPPORTED_PLAYLIST_EXTENSIONS + SUPPORTED_AUDIO_EXTENSIONS
-
-		val ALBUM_ART_FILENAMES = arrayOf(
-			"Folder.png",
-			"Folder.jpg",
-			"Folder.jpeg",
-			"Folder.jfif"
-		)
 
 		val explorerViewFilesAndDirsComparator = Comparator<ExplorerViewItem>{ a, b ->
 			when

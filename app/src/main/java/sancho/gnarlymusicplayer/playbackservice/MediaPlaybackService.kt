@@ -16,15 +16,9 @@ import android.widget.Toast
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
-import androidx.preference.PreferenceManager
-import com.google.gson.Gson
-import sancho.gnarlymusicplayer.App
-import sancho.gnarlymusicplayer.PlaybackQueue
-import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.models.Track
-import sancho.gnarlymusicplayer.setTrackMeta
 import java.io.IOException
-import java.lang.IllegalStateException
 
 class MediaPlaybackService : Service()
 {
@@ -136,17 +130,17 @@ class MediaPlaybackService : Service()
 			// first service call
 
 			// set media volume
-			if (App.volumeSystemSet)
+			if (AppSettingsManager.volumeSystemSet)
 			{
 				val max = _audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-				if (App.volumeSystemLevel > max) App.volumeSystemLevel = max
+				if (AppSettingsManager.volumeSystemLevel > max) AppSettingsManager.volumeSystemLevel = max
 
-				_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, App.volumeSystemLevel, 0)
+				_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, AppSettingsManager.volumeSystemLevel, 0)
 			}
 
 			try
 			{
-				setTrackMeta(_track)
+				TagExtractor.setTrackMeta(_track)
 				_player.setDataSource(_track.path)
 				_player.prepare()
 				_sessionCallback.onPlay()
@@ -164,8 +158,8 @@ class MediaPlaybackService : Service()
 				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
 			}
 
-			if (App.volumeInappEnabled)
-				_player.setVolume(App.volumeStepIdx)
+			if (AppSettingsManager.volumeInappEnabled)
+				_player.setVolume(AppSettingsManager.volumeStepIdx)
 
 			startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
 
@@ -292,7 +286,7 @@ class MediaPlaybackService : Service()
 		{
 			if (PlaybackQueue.trackSelected())
 			{
-				setTrackMeta(_track)
+				TagExtractor.setTrackMeta(_track)
 				val wasPlaying = _player.isPlaying
 				_player.reset()
 				_player.setDataSource(_track.path)
@@ -347,8 +341,8 @@ class MediaPlaybackService : Service()
 	{
 		val currTime = getCurrentTime()
 		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE || getTotalTime() - currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
-		App.savedTrackPath = _track.path
-		App.savedTrackTime = currTime
+		AppSettingsManager.savedTrackPath = _track.path
+		AppSettingsManager.savedTrackTime = currTime
 	}
 
 	fun registerNoisyReceiver()
@@ -384,28 +378,7 @@ class MediaPlaybackService : Service()
 
 		_mediaSession.release()
 
-		// SAVE MEEEEEEE (can't wake up)
-		val editor = PreferenceManager.getDefaultSharedPreferences(this).edit()
-		if (saveTrack)
-		{
-			// not needed when all tracks have been cleared
-			editor.putInt(App.PREFERENCE_CURRENTTRACK, PlaybackQueue.currentIdx)
-			editor.putString(App.PREFERENCE_SAVEDTRACK_PATH, App.savedTrackPath)
-			editor.putInt(App.PREFERENCE_SAVEDTRACK_TIME, App.savedTrackTime)
-		}
-
-		// save last volume setting
-		if (App.volumeInappEnabled)
-			editor.putInt(App.PREFERENCE_VOLUME_STEP_IDX, App.volumeStepIdx)
-
-		if(PlaybackQueue.hasChanged)
-		{
-			val gson = Gson()
-			editor.putString(App.PREFERENCE_QUEUE, gson.toJson(PlaybackQueue.queue))
-			PlaybackQueue.hasChanged = false
-		}
-
-		editor.apply()
+		AppSettingsManager.saveToPrefs(this, saveTrack)
 
 		if (App.audioSessionId != AudioManager.ERROR)
 		{
