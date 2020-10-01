@@ -868,14 +868,15 @@ class MainActivity : AppCompatActivity()
 	{
 		if (!App.serviceBound)
 		{
-			bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
-			App.serviceBound = true
+			val success = bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
+			if (success)
+				App.serviceBound = true
 		}
 	}
 
 	private fun unbindService()
 	{
-		if(App.serviceBound && App.mediaPlaybackServiceStarted && _service != null)
+		if(App.serviceBound)
 		{
 			unbindService(_serviceConn)
 			_service = null
