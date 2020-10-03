@@ -147,7 +147,7 @@ class MediaPlaybackService : Service()
 			if (AppSettingsManager.volumeInappEnabled)
 				_player.setVolume(AppSettingsManager.volumeStepIdx)
 
-			startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
+			startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(true, _track)) // on start show playing icon
 
 			App.mediaPlaybackServiceStarted = true
 
