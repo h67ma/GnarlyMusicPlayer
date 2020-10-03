@@ -16,6 +16,10 @@ import android.widget.Toast
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.models.Track
 import java.io.IOException
@@ -33,6 +37,8 @@ class MediaPlaybackService : Service()
 	private lateinit var _audioManager: AudioManager
 	private lateinit var _mediaSessionManager: MediaSessionManager
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+
+	private var _setTrackJob: Job? = null
 
 	private val _noisyAudioReceiver = object : BroadcastReceiver()
 	{
@@ -138,32 +144,19 @@ class MediaPlaybackService : Service()
 				_audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, AppSettingsManager.volumeSystemLevel, 0)
 			}
 
-			try
-			{
-				TagExtractor.setTrackMeta(_track)
-				_player.setDataSource(_track.path)
-				_player.prepare()
-				_sessionCallback.onPlay()
-			}
-			catch (ex: IOException)
-			{
-				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
-			}
-			catch (ex: IllegalArgumentException)
-			{
-				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
-			}
-			catch (ex: IllegalStateException)
-			{
-				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
-			}
-
 			if (AppSettingsManager.volumeInappEnabled)
 				_player.setVolume(AppSettingsManager.volumeStepIdx)
 
 			startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(_player.isPlaying, _track))
 
 			App.mediaPlaybackServiceStarted = true
+
+			GlobalScope.launch(Dispatchers.IO) {
+				setTrackJob()
+			}.invokeOnCompletion {
+				_sessionCallback.onPlay()
+				_notificationMaker.updateNotification(_player.isPlaying, _track)
+			}
 		}
 		else
 		{
@@ -280,35 +273,55 @@ class MediaPlaybackService : Service()
 		setTrack(false)
 	}
 
-	fun setTrack(forcePlay: Boolean)
+	private fun setTrackJob()
 	{
+		var error = false
 		try
 		{
 			if (PlaybackQueue.trackSelected())
 			{
 				TagExtractor.setTrackMeta(_track)
-				val wasPlaying = _player.isPlaying
 				_player.reset()
 				_player.setDataSource(_track.path)
 				_player.prepare()
-				if (forcePlay || wasPlaying) _sessionCallback.onPlay()
-
-				_notificationMaker.updateNotification(_player.isPlaying, _track)
 			}
 			else
-				Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+				error = true
 		}
-		catch(ex: IOException)
+		catch(_: IOException)
 		{
-			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			error = true
 		}
-		catch (ex: IllegalArgumentException)
+		catch (_: IllegalArgumentException)
 		{
-			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			error = true
 		}
-		catch (ex: IllegalStateException)
+		catch (_: IllegalStateException)
 		{
-			Toast.makeText(this, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			error = true
+		}
+
+		if (error) // this is so bad
+		{
+			GlobalScope.launch(Dispatchers.Main) {
+				Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+			}
+		}
+	}
+
+	fun setTrack(forcePlay: Boolean)
+	{
+		_setTrackJob?.cancel() // previous job instance might be running
+
+		val wasPlaying = _player.isPlaying
+
+		_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
+			setTrackJob()
+		}
+
+		_setTrackJob?.invokeOnCompletion {
+			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
+			_notificationMaker.updateNotification(_player.isPlaying, _track)
 		}
 	}
 
