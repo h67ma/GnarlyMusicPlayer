@@ -7,10 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
-import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.Helpers
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
+
+private const val EXPLORER_NORMAL_ITEM = 0
+private const val EXPLORER_GROUP_ITEM = 1
 
 class ExplorerAdapter(
 	private val context: Context,
@@ -29,7 +31,7 @@ class ExplorerAdapter(
 	{
 		return when (viewType)
 		{
-			App.EXPLORER_NORMAL_ITEM -> FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_item, parent, false))
+			EXPLORER_NORMAL_ITEM -> FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_item, parent, false))
 			else -> FileHolder(LayoutInflater.from(context).inflate(R.layout.explorer_group_item, parent, false))
 		}
 
@@ -68,8 +70,8 @@ class ExplorerAdapter(
 	override fun getItemViewType(pos: Int): Int
 	{
 		if (files[pos].isHeader)
-			return App.EXPLORER_GROUP_ITEM
+			return EXPLORER_GROUP_ITEM
 
-		return App.EXPLORER_NORMAL_ITEM
+		return EXPLORER_NORMAL_ITEM
 	}
 }

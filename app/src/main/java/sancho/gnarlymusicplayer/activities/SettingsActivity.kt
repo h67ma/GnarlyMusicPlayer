@@ -10,11 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
-import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.playbackservice.ACTION_UPDATE_MAX_VOLUME
+
+private const val INTENT_LAUNCH_EQ = 1337
 
 class SettingsActivity : AppCompatActivity()
 {
@@ -65,12 +67,12 @@ class SettingsActivity : AppCompatActivity()
 				if (pm != null && eqIntent.resolveActivity(pm) != null)
 				{
 					// don't pass value if not set - eq app will do some magic and save settings for next time
-					if (App.audioSessionId != AudioManager.ERROR)
-						eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+					if (MediaPlaybackService.audioSessionId != AudioManager.ERROR)
+						eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MediaPlaybackService.audioSessionId)
 
 					eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context?.packageName)
 					eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-					startActivityForResult(eqIntent, App.INTENT_LAUNCH_EQ)
+					startActivityForResult(eqIntent, INTENT_LAUNCH_EQ)
 				}
 				else
 					Toast.makeText(context, getString(R.string.no_eq_found), Toast.LENGTH_SHORT).show()
@@ -139,10 +141,10 @@ class SettingsActivity : AppCompatActivity()
 
 		private fun updateAudioService()
 		{
-			if (App.mediaPlaybackServiceStarted)
+			if (MediaPlaybackService.mediaPlaybackServiceStarted)
 			{
 				val intent = Intent(context, MediaPlaybackService::class.java)
-				intent.action = App.ACTION_UPDATE_MAX_VOLUME
+				intent.action = ACTION_UPDATE_MAX_VOLUME
 				context?.startService(intent)
 			}
 		}

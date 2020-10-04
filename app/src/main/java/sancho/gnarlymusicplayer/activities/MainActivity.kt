@@ -32,10 +32,15 @@ import sancho.gnarlymusicplayer.models.ExplorerHeader
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.QueueItem
+import sancho.gnarlymusicplayer.playbackservice.ACTION_START_PLAYBACK_SERVICE
 import sancho.gnarlymusicplayer.playbackservice.BoundServiceListeners
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import java.io.File
 import java.util.*
+
+private const val REQUEST_READ_STORAGE = 42
+private const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
+private const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 
 class MainActivity : AppCompatActivity()
 {
@@ -71,7 +76,7 @@ class MainActivity : AppCompatActivity()
 		setTheme(AppSettingsManager.getStyleFromPreference())
 
 		if(savedInstanceState != null)
-			_lastSelectedTrack = savedInstanceState.getInt(App.BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
+			_lastSelectedTrack = savedInstanceState.getInt(BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
 
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
@@ -97,7 +102,7 @@ class MainActivity : AppCompatActivity()
 
 		_queueAdapter.notifyDataSetChanged() // in case service modified queue and we didn't go through onCreate() (e.g. screen off/on)
 
-		if(App.mediaPlaybackServiceStarted)
+		if(MediaPlaybackService.mediaPlaybackServiceStarted)
 			bindService()
 
 		if (PlaybackQueue.currentIdx != _lastSelectedTrack)
@@ -112,14 +117,14 @@ class MainActivity : AppCompatActivity()
 	override fun onSaveInstanceState(outState: Bundle)
 	{
 		super.onSaveInstanceState(outState)
-		outState.putInt(App.BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
+		outState.putInt(BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
 	}
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
 	{
 		super.onActivityResult(requestCode, resultCode, data)
 
-		if (requestCode == App.INTENT_LAUNCH_FOR_RESULT_SETTINGS)
+		if (requestCode == INTENT_LAUNCH_FOR_RESULT_SETTINGS)
 			recreate() // must call onCreate after changing theme
 	}
 
@@ -330,14 +335,14 @@ class MainActivity : AppCompatActivity()
 				if (PlaybackQueue.removeAt(removedPos))
 				{
 					// no other track available, stop service
-					if (App.mediaPlaybackServiceStarted && _service != null)
+					if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
 						_service?.end(false)
 				}
 				else if (removedCurrent)
 				{
 					// we've removed currently selected track -> select next track and notify service
 
-					if (App.mediaPlaybackServiceStarted && _service != null)
+					if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
 						_service?.setTrack(false)
 
 					_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx)
@@ -368,7 +373,7 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
-		if (App.mediaPlaybackServiceStarted && _service != null)
+		if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
 			_service?.saveTrackPosition()
 
 		val oldPos = PlaybackQueue.currentIdx
@@ -376,10 +381,10 @@ class MainActivity : AppCompatActivity()
 		PlaybackQueue.currentIdx = newPosition
 		_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx)
 
-		if (!App.mediaPlaybackServiceStarted || _service == null)
+		if (!MediaPlaybackService.mediaPlaybackServiceStarted || _service == null)
 		{
 			val intent = Intent(this, MediaPlaybackService::class.java)
-			intent.action = App.ACTION_START_PLAYBACK_SERVICE
+			intent.action = ACTION_START_PLAYBACK_SERVICE
 			startService(intent)
 
 			bindService()
@@ -450,13 +455,13 @@ class MainActivity : AppCompatActivity()
 		}
 		else
 		{
-			requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), App.REQUEST_READ_STORAGE)
+			requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_READ_STORAGE)
 		}
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
 	{
-		if(requestCode == App.REQUEST_READ_STORAGE)
+		if(requestCode == REQUEST_READ_STORAGE)
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
@@ -713,7 +718,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun showSeekDialog()
 	{
-		if (!App.mediaPlaybackServiceStarted || _service == null)
+		if (!MediaPlaybackService.mediaPlaybackServiceStarted || _service == null)
 		{
 			Toast.makeText(this, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
 			return
@@ -762,7 +767,7 @@ class MainActivity : AppCompatActivity()
 
 			override fun onStopTrackingTouch(seekbar: SeekBar?)
 			{
-				if (App.mediaPlaybackServiceStarted && _service != null)
+				if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
 				{
 					_service?.seekAndPlay(seekView.seek_seekbar.progress)
 				}
@@ -795,7 +800,7 @@ class MainActivity : AppCompatActivity()
 		if (PlaybackQueue.size > 0)
 		{
 			// gotta stop service before removing all
-			if (App.mediaPlaybackServiceStarted && _service != null)
+			if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
 				_service?.end(false)
 
 			val clearedCnt = PlaybackQueue.removeAll()
@@ -818,28 +823,28 @@ class MainActivity : AppCompatActivity()
 
 	private fun launchSettings()
 	{
-		startActivityForResult(Intent(this, SettingsActivity::class.java), App.INTENT_LAUNCH_FOR_RESULT_SETTINGS)
+		startActivityForResult(Intent(this, SettingsActivity::class.java), INTENT_LAUNCH_FOR_RESULT_SETTINGS)
 	}
 
 	//endregion
 
 	private fun bindService()
 	{
-		if (!App.serviceBound)
+		if (!MediaPlaybackService.serviceBound)
 		{
 			val success = bindService(Intent(this, MediaPlaybackService::class.java), _serviceConn, Context.BIND_AUTO_CREATE)
 			if (success)
-				App.serviceBound = true
+				MediaPlaybackService.serviceBound = true
 		}
 	}
 
 	private fun unbindService()
 	{
-		if(App.serviceBound)
+		if(MediaPlaybackService.serviceBound)
 		{
 			unbindService(_serviceConn)
 			_service = null
-			App.serviceBound = false
+			MediaPlaybackService.serviceBound = false
 		}
 	}
 

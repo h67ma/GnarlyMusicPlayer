@@ -24,8 +24,27 @@ import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.models.Track
 import java.io.IOException
 
+private const val MIN_TRACK_TIME_S_TO_SAVE = 30
+const val ACTION_START_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.startplayback"
+const val ACTION_STOP_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.stopplayback"
+const val ACTION_REPLAY_TRACK = "sancho.gnarlymusicplayer.action.replaytrack"
+const val ACTION_PREV_TRACK = "sancho.gnarlymusicplayer.action.prevtrack"
+const val ACTION_PLAYPAUSE = "sancho.gnarlymusicplayer.action.playpause"
+const val ACTION_NEXT_TRACK = "sancho.gnarlymusicplayer.action.nexttrack"
+const val ACTION_UPDATE_MAX_VOLUME = "sancho.gnarlymusicplayer.action.updatemaxvolume"
+
 class MediaPlaybackService : Service()
 {
+	companion object
+	{
+		var mediaPlaybackServiceStarted: Boolean = false
+		var serviceBound: Boolean = false
+
+		// needs to be global because is used in service and in settings activity
+		// when session doesn't exist set it to error value
+		var audioSessionId: Int = AudioManager.ERROR
+	}
+
 	private lateinit var _notificationMaker: MediaNotificationMaker
 
 	private lateinit var _player: AudioPlayer
@@ -117,13 +136,13 @@ class MediaPlaybackService : Service()
 	{
 		when (intent.action)
 		{
-			App.ACTION_START_PLAYBACK_SERVICE -> start()
-			App.ACTION_REPLAY_TRACK -> replay()
-			App.ACTION_PREV_TRACK -> _sessionCallback.onSkipToPrevious()
-			App.ACTION_PLAYPAUSE -> playPause()
-			App.ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
-			App.ACTION_STOP_PLAYBACK_SERVICE ->	_sessionCallback.onStop()
-			App.ACTION_UPDATE_MAX_VOLUME -> _player.setVolumeProvider()
+			ACTION_START_PLAYBACK_SERVICE -> start()
+			ACTION_REPLAY_TRACK -> replay()
+			ACTION_PREV_TRACK -> _sessionCallback.onSkipToPrevious()
+			ACTION_PLAYPAUSE -> playPause()
+			ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
+			ACTION_STOP_PLAYBACK_SERVICE ->	_sessionCallback.onStop()
+			ACTION_UPDATE_MAX_VOLUME -> _player.setVolumeProvider()
 		}
 
 		return START_STICKY
@@ -131,7 +150,7 @@ class MediaPlaybackService : Service()
 
 	private fun start()
 	{
-		if(!App.mediaPlaybackServiceStarted)
+		if(!mediaPlaybackServiceStarted)
 		{
 			// first service call
 
@@ -147,9 +166,9 @@ class MediaPlaybackService : Service()
 			if (AppSettingsManager.volumeInappEnabled)
 				_player.setVolume(AppSettingsManager.volumeStepIdx)
 
-			startForeground(App.NOTIFICATION_ID, _notificationMaker.makeNotification(true, _track)) // on start show playing icon
+			startForeground(NOTIFICATION_ID, _notificationMaker.makeNotification(true, _track)) // on start show playing icon
 
-			App.mediaPlaybackServiceStarted = true
+			mediaPlaybackServiceStarted = true
 
 			GlobalScope.launch(Dispatchers.IO) {
 				setTrackJob()
@@ -245,7 +264,7 @@ class MediaPlaybackService : Service()
 			if (PlaybackQueue.removeCurrent()) // remove takes care of idx change in case track was at the bottom of queue
 			{
 				end(false)
-				if(App.serviceBound)
+				if(serviceBound)
 					_binder.listeners?.onTrackChanged(oldPos, trackFinished)
 				return
 			}
@@ -253,7 +272,7 @@ class MediaPlaybackService : Service()
 		else
 			PlaybackQueue.setNextTrackIdx() // just calculate next track index
 
-		if(App.serviceBound)
+		if(serviceBound)
 			_binder.listeners?.onTrackChanged(oldPos, trackFinished)
 
 		setTrack(trackFinished)
@@ -267,7 +286,7 @@ class MediaPlaybackService : Service()
 
 		PlaybackQueue.setPrevTrackIdx()
 
-		if(App.serviceBound)
+		if(serviceBound)
 			_binder.listeners?.onTrackChanged(oldPos, false)
 
 		setTrack(false)
@@ -353,7 +372,7 @@ class MediaPlaybackService : Service()
 	fun saveTrackPosition()
 	{
 		val currTime = getCurrentTime()
-		if (currTime < App.MIN_TRACK_TIME_S_TO_SAVE || getTotalTime() - currTime < App.MIN_TRACK_TIME_S_TO_SAVE) return
+		if (currTime < MIN_TRACK_TIME_S_TO_SAVE || getTotalTime() - currTime < MIN_TRACK_TIME_S_TO_SAVE) return
 		AppSettingsManager.savedTrackPath = _track.path
 		AppSettingsManager.savedTrackTime = currTime
 	}
@@ -384,7 +403,7 @@ class MediaPlaybackService : Service()
 		unregisterNoisyReceiver()
 		_mediaSession.isActive = false
 
-		if(App.serviceBound)
+		if(serviceBound)
 			_binder.listeners?.onEnd()
 
 		saveTrackPosition()
@@ -393,21 +412,21 @@ class MediaPlaybackService : Service()
 
 		AppSettingsManager.saveToPrefs(this, saveTrack)
 
-		if (App.audioSessionId != AudioManager.ERROR)
+		if (audioSessionId != AudioManager.ERROR)
 		{
 			// send broadcast to equalizer thing to close audio session
 			val eqIntent = Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)
-			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, App.audioSessionId)
+			eqIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, audioSessionId)
 			eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
 			eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
 			sendBroadcast(eqIntent)
 		}
 
-		App.audioSessionId = AudioManager.ERROR
+		audioSessionId = AudioManager.ERROR
 		_player.reset()
 		_player.release()
 
-		App.mediaPlaybackServiceStarted = false
+		mediaPlaybackServiceStarted = false
 		stopForeground(true)
 		stopSelf()
 	}

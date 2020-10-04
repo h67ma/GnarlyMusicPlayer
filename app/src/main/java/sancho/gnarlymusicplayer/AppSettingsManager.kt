@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import sancho.gnarlymusicplayer.models.QueueItem
+import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import java.io.File
 
 object AppSettingsManager
@@ -95,7 +96,7 @@ object AppSettingsManager
 
 		// settings that playback service can change
 		// don't load from preferences if playback service is running - will overwrite its settings
-		if (!App.mediaPlaybackServiceStarted)
+		if (!MediaPlaybackService.mediaPlaybackServiceStarted)
 		{
 			PlaybackQueue.currentIdx = sharedPref.getInt(PREFERENCE_CURRENTTRACK, 0)
 			savedTrackPath = sharedPref.getString(PREFERENCE_SAVEDTRACK_PATH, "") ?: ""

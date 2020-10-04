@@ -12,10 +12,12 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.activities.MainActivity
 import sancho.gnarlymusicplayer.models.Track
+
+const val NOTIFICATION_ID = 420 // what else did you expect?
+private const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificationthing"
 
 class MediaNotificationMaker(private val _context: Context, private val _session: MediaSessionCompat)
 {
@@ -26,11 +28,11 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 	{
 		val pcontentIntent = PendingIntent.getActivity(_context, 0, Intent(_context, MainActivity::class.java), 0)
 
-		val replayIntent = makePendingIntent(App.ACTION_REPLAY_TRACK)
-		val prevIntent = makePendingIntent(App.ACTION_PREV_TRACK)
-		val playPauseIntent = makePendingIntent(App.ACTION_PLAYPAUSE)
-		val nextIntent = makePendingIntent(App.ACTION_NEXT_TRACK)
-		val closeIntent = makePendingIntent(App.ACTION_STOP_PLAYBACK_SERVICE)
+		val replayIntent = makePendingIntent(ACTION_REPLAY_TRACK)
+		val prevIntent = makePendingIntent(ACTION_PREV_TRACK)
+		val playPauseIntent = makePendingIntent(ACTION_PLAYPAUSE)
+		val nextIntent = makePendingIntent(ACTION_NEXT_TRACK)
+		val closeIntent = makePendingIntent(ACTION_STOP_PLAYBACK_SERVICE)
 
 		_playPauseAction = NotificationCompat.Action(R.drawable.pause, _context.getString(R.string.play_pause), playPauseIntent)
 
@@ -39,7 +41,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 			.setShowActionsInCompactView(2, 3, 4)
 			.setCancelButtonIntent(closeIntent)
 
-		_builder = NotificationCompat.Builder(_context, App.NOTIFICATION_CHANNEL_ID)
+		_builder = NotificationCompat.Builder(_context, NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
 			.setStyle(style)
@@ -77,7 +79,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 
 		with(NotificationManagerCompat.from(_context))
 		{
-			notify(App.NOTIFICATION_ID, _builder.build())
+			notify(NOTIFICATION_ID, _builder.build())
 		}
 	}
 
@@ -85,7 +87,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 	{
 		with(NotificationManagerCompat.from(_context))
 		{
-			notify(App.NOTIFICATION_ID, makeNotification(playing, track))
+			notify(NOTIFICATION_ID, makeNotification(playing, track))
 		}
 	}
 
@@ -107,7 +109,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 	@RequiresApi(Build.VERSION_CODES.O)
 	private fun createNotificationChannel()
 	{
-		val chan = NotificationChannel(App.NOTIFICATION_CHANNEL_ID, _context.getString(R.string.media_notification), NotificationManager.IMPORTANCE_LOW)
+		val chan = NotificationChannel(NOTIFICATION_CHANNEL_ID, _context.getString(R.string.media_notification), NotificationManager.IMPORTANCE_LOW)
 		chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 		val service = _context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		service.createNotificationChannel(chan)

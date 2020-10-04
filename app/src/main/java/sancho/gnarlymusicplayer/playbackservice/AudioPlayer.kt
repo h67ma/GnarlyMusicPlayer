@@ -8,7 +8,6 @@ import android.media.audiofx.AudioEffect
 import android.os.PowerManager
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.media.VolumeProviderCompat
-import sancho.gnarlymusicplayer.App
 import sancho.gnarlymusicplayer.AppSettingsManager
 import kotlin.math.log2
 
@@ -18,7 +17,7 @@ class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompa
 
 	init
 	{
-		App.audioSessionId = audioSessionId
+		MediaPlaybackService.audioSessionId = audioSessionId
 
 		if (audioSessionId != AudioManager.ERROR)
 		{
@@ -82,7 +81,7 @@ class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompa
 
 			setVolumeDivider()
 
-			if (App.mediaPlaybackServiceStarted)
+			if (MediaPlaybackService.mediaPlaybackServiceStarted)
 				setVolume(AppSettingsManager.volumeStepIdx) // player already initialized
 		}
 		else
@@ -90,7 +89,7 @@ class AudioPlayer(context: Context, private val _mediaSession: MediaSessionCompa
 			// normal volume control
 			_mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC) // removes remote volume thing
 
-			if (App.mediaPlaybackServiceStarted)
+			if (MediaPlaybackService.mediaPlaybackServiceStarted)
 				setMaxVolume() // player already initialized
 		}
 	}
