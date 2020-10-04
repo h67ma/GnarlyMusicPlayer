@@ -117,11 +117,30 @@ class MainActivity : AppCompatActivity()
 			recreate() // must call onCreate after changing theme
 	}
 
+	private fun setToolbarText(text: String)
+	{
+		toolbar_title.text = text
+	}
+
+	private fun setDirListLoading(loading: Boolean)
+	{
+		if (loading)
+		{
+			progress_horizontal.visibility = View.VISIBLE
+			library_list_view.visibility = View.INVISIBLE
+		}
+		else
+		{
+			progress_horizontal.visibility = View.INVISIBLE
+			library_list_view.visibility = View.VISIBLE
+		}
+	}
+
 	private fun setupFileList()
 	{
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
-		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::scrollToTop, ::playTrack)
+		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::playTrack, ::setToolbarText, ::setDirListLoading)
 		library_list_view.adapter = _explorerAdapter
 	}
 
@@ -140,7 +159,6 @@ class MainActivity : AppCompatActivity()
 			if (item.exists())
 			{
 				_explorerAdapter.updateDirectoryView(item)
-				scrollToTop()
 
 				drawer_layout.closeDrawer(GravityCompat.END)
 				_actionSearch?.collapseActionView() // collapse searchbar thing
@@ -202,7 +220,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener {
-			_explorerAdapter.updateDirectoryViewShowStorage()
+			_explorerAdapter.updateDirectoryView(null)
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 	}
@@ -361,6 +379,7 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
+	// call with null to scroll to top
 	private fun restoreListScrollPos(oldPath: String?)
 	{
 		if (oldPath != null)
@@ -370,12 +389,7 @@ class MainActivity : AppCompatActivity()
 			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 200)
 		}
 		else
-			scrollToTop()
-	}
-
-	private fun scrollToTop()
-	{
-		(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
 	}
 
 	//region MENU
@@ -476,7 +490,7 @@ class MainActivity : AppCompatActivity()
 
 		val dir = PlaybackQueue.getCurrentTrackDir()
 		if (dir != null)
-			_explorerAdapter.updateDirectoryViewDir(dir)
+			_explorerAdapter.updateDirectoryView(dir)
 		else
 			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 	}
@@ -635,14 +649,12 @@ class MainActivity : AppCompatActivity()
 		else if (_explorerAdapter.searchResultsOpen)
 		{
 			_explorerAdapter.updateDirectoryView(_explorerAdapter.currentExplorerPath)
-			scrollToTop()
 			_explorerAdapter.searchResultsOpen = false
 		}
 		else if (_explorerAdapter.currentExplorerPath != null)
 		{
 			val oldPath = _explorerAdapter.currentExplorerPath?.path
-			_explorerAdapter.updateDirectoryViewDir(_explorerAdapter.currentExplorerPath?.parentFile)
-			restoreListScrollPos(oldPath)
+			_explorerAdapter.updateDirectoryView(_explorerAdapter.currentExplorerPath?.parentFile, oldPath)
 		}
 		else
 			super.onBackPressed() // exit app

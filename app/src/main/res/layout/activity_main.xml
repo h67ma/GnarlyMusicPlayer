@@ -38,6 +38,15 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
+        <ProgressBar
+            android:id="@+id/progress_horizontal"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateTint="?android:colorAccent"
+            android:translationY="52dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -48,7 +57,8 @@
                 android:id="@+id/library_list_view"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:scrollbars="vertical"/>
+                android:scrollbars="vertical"
+                android:visibility="invisible"/>
 
         </LinearLayout>
 

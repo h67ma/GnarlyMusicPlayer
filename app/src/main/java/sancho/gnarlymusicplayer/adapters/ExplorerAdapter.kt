@@ -1,18 +1,20 @@
 package sancho.gnarlymusicplayer.adapters
 
 import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.FileSupportChecker
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.activities.MainActivity
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesAndDirsComparator
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
 import sancho.gnarlymusicplayer.comparators.FilesComparator
@@ -30,12 +32,16 @@ class ExplorerAdapter(
 	private val _context: Context,
 	private val _dirList: MutableList<ExplorerViewItem>,
 	private val _queueAdapter: QueueAdapter,
-	private val _scrollToTop: () -> Unit,
-	private val _playTrack: (Int) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
+	private val _restoreListScrollPos: (String?) -> Unit,
+	private val _playTrack: (Int) -> Unit,
+	private val _setToolbarText: (String) -> Unit,
+	private val _setDirListLoading: (Boolean) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	private val _mountedDevices: MutableList<ExplorerViewItem> = mutableListOf()
 	var currentExplorerPath: File? = null
 	var searchResultsOpen = false
+
+	private var _fileLoaderJob: Job? = null
 
 	init
 	{
@@ -123,19 +129,12 @@ class ExplorerAdapter(
 			return
 		}
 
-		if (file.isDirectory)
+		if (file.isDirectory || FileSupportChecker.isFileSupportedAndPlaylist(file.path))
 		{
-			// navigate to directory
-			updateDirectoryViewDir(file)
-			_scrollToTop()
+			// navigate to directory or open playlist
+			updateDirectoryView(file)
+			_restoreListScrollPos(null)
 			searchResultsOpen = false // in case the dir was from search results
-		}
-		else if (FileSupportChecker.isFileSupportedAndPlaylist(file.path))
-		{
-			// open playlist
-			updateDirectoryViewPlaylist(file)
-			_scrollToTop()
-			searchResultsOpen = false // in case the playlist was from search results
 		}
 		else
 		{
@@ -197,51 +196,62 @@ class ExplorerAdapter(
 
 	fun searchOpen(query: String, prevDirList: MutableList<ExplorerViewItem>)
 	{
+		_setDirListLoading(true)
+
 		if (!searchResultsOpen)
 		{
 			prevDirList.clear()
 			prevDirList.addAll(_dirList)
 		}
 
-		val searchResultList = mutableListOf<ExplorerViewItem>()
+		_fileLoaderJob?.cancel()
 
-		val queryButLower = query.toLowerCase(Locale.getDefault())
-
-		// add results from current dir
-		searchResultList.addAll(prevDirList
-			.filter { file ->
-				file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
-			}
-			.sortedWith(ExplorerViewFilesComparator())
-		)
-
-		// add results from first level dirs (grouped by subdir name)
-		for (elem in prevDirList.filter{file -> file.isDirectory}.sortedWith(ExplorerViewFilesComparator()))
+		_fileLoaderJob = GlobalScope.launch(Dispatchers.IO)
 		{
-			val dir = File(elem.path)
+			val searchResultList = mutableListOf<ExplorerViewItem>()
 
-			val results = dir
-				.listFiles{file ->
-					(file.isDirectory || FileSupportChecker.isFileSupported(file.name))
-							&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
+			val queryButLower = query.toLowerCase(Locale.getDefault())
+
+			// add results from current dir
+			searchResultList.addAll(prevDirList
+				.filter { file ->
+					file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
 				}
-				?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
-				?.sortedWith(ExplorerViewFilesComparator())
+				.sortedWith(ExplorerViewFilesComparator())
+			)
 
-			if (results?.isNotEmpty() == true)
+			// add results from first level dirs (grouped by subdir name)
+			for (elem in prevDirList.filter { file -> file.isDirectory }.sortedWith(ExplorerViewFilesComparator()))
 			{
-				// add subdir header
-				searchResultList.add(ExplorerHeader(elem.displayName))
+				val dir = File(elem.path)
 
-				// add results in this dir
-				searchResultList.addAll(results)
+				val results = dir
+					.listFiles { file ->
+						(file.isDirectory || FileSupportChecker.isFileSupported(file.name))
+								&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
+					}
+					?.map { file -> ExplorerItem(file.path, file.name, file.isDirectory) }
+					?.sortedWith(ExplorerViewFilesComparator())
+
+				if (results?.isNotEmpty() == true)
+				{
+					// add subdir header
+					searchResultList.add(ExplorerHeader(elem.displayName))
+
+					// add results in this dir
+					searchResultList.addAll(results)
+				}
+			}
+
+			GlobalScope.launch(Dispatchers.Main)
+			{
+				_dirList.clear()
+				_dirList.addAll(searchResultList)
+				notifyDataSetChanged()
+				searchResultsOpen = true
+				_setDirListLoading(false)
 			}
 		}
-
-		_dirList.clear()
-		_dirList.addAll(searchResultList)
-		notifyDataSetChanged()
-		searchResultsOpen = true
 	}
 
 	fun searchClose()
@@ -250,78 +260,60 @@ class ExplorerAdapter(
 		searchResultsOpen = false
 	}
 
-	fun updateDirectoryViewShowStorage()
-	{
-		currentExplorerPath = null
-		(_context as MainActivity).toolbar_title.text = _context.getString(R.string.storage_devices)
-		_dirList.clear()
-		_dirList.addAll(_mountedDevices)
-		notifyDataSetChanged()
-	}
-
-	fun updateDirectoryView(newPath: File?)
-	{
-		if(newPath == null || !newPath.exists())
-		{
-			updateDirectoryViewShowStorage()
-			return
-		}
-
-		if (newPath.isDirectory)
-			updateDirectoryViewDir(newPath)
-		else
-			updateDirectoryViewPlaylist(newPath)
-	}
-
-	fun updateDirectoryViewDir(newPath: File?)
+	fun updateDirectoryView(newPath: File?, oldPath: String? = null)
 	{
 		currentExplorerPath = newPath
+		_setDirListLoading(true)
+		_setToolbarText(if (newPath == null) _context.getString(R.string.storage_devices) else newPath.absolutePath)
 
-		if(newPath == null || !newPath.exists())
+		_fileLoaderJob?.cancel()
+
+		_fileLoaderJob = GlobalScope.launch(Dispatchers.IO)
 		{
-			updateDirectoryViewShowStorage()
-			return
+			val futureList: List<ExplorerViewItem>? =
+				if (newPath == null || !newPath.exists())
+					updateDirectoryViewShowStorage()
+				else if (newPath.isDirectory)
+					updateDirectoryViewDir(newPath)
+				else
+					updateDirectoryViewPlaylist(newPath)
+
+			GlobalScope.launch(Dispatchers.Main)
+			{
+				if (futureList != null)
+				{
+					_dirList.clear() // must modify recyclerview list on main thread
+					_dirList.addAll(futureList)
+					notifyDataSetChanged()
+					_restoreListScrollPos(oldPath)
+					_setDirListLoading(false)
+				}
+				else
+					Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+			}
 		}
+	}
 
-		(_context as MainActivity).toolbar_title.text = newPath.absolutePath
+	private fun updateDirectoryViewShowStorage(): MutableList<ExplorerViewItem>?
+	{
+		return _mountedDevices
+	}
 
+	private fun updateDirectoryViewDir(newPath: File): List<ExplorerViewItem>?
+	{
 		val list = listDir(newPath, false)
 
-		if (list != null)
-		{
-			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }.toMutableList()
-			viewList.sortWith(ExplorerViewFilesAndDirsComparator())
-			_dirList.clear()
-			_dirList.addAll(viewList)
-			notifyDataSetChanged()
-		}
-		else
-			Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+		val viewList = list?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }?.toMutableList()
+		viewList?.sortWith(ExplorerViewFilesAndDirsComparator())
+
+		return viewList
 	}
 
-	private fun updateDirectoryViewPlaylist(newPath: File?)
+	private fun updateDirectoryViewPlaylist(newPath: File): List<ExplorerViewItem>?
 	{
-		currentExplorerPath = newPath
-
-		if(newPath == null || !newPath.exists())
-		{
-			updateDirectoryViewShowStorage()
-			return
-		}
-
-		(_context as MainActivity).toolbar_title.text = newPath.absolutePath
-
 		val list = listPlaylist(newPath)
 
-		if (list != null)
-		{
-			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
-			_dirList.clear()
-			_dirList.addAll(viewList)
-			notifyDataSetChanged()
-		}
-		else
-			Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+		return list?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}?.toMutableList()
 	}
 
 	private fun listDir(path: File, onlyAudio: Boolean): MutableList<File>?
