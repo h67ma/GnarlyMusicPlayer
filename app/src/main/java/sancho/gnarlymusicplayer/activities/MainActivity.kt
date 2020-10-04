@@ -21,14 +21,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_seek.view.*
-import sancho.gnarlymusicplayer.*
+import sancho.gnarlymusicplayer.AppSettingsManager
+import sancho.gnarlymusicplayer.PlaybackQueue
+import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.TagExtractor
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
-import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesAndDirsComparator
-import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
-import sancho.gnarlymusicplayer.comparators.FilesComparator
-import sancho.gnarlymusicplayer.models.ExplorerHeader
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.QueueItem
@@ -36,7 +35,6 @@ import sancho.gnarlymusicplayer.playbackservice.ACTION_START_PLAYBACK_SERVICE
 import sancho.gnarlymusicplayer.playbackservice.BoundServiceListeners
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import java.io.File
-import java.util.*
 
 private const val REQUEST_READ_STORAGE = 42
 private const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
@@ -44,11 +42,8 @@ private const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.la
 
 class MainActivity : AppCompatActivity()
 {
-	private lateinit var _mountedDevices: MutableList<ExplorerViewItem>
-
 	private val _dirList = mutableListOf<ExplorerViewItem>()
 	private var _prevDirList = mutableListOf<ExplorerViewItem>() // store "real" dir listing, for re-searching ability. because _dirList contains search results
-	private var _currentExplorerPath: File? = null
 
 	private lateinit var _explorerAdapter: ExplorerAdapter
 
@@ -59,8 +54,6 @@ class MainActivity : AppCompatActivity()
 	private var _bookmarksChanged = false
 
 	private var _actionSearch: MenuItem? = null
-
-	private var _searchResultsOpen = false
 
 	private var _seekDialog: AlertDialog? = null
 
@@ -84,8 +77,6 @@ class MainActivity : AppCompatActivity()
 		title = ""
 
 		setupServiceConnection()
-
-		getStorageDevices() // prepare list with storage devices
 
 		setupBookmarks()
 
@@ -112,8 +103,6 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-
-
 	override fun onSaveInstanceState(outState: Bundle)
 	{
 		super.onSaveInstanceState(outState)
@@ -132,86 +121,7 @@ class MainActivity : AppCompatActivity()
 	{
 		library_list_view.layoutManager = LinearLayoutManager(this)
 
-		_explorerAdapter = ExplorerAdapter(this, _dirList,
-			{ item ->
-				val file = File(item.path)
-
-				if (!file.exists())
-				{
-					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
-					return@ExplorerAdapter
-				}
-
-				if (file.isDirectory)
-				{
-					// navigate to directory
-					updateDirectoryViewDir(file)
-					scrollToTop()
-					_searchResultsOpen = false // in case the dir was from search results
-				}
-				else if (Helpers.isFileSupportedAndPlaylist(file.path))
-				{
-					// open playlist
-					updateDirectoryViewPlaylist(file)
-					scrollToTop()
-					_searchResultsOpen = false // in case the playlist was from search results
-				}
-				else
-				{
-					// audio file
-					addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
-				}
-			},
-			{ item ->
-				val file = File(item.path)
-
-				if (!file.exists())
-				{
-					Toast.makeText(applicationContext, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
-					return@ExplorerAdapter
-				}
-
-				if (file.isDirectory)
-				{
-					// add all tracks in dir (not recursive)
-					val files = Helpers.listDir(file, true)
-
-					if (files != null)
-					{
-						files.sortWith(FilesComparator())
-						addToQueue(files.map { track ->
-							QueueItem(track.absolutePath, track.nameWithoutExtension)
-						})
-
-						Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
-					}
-					else
-						Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
-				}
-				else if (Helpers.isFileSupportedAndPlaylist(file.path))
-				{
-					// add all tracks in playlist (not recursive)
-					val files = Helpers.listPlaylist(file)
-
-					if (files != null)
-					{
-						addToQueue(files.map { track ->
-							QueueItem(track.absolutePath, track.nameWithoutExtension)
-						})
-
-						Toast.makeText(this, getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
-					}
-					else
-						Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
-				}
-				else
-				{
-					// audio file
-					addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
-					playTrack(PlaybackQueue.lastIdx)
-				}
-			}
-		)
+		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::scrollToTop, ::playTrack)
 		library_list_view.adapter = _explorerAdapter
 	}
 
@@ -220,7 +130,7 @@ class MainActivity : AppCompatActivity()
 		bookmark_list_view.layoutManager = LinearLayoutManager(this)
 		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 
-			if (bookmark.path == _currentExplorerPath?.absolutePath)
+			if (bookmark.path == _explorerAdapter.currentExplorerPath?.absolutePath)
 			{
 				drawer_layout.closeDrawer(GravityCompat.END)
 				return@BookmarksAdapter // already open
@@ -229,7 +139,7 @@ class MainActivity : AppCompatActivity()
 			val item = File(bookmark.path)
 			if (item.exists())
 			{
-				updateDirectoryView(item)
+				_explorerAdapter.updateDirectoryView(item)
 				scrollToTop()
 
 				drawer_layout.closeDrawer(GravityCompat.END)
@@ -271,8 +181,8 @@ class MainActivity : AppCompatActivity()
 		touchHelper.attachToRecyclerView(bookmark_list_view)
 
 		bookmark_add_btn.setOnClickListener {
-			val path = _currentExplorerPath?.absolutePath
-			val label = _currentExplorerPath?.name
+			val path = _explorerAdapter.currentExplorerPath?.absolutePath
+			val label = _explorerAdapter.currentExplorerPath?.name
 			if (path != null && label != null)
 			{
 				// check if bookmark already exists
@@ -292,7 +202,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		bookmark_root.setOnClickListener {
-			updateDirectoryViewShowStorage()
+			_explorerAdapter.updateDirectoryViewShowStorage()
 			drawer_layout.closeDrawer(GravityCompat.END)
 		}
 	}
@@ -351,18 +261,6 @@ class MainActivity : AppCompatActivity()
 		})
 		_queueAdapter.touchHelper = touchHelper
 		touchHelper.attachToRecyclerView(queue_list_view)
-	}
-
-	private fun addToQueue(queueItem: QueueItem)
-	{
-		PlaybackQueue.add(queueItem)
-		_queueAdapter.notifyItemInserted(PlaybackQueue.lastIdx)
-	}
-
-	private fun addToQueue(trackList: List<QueueItem>)
-	{
-		PlaybackQueue.add(trackList)
-		_queueAdapter.notifyItemRangeInserted(PlaybackQueue.size - trackList.size, trackList.size)
 	}
 
 	private fun playTrack(newPosition: Int)
@@ -436,22 +334,11 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	private fun getStorageDevices()
-	{
-		_mountedDevices = mutableListOf()
-		val externalStorageFiles = getExternalFilesDirs(null)
-		for(f in externalStorageFiles)
-		{
-			val device = f?.parentFile?.parentFile?.parentFile?.parentFile // srsl?
-			_mountedDevices.add(ExplorerItem(device?.path ?: "", device?.name ?: "", device?.isDirectory ?: false))
-		}
-	}
-
 	private fun requestReadPermishon()
 	{
 		if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
 		{
-			updateDirectoryView(AppSettingsManager.lastDir)
+			_explorerAdapter.updateDirectoryView(AppSettingsManager.lastDir)
 		}
 		else
 		{
@@ -465,62 +352,13 @@ class MainActivity : AppCompatActivity()
 		{
 			if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED))
 			{
-				updateDirectoryView(AppSettingsManager.lastDir)
+				_explorerAdapter.updateDirectoryView(AppSettingsManager.lastDir)
 			}
 			else
 			{
 				requestReadPermishon()
 			}
 		}
-	}
-
-	private fun updateDirectoryViewShowStorage()
-	{
-		_currentExplorerPath = null
-		toolbar_title.text = getString(R.string.storage_devices)
-		_dirList.clear()
-		_dirList.addAll(_mountedDevices)
-		_explorerAdapter.notifyDataSetChanged()
-	}
-
-	private fun updateDirectoryView(newPath: File?)
-	{
-		if(newPath == null || !newPath.exists())
-		{
-			updateDirectoryViewShowStorage()
-			return
-		}
-
-		if (newPath.isDirectory)
-			updateDirectoryViewDir(newPath)
-		else
-			updateDirectoryViewPlaylist(newPath)
-	}
-
-	private fun updateDirectoryViewDir(newPath: File?)
-	{
-		_currentExplorerPath = newPath
-
-		if(newPath == null || !newPath.exists())
-		{
-			updateDirectoryViewShowStorage()
-			return
-		}
-
-		toolbar_title.text = newPath.absolutePath
-
-		val list = Helpers.listDir(newPath, false)
-
-		if (list != null)
-		{
-			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
-			viewList.sortWith(ExplorerViewFilesAndDirsComparator())
-			_dirList.clear()
-			_dirList.addAll(viewList)
-			_explorerAdapter.notifyDataSetChanged()
-		}
-		else
-			Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 	}
 
 	private fun restoreListScrollPos(oldPath: String?)
@@ -538,31 +376,6 @@ class MainActivity : AppCompatActivity()
 	private fun scrollToTop()
 	{
 		(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
-	}
-
-	private fun updateDirectoryViewPlaylist(newPath: File?)
-	{
-		_currentExplorerPath = newPath
-
-		if(newPath == null || !newPath.exists())
-		{
-			updateDirectoryViewShowStorage()
-			return
-		}
-
-		toolbar_title.text = newPath.absolutePath
-
-		val list = Helpers.listPlaylist(newPath)
-
-		if (list != null)
-		{
-			val viewList = list.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}.toMutableList()
-			_dirList.clear()
-			_dirList.addAll(viewList)
-			_explorerAdapter.notifyDataSetChanged()
-		}
-		else
-			Toast.makeText(this, getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 	}
 
 	//region MENU
@@ -596,19 +409,16 @@ class MainActivity : AppCompatActivity()
 		_actionSearch?.setOnActionExpandListener(object: MenuItem.OnActionExpandListener
 		{
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
-			override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean
+			override fun onMenuItemActionCollapse(item: MenuItem?): Boolean
 			{
 				menuElementsToToggle.forEach{elem -> elem.isVisible = true}
-
-				updateDirectoryView(_currentExplorerPath)
-				_searchResultsOpen = false
+				_explorerAdapter.searchClose()
 				return true
 			}
 
-			override fun onMenuItemActionExpand(p0: MenuItem?): Boolean
+			override fun onMenuItemActionExpand(item: MenuItem?): Boolean
 			{
 				menuElementsToToggle.forEach{elem -> elem.isVisible = false}
-
 				return true
 			}
 		})
@@ -617,52 +427,7 @@ class MainActivity : AppCompatActivity()
 		{
 			override fun onQueryTextSubmit(query: String): Boolean
 			{
-				if (!_searchResultsOpen)
-				{
-					_prevDirList.clear()
-					_prevDirList.addAll(_dirList)
-				}
-
-				val searchResultList = mutableListOf<ExplorerViewItem>()
-
-				val queryButLower = query.toLowerCase(Locale.getDefault())
-
-				// add results from current dir
-				searchResultList.addAll(_prevDirList
-					.filter { file ->
-						file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
-					}
-					.sortedWith(ExplorerViewFilesComparator())
-				)
-
-				// add results from first level dirs (grouped by subdir name)
-				for (elem in _prevDirList.filter{file -> file.isDirectory}.sortedWith(ExplorerViewFilesComparator()))
-				{
-					val dir = File(elem.path)
-
-					val results = dir
-						.listFiles{file ->
-							(file.isDirectory || Helpers.isFileSupported(file.name))
-									&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
-						}
-						?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
-						?.sortedWith(ExplorerViewFilesComparator())
-
-					if (results?.isNotEmpty() == true)
-					{
-						// add subdir header
-						searchResultList.add(ExplorerHeader(elem.displayName))
-
-						// add results in this dir
-						searchResultList.addAll(results)
-					}
-				}
-
-				_dirList.clear()
-				_dirList.addAll(searchResultList)
-				_explorerAdapter.notifyDataSetChanged()
-				_searchResultsOpen = true
-
+				_explorerAdapter.searchOpen(query, _prevDirList)
 				return false // do "default action" (dunno what it is but it hides keyboard)
 			}
 
@@ -711,7 +476,7 @@ class MainActivity : AppCompatActivity()
 
 		val dir = PlaybackQueue.getCurrentTrackDir()
 		if (dir != null)
-			updateDirectoryViewDir(dir)
+			_explorerAdapter.updateDirectoryViewDir(dir)
 		else
 			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
 	}
@@ -856,7 +621,7 @@ class MainActivity : AppCompatActivity()
 
 		_actionSearch?.collapseActionView() // collapse searchbar thing
 
-		AppSettingsManager.saveToPrefs(this, _bookmarksChanged, _currentExplorerPath?.absolutePath, _bookmarks)
+		AppSettingsManager.saveToPrefs(this, _bookmarksChanged, _explorerAdapter.currentExplorerPath?.absolutePath, _bookmarks)
 
 		super.onPause()
 	}
@@ -867,16 +632,16 @@ class MainActivity : AppCompatActivity()
 			drawer_layout.closeDrawer(GravityCompat.START)
 		else if (drawer_layout.isDrawerOpen(GravityCompat.END))
 			drawer_layout.closeDrawer(GravityCompat.END)
-		else if (_searchResultsOpen)
+		else if (_explorerAdapter.searchResultsOpen)
 		{
-			updateDirectoryView(_currentExplorerPath)
+			_explorerAdapter.updateDirectoryView(_explorerAdapter.currentExplorerPath)
 			scrollToTop()
-			_searchResultsOpen = false
+			_explorerAdapter.searchResultsOpen = false
 		}
-		else if (_currentExplorerPath != null)
+		else if (_explorerAdapter.currentExplorerPath != null)
 		{
-			val oldPath = _currentExplorerPath?.path
-			updateDirectoryViewDir(_currentExplorerPath?.parentFile)
+			val oldPath = _explorerAdapter.currentExplorerPath?.path
+			_explorerAdapter.updateDirectoryViewDir(_explorerAdapter.currentExplorerPath?.parentFile)
 			restoreListScrollPos(oldPath)
 		}
 		else

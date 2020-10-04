@@ -1,7 +1,5 @@
 package sancho.gnarlymusicplayer
 
-import java.io.File
-
 object Helpers
 {
 	// from https://developer.android.com/guide/topics/media/media-formats
@@ -39,7 +37,7 @@ object Helpers
 		return isFileExtensionInArray(filename, SUPPORTED_EXTENSIONS)
 	}
 
-	private fun isFileSupportedAndAudio(filename: String): Boolean
+	fun isFileSupportedAndAudio(filename: String): Boolean
 	{
 		return isFileExtensionInArray(filename, SUPPORTED_AUDIO_EXTENSIONS)
 	}
@@ -52,26 +50,5 @@ object Helpers
 	private fun isFileExtensionInArray(filename: String, extensions: Array<String>): Boolean
 	{
 		return filename.lastIndexOf('.') > 0 && filename.substring(filename.lastIndexOf('.') + 1) in extensions
-	}
-
-	fun listDir(path: File, onlyAudio: Boolean): MutableList<File>?
-	{
-		return path.listFiles { file ->
-			(onlyAudio && !file.isDirectory && isFileSupportedAndAudio(file.name)) ||
-					(!onlyAudio && (file.isDirectory || isFileSupported(file.name)))
-		}?.toMutableList()
-	}
-
-	fun listPlaylist(path: File): MutableList<File>?
-	{
-		val list = mutableListOf<File>()
-
-		path.readLines().forEach {
-			val track = File(path.parent, it) // relative to playlist's directory
-			if (track.exists() && !track.isDirectory && isFileSupportedAndAudio(it))
-				list.add(track)
-		}
-
-		return list
 	}
 }
