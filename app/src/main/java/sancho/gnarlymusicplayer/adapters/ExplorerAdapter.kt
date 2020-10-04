@@ -9,7 +9,7 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
-import sancho.gnarlymusicplayer.Helpers
+import sancho.gnarlymusicplayer.FileSupportChecker
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.activities.MainActivity
@@ -78,7 +78,7 @@ class ExplorerAdapter(
 				val icon = when
 				{
 					file.isDirectory -> R.drawable.folder
-					Helpers.isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
+					FileSupportChecker.isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
 					else -> R.drawable.note
 				}
 
@@ -130,7 +130,7 @@ class ExplorerAdapter(
 			_scrollToTop()
 			searchResultsOpen = false // in case the dir was from search results
 		}
-		else if (Helpers.isFileSupportedAndPlaylist(file.path))
+		else if (FileSupportChecker.isFileSupportedAndPlaylist(file.path))
 		{
 			// open playlist
 			updateDirectoryViewPlaylist(file)
@@ -171,7 +171,7 @@ class ExplorerAdapter(
 			else
 				Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
 		}
-		else if (Helpers.isFileSupportedAndPlaylist(file.path))
+		else if (FileSupportChecker.isFileSupportedAndPlaylist(file.path))
 		{
 			// add all tracks in playlist (not recursive)
 			val files = listPlaylist(file)
@@ -222,7 +222,7 @@ class ExplorerAdapter(
 
 			val results = dir
 				.listFiles{file ->
-					(file.isDirectory || Helpers.isFileSupported(file.name))
+					(file.isDirectory || FileSupportChecker.isFileSupported(file.name))
 							&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
 				}
 				?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory) }
@@ -327,8 +327,8 @@ class ExplorerAdapter(
 	private fun listDir(path: File, onlyAudio: Boolean): MutableList<File>?
 	{
 		return path.listFiles { file ->
-			(onlyAudio && !file.isDirectory && Helpers.isFileSupportedAndAudio(file.name)) ||
-					(!onlyAudio && (file.isDirectory || Helpers.isFileSupported(file.name)))
+			(onlyAudio && !file.isDirectory && FileSupportChecker.isFileSupportedAndAudio(file.name)) ||
+					(!onlyAudio && (file.isDirectory || FileSupportChecker.isFileSupported(file.name)))
 		}?.toMutableList()
 	}
 
@@ -338,7 +338,7 @@ class ExplorerAdapter(
 
 		path.readLines().forEach {
 			val track = File(path.parent, it) // relative to playlist's directory
-			if (track.exists() && !track.isDirectory && Helpers.isFileSupportedAndAudio(it))
+			if (track.exists() && !track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
 				list.add(track)
 		}
 

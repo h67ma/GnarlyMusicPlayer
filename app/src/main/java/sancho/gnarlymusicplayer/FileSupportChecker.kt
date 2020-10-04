@@ -1,6 +1,6 @@
 package sancho.gnarlymusicplayer
 
-object Helpers
+object FileSupportChecker
 {
 	// from https://developer.android.com/guide/topics/media/media-formats
 	private val SUPPORTED_AUDIO_EXTENSIONS = arrayOf(

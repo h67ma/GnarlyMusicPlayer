@@ -82,7 +82,7 @@ object AppSettingsManager
 		}
 
 		val lastDirPref = File(sharedPref.getString(PREFERENCE_LASTDIR, "") ?: "")
-		if (lastDirPref.exists() && (lastDirPref.isDirectory || Helpers.isFileSupportedAndPlaylist(lastDirPref.absolutePath)))
+		if (lastDirPref.exists() && (lastDirPref.isDirectory || FileSupportChecker.isFileSupportedAndPlaylist(lastDirPref.absolutePath)))
 			lastDir = lastDirPref
 
 		accentColorKey = sharedPref.getString(context.getString(R.string.pref_accentcolor), DEFAULT_ACCENTCOLOR) ?: DEFAULT_ACCENTCOLOR
