@@ -38,20 +38,20 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <ProgressBar
-            android:id="@+id/progress_horizontal"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:indeterminateTint="?android:colorAccent"
-            android:translationY="52dp"/>
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context=".activities.MainActivity">
+
+            <ProgressBar
+                android:id="@+id/progress_horizontal"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:indeterminateTint="?android:textColorPrimary"
+                android:layout_marginTop="-6dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/library_list_view"
@@ -60,7 +60,7 @@
                 android:scrollbars="vertical"
                 android:visibility="invisible"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
