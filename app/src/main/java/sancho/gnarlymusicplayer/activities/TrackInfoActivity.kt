@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +22,9 @@ import wseemann.media.FFmpegMediaMetadataRetriever
 
 class TrackInfoActivity : AppCompatActivity()
 {
+	private lateinit var _trackPath: String
+	private var _raw = false
+
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		setTheme(AppSettingsManager.restoreAndGetStyleFromPrefs(this))
@@ -39,8 +44,48 @@ class TrackInfoActivity : AppCompatActivity()
 			return
 		}
 
+		_trackPath = trackPath
+
+		asyncGetTrackInfos(::getTrackInfos)
+	}
+
+	override fun onCreateOptionsMenu(menu: Menu): Boolean
+	{
+		if (!_raw) // just don't show menu when "raw" button was clicked
+			menuInflater.inflate(R.menu.track_details, menu)
+		return super.onCreateOptionsMenu(menu)
+	}
+
+	override fun onOptionsItemSelected(item: MenuItem): Boolean
+	{
+		when (item.itemId)
+		{
+			R.id.action_raw -> switchToRaw()
+			else -> return super.onOptionsItemSelected(item)
+		}
+		return true
+	}
+
+	private fun switchToRaw()
+	{
+		// hide "raw" button in navbar
+		title = "Track into (raw ffmpeg)"
+		_raw = true
+		invalidateOptionsMenu()
+
+		// clear table and show loading state (like on initial activity launch)
+		meta_layout.visibility = View.GONE
+		progress_circle.visibility = View.VISIBLE
+		table_main.removeAllViews()
+
+		// initiate raw track fetch
+		asyncGetTrackInfos(::getRawTrackInfos)
+	}
+
+	private fun asyncGetTrackInfos(f: () -> Pair<List<Pair<String, String>>, Bitmap?>?)
+	{
 		GlobalScope.launch(Dispatchers.IO) {
-			val meta = getTrackInfos(trackPath)
+			val meta = f()
 			GlobalScope.launch(Dispatchers.Main) {
 				if (meta == null)
 					Toast.makeText(applicationContext, getString(R.string.no_track), Toast.LENGTH_SHORT).show()
@@ -50,12 +95,42 @@ class TrackInfoActivity : AppCompatActivity()
 		}
 	}
 
-	private fun getTrackInfos(trackPath: String): Pair<List<Pair<String, String>>, Bitmap?>?
+	private fun getRawTrackInfos(): Pair<List<Pair<String, String>>, Bitmap?>?
 	{
 		val mediaInfo = FFmpegMediaMetadataRetriever()
 		try
 		{
-			mediaInfo.setDataSource(trackPath)
+			mediaInfo.setDataSource(_trackPath)
+		}
+		catch (_: RuntimeException) // invalid file
+		{
+			return null
+		}
+		catch (_: IllegalArgumentException) // invalid file path
+		{
+			return null
+		}
+
+		val metaDict = TagExtractor.lowercaseTagNames(mediaInfo.metadata.all)
+
+		val tagList = mutableListOf<Pair<String, String>>()
+
+		for (tag in metaDict)
+		{
+			tagList.add(Pair(tag.key, tag.value))
+		}
+
+		mediaInfo.release()
+
+		return Pair(tagList, null)
+	}
+
+	private fun getTrackInfos(): Pair<List<Pair<String, String>>, Bitmap?>?
+	{
+		val mediaInfo = FFmpegMediaMetadataRetriever()
+		try
+		{
+			mediaInfo.setDataSource(_trackPath)
 		}
 		catch (_: RuntimeException) // invalid file
 		{
@@ -84,7 +159,7 @@ class TrackInfoActivity : AppCompatActivity()
 			val lameMediaInfo = MediaMetadataRetriever()
 			try
 			{
-				lameMediaInfo.setDataSource(trackPath)
+				lameMediaInfo.setDataSource(_trackPath)
 			}
 			catch (_: RuntimeException) // invalid file
 			{
@@ -114,9 +189,9 @@ class TrackInfoActivity : AppCompatActivity()
 			}
 		}
 
-		tagList.add(Pair("Path", trackPath))
+		tagList.add(Pair("Path", _trackPath))
 
-		val cover = TagExtractor.getTrackBitmap(trackPath, mediaInfo)
+		val cover = TagExtractor.getTrackBitmap(_trackPath, mediaInfo)
 
 		if (mediaInfo.embeddedPicture != null)
 			tagList.add(Pair("Cover art source", "Tag"))
