@@ -2,6 +2,7 @@ package sancho.gnarlymusicplayer
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import sancho.gnarlymusicplayer.models.Track
 import wseemann.media.FFmpegMediaMetadataRetriever
 import java.io.File
@@ -9,7 +10,7 @@ import java.util.*
 
 object TagExtractor
 {
-	val NICE_TAG_NAMES = linkedMapOf(
+	val FFMPEG_TAGS = linkedMapOf(
 		"Title" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_TITLE),
 		"Artist" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_ARTIST),
 		"Album" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM),
@@ -21,10 +22,23 @@ object TagExtractor
 		"Total tracks" to listOf("totaltracks", "total tracks", "total_tracks"),
 		"Disc number" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DISC, "discnumber", "disc number", "disc_number"),
 		"Total discs" to listOf("totaldiscs", "total discs", "total_discs"),
-		"Duration" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION),
-		"Codec" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC, "audiocodec", "audio codec"),
 		"BPM" to listOf("bpm", "tpbm"),
-		"Comment" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMMENT)
+		"Comment" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMMENT),
+		"Duration" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION),
+		"Codec" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC)
+	)
+
+	val MMR_TAGS = linkedMapOf(
+		"Title" to MediaMetadataRetriever.METADATA_KEY_TITLE,
+		"Artist" to MediaMetadataRetriever.METADATA_KEY_ARTIST,
+		"Album" to MediaMetadataRetriever.METADATA_KEY_ALBUM,
+		"Date" to MediaMetadataRetriever.METADATA_KEY_DATE,
+		"Genre" to MediaMetadataRetriever.METADATA_KEY_GENRE,
+		"Album artist" to MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
+		"Composer" to MediaMetadataRetriever.METADATA_KEY_COMPOSER,
+		"Track number" to MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
+		"Total tracks" to MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS,
+		"Disc number" to MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER
 	)
 
 	private val ALBUM_ART_FILENAMES = arrayOf(
@@ -82,9 +96,38 @@ object TagExtractor
 
 		track.title = smartTagExtract(tagDict, "Title") ?: queueItem.name
 		track.artist = smartTagExtract(tagDict, "Artist") ?: ""
-		track.year = smartTagExtract(tagDict, "Date")?.toIntOrNull() // I won't accept some weird timestamps, only year
+		track.year = smartTagExtract(tagDict, "Date")?.toIntOrNull() // I won't accept some weird timestamps, only a year
 
 		track.cover = getTrackBitmap(queueItem.path, mediaInfo)
+
+		mediaInfo.release()
+
+		if (smartTagExtract(tagDict, "Codec") == "opus")
+		{
+			// workaround for opus :/ cover is ok, tags not
+
+			val lameMediaInfo = MediaMetadataRetriever()
+			try
+			{
+				lameMediaInfo.setDataSource(queueItem.path)
+			}
+			catch (_: RuntimeException) // invalid file
+			{
+				resetTrackMeta(track)
+				return
+			}
+			catch (_: IllegalArgumentException) // invalid file path
+			{
+				resetTrackMeta(track)
+				return
+			}
+
+			track.title = lameMediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
+			track.artist = lameMediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
+			track.year = lameMediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)?.toIntOrNull() // I won't accept some weird timestamps, only a year
+
+			lameMediaInfo.release()
+		}
 	}
 
 	fun lowercaseTagNames(tagDict: Map<String, String>): MutableMap<String, String>
@@ -99,9 +142,9 @@ object TagExtractor
 
 	fun smartTagExtract(tagDict: Map<String, String>, niceTagName: String): String?
 	{
-		if (niceTagName in NICE_TAG_NAMES)
+		if (niceTagName in FFMPEG_TAGS)
 		{
-			for (possibleTagName in NICE_TAG_NAMES[niceTagName]!!) // first time when I had to use !!. I don't know what is your problem kotlin.
+			for (possibleTagName in FFMPEG_TAGS[niceTagName]!!) // first time when I had to use !!. I don't know what is your problem kotlin.
 			{
 				if (possibleTagName in tagDict)
 					return tagDict[possibleTagName]

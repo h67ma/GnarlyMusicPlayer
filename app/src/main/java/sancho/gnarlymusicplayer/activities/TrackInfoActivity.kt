@@ -1,6 +1,7 @@
 package sancho.gnarlymusicplayer.activities
 
 import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -76,7 +77,35 @@ class TrackInfoActivity : AppCompatActivity()
 
 		val tagList = mutableListOf<Pair<String, String>>()
 
-		for (tag in TagExtractor.NICE_TAG_NAMES)
+		if (TagExtractor.smartTagExtract(metaDict, "Codec") == "opus")
+		{
+			// workaround for opus :/ cover is ok, tags not
+
+			val lameMediaInfo = MediaMetadataRetriever()
+			try
+			{
+				lameMediaInfo.setDataSource(trackPath)
+			}
+			catch (_: RuntimeException) // invalid file
+			{
+				return null
+			}
+			catch (_: IllegalArgumentException) // invalid file path
+			{
+				return null
+			}
+
+			for (tag in TagExtractor.MMR_TAGS)
+			{
+				val tagValue = lameMediaInfo.extractMetadata(tag.value)
+				if (tagValue != null)
+					tagList.add(Pair(tag.key, tagValue))
+			}
+
+			lameMediaInfo.release()
+		}
+
+		for (tag in TagExtractor.FFMPEG_TAGS)
 		{
 			val value = TagExtractor.smartTagExtract(metaDict, tag.key)
 			if (value != null)
@@ -85,7 +114,14 @@ class TrackInfoActivity : AppCompatActivity()
 			}
 		}
 
+		tagList.add(Pair("Path", trackPath))
+
 		val cover = TagExtractor.getTrackBitmap(trackPath, mediaInfo)
+
+		if (mediaInfo.embeddedPicture != null)
+			tagList.add(Pair("Cover art source", "Tag"))
+		else if (cover != null)
+			tagList.add(Pair("Cover art source", "Directory"))
 
 		mediaInfo.release()
 
