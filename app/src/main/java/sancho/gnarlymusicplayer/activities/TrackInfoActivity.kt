@@ -71,7 +71,7 @@ class TrackInfoActivity : AppCompatActivity()
 		if (durationMS != null)
 		{
 			val durationS = durationMS.toInt() / 1000
-			metaDict[FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION] = "${(durationS / 60)}:${(durationS % 60)}"
+			metaDict[FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION] = "%d:%02d".format(durationS / 60, durationS % 60)
 		}
 
 		val tagList = mutableListOf<Pair<String, String>>()
