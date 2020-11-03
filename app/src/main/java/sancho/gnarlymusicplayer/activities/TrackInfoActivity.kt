@@ -94,7 +94,10 @@ class TrackInfoActivity : AppCompatActivity()
 
 	private fun updateTableView(metaDict: List<Pair<String, String>>, cover: Bitmap?)
 	{
-		img_cover.setImageBitmap(cover)
+		if (cover != null)
+			img_cover.setImageBitmap(cover)
+		else
+			img_cover.visibility = View.GONE
 
 		for (row in metaDict)
 		{
