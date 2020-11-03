@@ -24,7 +24,6 @@ import kotlinx.android.synthetic.main.dialog_seek.view.*
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.TagExtractor
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
@@ -39,6 +38,7 @@ import java.io.File
 private const val REQUEST_READ_STORAGE = 42
 private const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
 private const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
+const val EXTRA_TRACK_DETAIL_PATH = "sancho.gnarlymusicplayer.extra.trackdetailpath"
 
 class MainActivity : AppCompatActivity()
 {
@@ -477,7 +477,15 @@ class MainActivity : AppCompatActivity()
 
 	private fun showCurrTrackInfo()
 	{
-		TagExtractor.showCurrTrackInfo(this)
+		if (!PlaybackQueue.trackSelected())
+		{
+			Toast.makeText(this, getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
+			return
+		}
+
+		val intent = Intent(this, TrackInfoActivity::class.java)
+		intent.putExtra(EXTRA_TRACK_DETAIL_PATH, PlaybackQueue.getCurrentTrackPath())
+		startActivity(intent)
 	}
 
 	private fun gotoCurrentTrackDir()

@@ -1,56 +1,42 @@
 package sancho.gnarlymusicplayer
 
-import android.app.AlertDialog
-import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
-import android.widget.Toast
 import sancho.gnarlymusicplayer.models.Track
+import wseemann.media.FFmpegMediaMetadataRetriever
 import java.io.File
-import java.lang.RuntimeException
+import java.util.*
 
 object TagExtractor
 {
+	val NICE_TAG_NAMES = linkedMapOf(
+		"Title" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_TITLE),
+		"Artist" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_ARTIST),
+		"Album" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM),
+		"Date" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DATE),
+		"Genre" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_GENRE),
+		"Album artist" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM_ARTIST, "albumartist", "album artist"),
+		"Composer" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMPOSER),
+		"Track number" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_TRACK, "tracknumber", "track number", "track_number"),
+		"Total tracks" to listOf("totaltracks", "total tracks", "total_tracks"),
+		"Disc number" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DISC, "discnumber", "disc number", "disc_number"),
+		"Total discs" to listOf("totaldiscs", "total discs", "total_discs"),
+		"Duration" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION),
+		"Codec" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC, "audiocodec", "audio codec"),
+		"BPM" to listOf("bpm", "tpbm"),
+		"Comment" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMMENT)
+	)
+
 	private val ALBUM_ART_FILENAMES = arrayOf(
 		"Folder.png",
 		"Folder.jpg",
 		"Folder.jpeg",
-		"Folder.jfif"
+		"Folder.jfif",
+		"Artist.png",
+		"Artist.jpg",
+		"Artist.jpeg",
+		"Artist.jfif"
 	)
-
-	fun showCurrTrackInfo(context: Context)
-	{
-		if (!PlaybackQueue.trackSelected())
-		{
-			Toast.makeText(context, context.getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
-			return
-		}
-
-		val mediaInfo = MediaMetadataRetriever()
-		mediaInfo.setDataSource(PlaybackQueue.getCurrentTrackPath())
-		val durationSS = (mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: "0").toInt() / 1000
-		val kbps = (mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) ?: "0").toInt() / 1000
-
-		AlertDialog.Builder(context)
-			.setTitle(PlaybackQueue.getCurrentTrackName())
-			.setMessage(context.getString(R.string.about_track,
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "",
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "",
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "",
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE) ?: "",
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: "",
-				durationSS / 60,
-				durationSS % 60,
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER) ?: "",
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) ?: "",
-				kbps,
-				mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE) ?: "",
-				PlaybackQueue.getCurrentTrackPath()
-			))
-			.setPositiveButton(context.getString(R.string.close), null)
-			.create()
-			.show()
-	}
 
 	private fun resetTrackMeta(track: Track)
 	{
@@ -76,7 +62,7 @@ object TagExtractor
 		track.path = queueItem.path
 
 		// title and artist
-		val mediaInfo = MediaMetadataRetriever()
+		val mediaInfo = FFmpegMediaMetadataRetriever()
 		try
 		{
 			mediaInfo.setDataSource(queueItem.path)
@@ -92,41 +78,65 @@ object TagExtractor
 			return
 		}
 
-		track.title = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
-		track.artist = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
-		track.year = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)?.toIntOrNull() // I won't accept some weird timestamps, only year
+		val tagDict = lowercaseTagNames(mediaInfo.metadata.all)
 
-		// cover
+		track.title = smartTagExtract(tagDict, "Title") ?: queueItem.name
+		track.artist = smartTagExtract(tagDict, "Artist") ?: ""
+		track.year = smartTagExtract(tagDict, "Date")?.toIntOrNull() // I won't accept some weird timestamps, only year
+
+		track.cover = getTrackBitmap(queueItem.path, mediaInfo)
+	}
+
+	fun lowercaseTagNames(tagDict: Map<String, String>): MutableMap<String, String>
+	{
+		val lowercasedDict = mutableMapOf<String, String>()
+		for (item in tagDict)
+		{
+			lowercasedDict[item.key.toLowerCase(Locale.getDefault())] = item.value
+		}
+		return lowercasedDict
+	}
+
+	fun smartTagExtract(tagDict: Map<String, String>, niceTagName: String): String?
+	{
+		if (niceTagName in NICE_TAG_NAMES)
+		{
+			for (possibleTagName in NICE_TAG_NAMES[niceTagName]!!) // first time when I had to use !!. I don't know what is your problem kotlin.
+			{
+				if (possibleTagName in tagDict)
+					return tagDict[possibleTagName]
+			}
+		}
+		return null
+	}
+
+	fun getTrackBitmap(trackPath: String, mediaInfo: FFmpegMediaMetadataRetriever): Bitmap?
+	{
 		// first try embedded artwork
 		val embeddedPic = mediaInfo.embeddedPicture
 
 		if (embeddedPic != null)
 		{
-			track.cover = BitmapFactory.decodeByteArray(embeddedPic, 0, embeddedPic.size)
+			return BitmapFactory.decodeByteArray(embeddedPic, 0, embeddedPic.size)
 		}
 		else
 		{
 			// fallback to album art in track's dir
 
-			val dir = File(queueItem.path).parent
+			val dir = File(trackPath).parent
 
-			var foundCover = false
 			for (filename in ALBUM_ART_FILENAMES)
 			{
 				val art = File(dir, filename)
 
 				if (art.exists())
 				{
-					val bitmap = BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
-					track.cover = bitmap
-					foundCover = true
-					break
+					return BitmapFactory.decodeFile(art.absolutePath, BitmapFactory.Options())
 				}
 			}
 
 			// no cover found
-			if (!foundCover)
-				track.cover = null
+			return null
 		}
 	}
 }
