@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_settings.toolbar
@@ -72,6 +73,7 @@ class TrackInfoActivity : AppCompatActivity()
 		// clear table and show loading state (like on initial activity launch)
 		meta_layout.visibility = View.GONE
 		progress_circle.visibility = View.VISIBLE
+		meta_layout.fullScroll(ScrollView.FOCUS_UP) // have to do this before removing elements for some reason
 		table_main.removeAllViews()
 
 		_raw = !_raw
