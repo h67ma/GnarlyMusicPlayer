@@ -51,8 +51,9 @@ class TrackInfoActivity : AppCompatActivity()
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
 	{
-		if (!_raw) // just don't show menu when "raw" button was clicked
-			menuInflater.inflate(R.menu.track_details, menu)
+		menuInflater.inflate(R.menu.track_details, menu)
+		if (_raw)
+			menu.findItem(R.id.action_raw).title = getString(R.string.nice)
 		return super.onCreateOptionsMenu(menu)
 	}
 
@@ -60,26 +61,31 @@ class TrackInfoActivity : AppCompatActivity()
 	{
 		when (item.itemId)
 		{
-			R.id.action_raw -> switchToRaw()
+			R.id.action_raw -> switchMode()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
 	}
 
-	private fun switchToRaw()
+	private fun switchMode()
 	{
-		// hide "raw" button in navbar
-		title = "Track into (raw ffmpeg)"
-		_raw = true
-		invalidateOptionsMenu()
-
 		// clear table and show loading state (like on initial activity launch)
 		meta_layout.visibility = View.GONE
 		progress_circle.visibility = View.VISIBLE
 		table_main.removeAllViews()
 
-		// initiate raw track fetch
-		asyncGetTrackInfos(::getRawTrackInfos)
+		_raw = !_raw
+		invalidateOptionsMenu() // update navbar btn
+		if (_raw)
+		{
+			title = getString(R.string.track_info_raw)
+			asyncGetTrackInfos(::getRawTrackInfos)
+		}
+		else
+		{
+			title = getString(R.string.track_info)
+			asyncGetTrackInfos(::getTrackInfos)
+		}
 	}
 
 	private fun asyncGetTrackInfos(f: () -> Pair<List<Pair<String, String>>, Bitmap?>?)
@@ -194,9 +200,9 @@ class TrackInfoActivity : AppCompatActivity()
 		val cover = TagExtractor.getTrackBitmap(_trackPath, mediaInfo.embeddedPicture)
 
 		if (mediaInfo.embeddedPicture != null)
-			tagList.add(Pair("Cover art source", "Tag"))
+			tagList.add(Pair("Cover source", "Tag"))
 		else if (cover != null)
-			tagList.add(Pair("Cover art source", "Directory"))
+			tagList.add(Pair("Cover source", "Directory"))
 
 		mediaInfo.release()
 
@@ -206,7 +212,10 @@ class TrackInfoActivity : AppCompatActivity()
 	private fun updateTableView(metaDict: List<Pair<String, String>>, cover: Bitmap?)
 	{
 		if (cover != null)
+		{
 			img_cover.setImageBitmap(cover)
+			img_cover.visibility = View.VISIBLE
+		}
 		else
 			img_cover.visibility = View.GONE
 
