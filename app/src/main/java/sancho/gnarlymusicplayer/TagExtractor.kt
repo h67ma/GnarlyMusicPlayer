@@ -75,8 +75,10 @@ object TagExtractor
 		// first for the obvious
 		track.path = queueItem.path
 
-		// title and artist
-		val mediaInfo = FFmpegMediaMetadataRetriever()
+		// ffmpeg doesn't seem to be able to read opus tags
+		// but mmr can, and is sufficient for just extracting title/artist/date/pic
+
+		val mediaInfo = MediaMetadataRetriever()
 		try
 		{
 			mediaInfo.setDataSource(queueItem.path)
@@ -92,42 +94,13 @@ object TagExtractor
 			return
 		}
 
-		val tagDict = lowercaseTagNames(mediaInfo.metadata.all)
+		track.title = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
+		track.artist = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
+		track.year = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)?.toIntOrNull() // I won't accept some weird timestamps, only a year
 
-		track.title = smartTagExtract(tagDict, "Title") ?: queueItem.name
-		track.artist = smartTagExtract(tagDict, "Artist") ?: ""
-		track.year = smartTagExtract(tagDict, "Date")?.toIntOrNull() // I won't accept some weird timestamps, only a year
-
-		track.cover = getTrackBitmap(queueItem.path, mediaInfo)
+		track.cover = getTrackBitmap(queueItem.path, mediaInfo.embeddedPicture)
 
 		mediaInfo.release()
-
-		if (smartTagExtract(tagDict, "Codec") == "opus")
-		{
-			// workaround for opus :/ cover is ok, tags not
-
-			val lameMediaInfo = MediaMetadataRetriever()
-			try
-			{
-				lameMediaInfo.setDataSource(queueItem.path)
-			}
-			catch (_: RuntimeException) // invalid file
-			{
-				resetTrackMeta(track)
-				return
-			}
-			catch (_: IllegalArgumentException) // invalid file path
-			{
-				resetTrackMeta(track)
-				return
-			}
-
-			track.title = lameMediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
-			track.artist = lameMediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
-			track.year = lameMediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)?.toIntOrNull() // I won't accept some weird timestamps, only a year
-
-			lameMediaInfo.release()
-		}
 	}
 
 	fun lowercaseTagNames(tagDict: Map<String, String>): MutableMap<String, String>
@@ -153,10 +126,9 @@ object TagExtractor
 		return null
 	}
 
-	fun getTrackBitmap(trackPath: String, mediaInfo: FFmpegMediaMetadataRetriever): Bitmap?
+	fun getTrackBitmap(trackPath: String, embeddedPic: ByteArray?): Bitmap?
 	{
 		// first try embedded artwork
-		val embeddedPic = mediaInfo.embeddedPicture
 
 		if (embeddedPic != null)
 		{

@@ -191,7 +191,7 @@ class TrackInfoActivity : AppCompatActivity()
 
 		tagList.add(Pair("Path", _trackPath))
 
-		val cover = TagExtractor.getTrackBitmap(_trackPath, mediaInfo)
+		val cover = TagExtractor.getTrackBitmap(_trackPath, mediaInfo.embeddedPicture)
 
 		if (mediaInfo.embeddedPicture != null)
 			tagList.add(Pair("Cover art source", "Tag"))
