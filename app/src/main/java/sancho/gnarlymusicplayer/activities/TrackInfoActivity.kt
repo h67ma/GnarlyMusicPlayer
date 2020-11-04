@@ -156,6 +156,13 @@ class TrackInfoActivity : AppCompatActivity()
 			metaDict[FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION] = "%d:%02d".format(durationS / 60, durationS % 60)
 		}
 
+		val sizeBytes = metaDict[FFmpegMediaMetadataRetriever.METADATA_KEY_FILESIZE]
+		if (sizeBytes != null)
+		{
+			val niceSize = sizeBytes.toFloat() / 1000000
+			metaDict[FFmpegMediaMetadataRetriever.METADATA_KEY_FILESIZE] = "%.2fMB".format(niceSize)
+		}
+
 		val tagList = mutableListOf<Pair<String, String>>()
 
 		if (TagExtractor.smartTagExtract(metaDict, "Codec") == "opus")
@@ -200,9 +207,9 @@ class TrackInfoActivity : AppCompatActivity()
 		val cover = TagExtractor.getTrackBitmap(_trackPath, mediaInfo.embeddedPicture)
 
 		if (mediaInfo.embeddedPicture != null)
-			tagList.add(Pair("Cover source", "Tag"))
+			tagList.add(Pair("Cover src", "Tag"))
 		else if (cover != null)
-			tagList.add(Pair("Cover source", "Directory"))
+			tagList.add(Pair("Cover src", "Directory"))
 
 		mediaInfo.release()
 

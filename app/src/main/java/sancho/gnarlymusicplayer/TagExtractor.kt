@@ -18,13 +18,14 @@ object TagExtractor
 		"Genre" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_GENRE),
 		"Album artist" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM_ARTIST, "albumartist", "album artist"),
 		"Composer" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMPOSER),
-		"Track number" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_TRACK, "tracknumber", "track number", "track_number"),
+		"Track" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_TRACK, "tracknumber", "track number", "track_number"),
 		"Total tracks" to listOf("totaltracks", "total tracks", "total_tracks"),
-		"Disc number" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DISC, "discnumber", "disc number", "disc_number"),
+		"Disc" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DISC, "discnumber", "disc number", "disc_number"),
 		"Total discs" to listOf("totaldiscs", "total discs", "total_discs"),
 		"BPM" to listOf("bpm", "tpbm"),
 		"Comment" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMMENT),
 		"Duration" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION),
+		"Size" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_FILESIZE),
 		"Codec" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC)
 	)
 
