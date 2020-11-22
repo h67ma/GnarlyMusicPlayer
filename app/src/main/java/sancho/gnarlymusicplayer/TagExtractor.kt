@@ -22,8 +22,9 @@ object TagExtractor
 		"Total tracks" to listOf("totaltracks", "total tracks", "total_tracks"),
 		"Disc" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DISC, "discnumber", "disc number", "disc_number"),
 		"Total discs" to listOf("totaldiscs", "total discs", "total_discs"),
-		"BPM" to listOf("bpm", "tpbm"),
+		"BPM" to listOf("bpm", "tbpm"),
 		"Comment" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_COMMENT),
+		"Lyrics" to listOf("unsyncedlyrics", "lyrics"),
 		"Duration" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION),
 		"Size" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_FILESIZE),
 		"Codec" to listOf(FFmpegMediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC)
