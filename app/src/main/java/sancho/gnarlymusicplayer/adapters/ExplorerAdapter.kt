@@ -18,10 +18,7 @@ import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesAndDirsComparator
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
 import sancho.gnarlymusicplayer.comparators.FilesComparator
-import sancho.gnarlymusicplayer.models.ExplorerHeader
-import sancho.gnarlymusicplayer.models.ExplorerItem
-import sancho.gnarlymusicplayer.models.ExplorerViewItem
-import sancho.gnarlymusicplayer.models.QueueItem
+import sancho.gnarlymusicplayer.models.*
 import java.io.File
 import java.util.*
 
@@ -84,6 +81,7 @@ class ExplorerAdapter(
 				val icon = when
 				{
 					file.isDirectory -> R.drawable.folder
+					file.isError -> R.drawable.warning
 					FileSupportChecker.isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
 					else -> R.drawable.note
 				}
@@ -311,9 +309,18 @@ class ExplorerAdapter(
 
 	private fun updateDirectoryViewPlaylist(newPath: File): List<ExplorerViewItem>?
 	{
-		val list = listPlaylist(newPath)
+		val list = mutableListOf<ExplorerViewItem>()
 
-		return list?.map{file -> ExplorerItem(file.path, file.name, file.isDirectory)}?.toMutableList()
+		newPath.readLines().forEach {
+			val track = File(newPath.parent, it) // relative to playlist's directory
+			if (!track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
+				if (track.exists())
+					list.add(ExplorerItem(track.path, track.name, track.isDirectory))
+				else
+					list.add(ExplorerErrorItem(track.path, track.name, track.isDirectory))
+		}
+
+		return list.toMutableList()
 	}
 
 	private fun listDir(path: File, onlyAudio: Boolean): MutableList<File>?
