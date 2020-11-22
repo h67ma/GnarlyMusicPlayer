@@ -172,7 +172,6 @@ class MediaPlaybackService : Service()
 
 			GlobalScope.launch(Dispatchers.IO) {
 				setTrackJob()
-			}.invokeOnCompletion {
 				_sessionCallback.onPlay()
 				_notificationMaker.updateNotification(_player.isPlaying, _track)
 			}
@@ -336,9 +335,6 @@ class MediaPlaybackService : Service()
 
 		_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
 			setTrackJob()
-		}
-
-		_setTrackJob?.invokeOnCompletion {
 			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
 			_notificationMaker.updateNotification(_player.isPlaying, _track)
 		}
