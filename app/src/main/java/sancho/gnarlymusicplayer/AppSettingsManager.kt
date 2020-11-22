@@ -20,6 +20,8 @@ object AppSettingsManager
 	var lastDir: File? = null
 	private var accentColorKey: String = DEFAULT_ACCENTCOLOR
 
+	var ignoreAf = false
+
 	var volumeStepsTotal: Int = 30
 	var volumeInappEnabled: Boolean = false
 	var volumeStepIdx: Int = 15
@@ -88,6 +90,8 @@ object AppSettingsManager
 		accentColorKey = sharedPref.getString(context.getString(R.string.pref_accentcolor), DEFAULT_ACCENTCOLOR) ?: DEFAULT_ACCENTCOLOR
 
 		PlaybackQueue.autoClean = sharedPref.getBoolean(context.getString(R.string.pref_autoclean), false)
+
+		ignoreAf = sharedPref.getBoolean(context.getString(R.string.pref_ignoreaf), false)
 
 		volumeStepsTotal = sharedPref.getInt(context.getString(R.string.pref_totalsteps), 30)
 		volumeInappEnabled = sharedPref.getBoolean(context.getString(R.string.pref_inappenabled), false)

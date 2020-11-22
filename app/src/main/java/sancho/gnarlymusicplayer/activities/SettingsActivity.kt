@@ -81,6 +81,12 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			findPreference<CheckBoxPreference>(getString(R.string.pref_ignoreaf))?.setOnPreferenceChangeListener { _, newValue ->
+				AppSettingsManager.ignoreAf = (newValue as Boolean) == true
+
+				true
+			}
+
 			findPreference<CheckBoxPreference>(getString(R.string.pref_inappenabled))?.setOnPreferenceChangeListener { _, newValue ->
 				AppSettingsManager.volumeInappEnabled = (newValue as Boolean) == true
 

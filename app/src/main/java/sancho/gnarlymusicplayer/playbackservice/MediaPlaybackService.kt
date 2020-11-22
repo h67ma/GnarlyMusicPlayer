@@ -63,32 +63,35 @@ class MediaPlaybackService : Service()
 	{
 		override fun onReceive(context: Context?, intent: Intent?)
 		{
-			_sessionCallback.onPause()
+			if (!AppSettingsManager.ignoreAf)
+				_sessionCallback.onPause()
 		}
 	}
 
 	private var _receiverRegistered = false
 
-	private val _afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
-		when (focusChange) {
-			AudioManager.AUDIOFOCUS_LOSS -> {
-				_sessionCallback.onPause()
-			}
-			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-				_sessionCallback.onPause()
-			}
-			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-				_audioManager.adjustVolume(AudioManager.ADJUST_LOWER, 0) // does this work?
-			}
-			AudioManager.AUDIOFOCUS_GAIN -> {
-				_audioManager.adjustVolume(AudioManager.ADJUST_RAISE, 0) // does this work?
-				playAndUpdateNotification()
+	private val _focusRequest = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).run {
+		val afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+			when (focusChange) {
+				AudioManager.AUDIOFOCUS_LOSS -> {
+					if (!AppSettingsManager.ignoreAf)
+						_sessionCallback.onPause()
+				}
+				AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+					if (!AppSettingsManager.ignoreAf)
+						_sessionCallback.onPause()
+				}
+				AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+					_audioManager.adjustVolume(AudioManager.ADJUST_LOWER, 0) // does this work?
+				}
+				AudioManager.AUDIOFOCUS_GAIN -> {
+					_audioManager.adjustVolume(AudioManager.ADJUST_RAISE, 0) // does this work?
+					playAndUpdateNotification()
+				}
 			}
 		}
-	}
 
-	private val _focusRequest = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).run {
-		setOnAudioFocusChangeListener(_afChangeListener)
+		setOnAudioFocusChangeListener(afChangeListener)
 		setAudioAttributes(AudioAttributesCompat.Builder().run {
 			setUsage(AudioAttributesCompat.USAGE_MEDIA)
 			setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
@@ -220,7 +223,7 @@ class MediaPlaybackService : Service()
 			{
 				val result = AudioManagerCompat.requestAudioFocus(_audioManager, _focusRequest)
 
-				if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+				if (AppSettingsManager.ignoreAf || result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 					_player.start()
 					_notificationMaker.updateNotification(_player.isPlaying)
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
@@ -378,7 +381,7 @@ class MediaPlaybackService : Service()
 		AppSettingsManager.savedTrackTime = currTime
 	}
 
-	fun registerNoisyReceiver()
+	private fun registerNoisyReceiver()
 	{
 		if (!_receiverRegistered)
 		{
@@ -387,7 +390,7 @@ class MediaPlaybackService : Service()
 		}
 	}
 
-	fun unregisterNoisyReceiver()
+	private fun unregisterNoisyReceiver()
 	{
 		if (_receiverRegistered)
 		{

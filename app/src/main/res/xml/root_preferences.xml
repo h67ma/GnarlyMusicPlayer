@@ -35,6 +35,12 @@
             app:iconSpaceReserved="false"/>
 
         <CheckBoxPreference
+            app:title="Ignore audio focus"
+            app:summary="Audio playback will not stop e.g. when other media is played. You might have to restart the media playback service for this option to take effect"
+            app:key="@string/pref_ignoreaf"
+            app:iconSpaceReserved="false"/>
+
+        <CheckBoxPreference
             app:title="In-app volume control"
             app:summary="Tired of having only 15 volume steps? When enabled, volume keys will change in-app volume instead of global media volume"
             app:key="@string/pref_inappenabled"
