@@ -138,15 +138,12 @@ class MainActivity : AppCompatActivity()
 
 	private fun setupFileList()
 	{
-		library_list_view.layoutManager = LinearLayoutManager(this)
-
 		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::playTrack, ::setToolbarText, ::setDirListLoading)
 		library_list_view.adapter = _explorerAdapter
 	}
 
 	private fun setupBookmarks()
 	{
-		bookmark_list_view.layoutManager = LinearLayoutManager(this)
 		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
 
 			if (bookmark.path == _explorerAdapter.currentExplorerPath?.absolutePath)
@@ -227,7 +224,6 @@ class MainActivity : AppCompatActivity()
 
 	private fun setupQueue()
 	{
-		queue_list_view.layoutManager = LinearLayoutManager(this)
 		_queueAdapter = QueueAdapter(this) { position ->
 			playTrack(position)
 		}
