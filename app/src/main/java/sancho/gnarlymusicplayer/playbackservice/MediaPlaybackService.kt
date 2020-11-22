@@ -170,8 +170,9 @@ class MediaPlaybackService : Service()
 
 			mediaPlaybackServiceStarted = true
 
-			GlobalScope.launch(Dispatchers.IO) {
+			_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
 				setTrackJob()
+
 				_sessionCallback.onPlay()
 				_notificationMaker.updateNotification(_player.isPlaying, _track)
 			}
@@ -329,7 +330,8 @@ class MediaPlaybackService : Service()
 
 	fun setTrack(forcePlay: Boolean)
 	{
-		_setTrackJob?.cancel() // previous job instance might be running
+		if (_setTrackJob?.isActive == true)
+			return // better let it finish
 
 		val wasPlaying = _player.isPlaying
 
@@ -348,6 +350,9 @@ class MediaPlaybackService : Service()
 
 	fun playPause()
 	{
+		if (_setTrackJob?.isActive == true)
+			return // mission failed, we'll get em next time
+
 		if (_player.isPlaying)
 			_sessionCallback.onPause()
 		else

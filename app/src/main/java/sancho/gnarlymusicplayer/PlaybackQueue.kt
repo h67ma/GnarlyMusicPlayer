@@ -141,6 +141,7 @@ object PlaybackQueue
 
 	fun trackExists(pos: Int): Boolean
 	{
+		if (pos < 0 || pos >= queue.size) return false
 		return File(queue[pos].path).exists()
 	}
 
