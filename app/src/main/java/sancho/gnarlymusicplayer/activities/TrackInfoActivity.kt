@@ -63,6 +63,7 @@ class TrackInfoActivity : AppCompatActivity()
 		when (item.itemId)
 		{
 			R.id.action_raw -> switchMode()
+			android.R.id.home -> super.onBackPressed()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true

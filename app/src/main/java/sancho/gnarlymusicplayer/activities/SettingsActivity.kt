@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
@@ -153,5 +154,15 @@ class SettingsActivity : AppCompatActivity()
 		{
 			return context?.packageManager?.getPackageInfo(context?.packageName ?: "", 0)?.versionName ?: "Unknown"
 		}
+	}
+
+	override fun onOptionsItemSelected(item: MenuItem): Boolean
+	{
+		when (item.itemId)
+		{
+			android.R.id.home -> super.onBackPressed()
+			else -> return super.onOptionsItemSelected(item)
+		}
+		return true
 	}
 }

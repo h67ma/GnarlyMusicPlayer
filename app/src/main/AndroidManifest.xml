@@ -20,18 +20,12 @@
             android:name=".activities.TrackInfoActivity"
             android:label="@string/track_info"
             android:parentActivityName=".activities.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="sancho.gnarlymusicplayer.activities.MainActivity" />
         </activity>
 
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/settings"
             android:parentActivityName=".activities.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="sancho.gnarlymusicplayer.activities.MainActivity" />
         </activity>
 
         <activity
