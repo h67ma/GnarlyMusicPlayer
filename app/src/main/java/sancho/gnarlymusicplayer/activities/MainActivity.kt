@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity()
 		setSupportActionBar(toolbar)
 		title = ""
 
+		toolbar_scroller.isSmoothScrollingEnabled = false
+
 		setupServiceConnection()
 
 		setupBookmarks()
