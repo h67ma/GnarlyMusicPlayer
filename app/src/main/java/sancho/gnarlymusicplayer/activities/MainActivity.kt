@@ -421,19 +421,19 @@ class MainActivity : AppCompatActivity()
 		searchThing.queryHint = getString(R.string.search_bar_hint)
 		searchThing.maxWidth = Int.MAX_VALUE
 
-		_actionSearch?.setOnActionExpandListener(object: MenuItem.OnActionExpandListener
+		_actionSearch?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener
 		{
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(item: MenuItem?): Boolean
 			{
-				menuElementsToToggle.forEach{elem -> elem.isVisible = true}
+				menuElementsToToggle.forEach { elem -> elem.isVisible = true }
 				_explorerAdapter.searchClose()
 				return true
 			}
 
 			override fun onMenuItemActionExpand(item: MenuItem?): Boolean
 			{
-				menuElementsToToggle.forEach{elem -> elem.isVisible = false}
+				menuElementsToToggle.forEach { elem -> elem.isVisible = false }
 				return true
 			}
 		})
