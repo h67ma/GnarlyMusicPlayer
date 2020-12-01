@@ -12,7 +12,6 @@ import android.os.Binder
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.Toast
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
@@ -326,7 +325,7 @@ class MediaPlaybackService : Service()
 		if (error) // this is so bad
 		{
 			GlobalScope.launch(Dispatchers.Main) {
-				Toast.makeText(applicationContext, getString(R.string.cant_play_track), Toast.LENGTH_SHORT).show()
+				Toaster.show(applicationContext, getString(R.string.cant_play_track))
 			}
 		}
 	}

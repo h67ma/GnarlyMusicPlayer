@@ -12,7 +12,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
@@ -24,6 +23,7 @@ import kotlinx.android.synthetic.main.dialog_seek.view.*
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.Toaster
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity()
 				_actionSearch?.collapseActionView() // collapse searchbar thing
 			}
 			else
-				Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
+				Toaster.show(this, getString(R.string.dir_doesnt_exist))
 		}
 		bookmark_list_view.adapter = adapter
 
@@ -203,7 +203,7 @@ class MainActivity : AppCompatActivity()
 				// check if bookmark already exists
 				if (_bookmarks.any { item -> item.path == path })
 				{
-					Toast.makeText(applicationContext, getString(R.string.bookmark_exists), Toast.LENGTH_SHORT).show()
+					Toaster.show(this, getString(R.string.bookmark_exists))
 					return@setOnClickListener
 				}
 
@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity()
 				adapter.notifyItemInserted(_bookmarks.size - 1)
 			}
 			else
-				Toast.makeText(applicationContext, getString(R.string.cant_add_root_dir), Toast.LENGTH_SHORT).show()
+				Toaster.show(this, getString(R.string.cant_add_root_dir))
 		}
 
 		bookmark_root.setOnClickListener {
@@ -281,7 +281,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (!PlaybackQueue.trackExists(newPosition))
 		{
-			Toast.makeText(this, getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.file_doesnt_exist))
 			return
 		}
 
@@ -475,7 +475,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (!PlaybackQueue.trackSelected())
 		{
-			Toast.makeText(this, getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.no_track_selected))
 			return
 		}
 
@@ -488,7 +488,7 @@ class MainActivity : AppCompatActivity()
 	{
 		if (!PlaybackQueue.trackSelected())
 		{
-			Toast.makeText(this, getString(R.string.no_track_selected), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.no_track_selected))
 			return
 		}
 
@@ -496,14 +496,14 @@ class MainActivity : AppCompatActivity()
 		if (dir != null)
 			_explorerAdapter.updateDirectoryView(dir)
 		else
-			Toast.makeText(applicationContext, getString(R.string.dir_doesnt_exist), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.dir_doesnt_exist))
 	}
 
 	private fun showSeekDialog()
 	{
 		if (!MediaPlaybackService.mediaPlaybackServiceStarted || _service == null)
 		{
-			Toast.makeText(this, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.playback_service_not_running))
 			return
 		}
 
@@ -555,7 +555,7 @@ class MainActivity : AppCompatActivity()
 					_service?.seekAndPlay(seekView.seek_seekbar.progress)
 				}
 				else
-					Toast.makeText(applicationContext, getString(R.string.playback_service_not_running), Toast.LENGTH_SHORT).show()
+					Toaster.show(this@MainActivity, getString(R.string.playback_service_not_running))
 			}
 		})
 
@@ -574,7 +574,7 @@ class MainActivity : AppCompatActivity()
 		if (clearedCnt > 0)
 		{
 			_queueAdapter.notifyItemRangeRemoved(0, clearedCnt)
-			Toast.makeText(this, getString(R.string.cleared_n_tracks, clearedCnt), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
 		}
 	}
 
@@ -589,7 +589,7 @@ class MainActivity : AppCompatActivity()
 			val clearedCnt = PlaybackQueue.removeAll()
 
 			_queueAdapter.notifyItemRangeRemoved(0, clearedCnt)
-			Toast.makeText(this, getString(R.string.cleared_n_tracks, clearedCnt), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
 		}
 	}
 
@@ -600,7 +600,7 @@ class MainActivity : AppCompatActivity()
 		if (clearedCnt > 0)
 		{
 			_queueAdapter.notifyItemRangeRemoved(removedFromIdx, clearedCnt)
-			Toast.makeText(this, getString(R.string.cleared_n_tracks, clearedCnt), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
 		}
 	}
 

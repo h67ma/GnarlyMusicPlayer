@@ -7,15 +7,15 @@ import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import kotlinx.android.synthetic.main.activity_settings.*
-import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.AppSettingsManager
-import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
+import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.Toaster
 import sancho.gnarlymusicplayer.playbackservice.ACTION_UPDATE_MAX_VOLUME
+import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 
 private const val INTENT_LAUNCH_EQ = 1337
 
@@ -45,7 +45,7 @@ class SettingsActivity : AppCompatActivity()
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
 			findPreference<Preference>("version")?.setOnPreferenceClickListener { _ ->
-				Toast.makeText(context, getString(R.string.ur_not_a_developer), Toast.LENGTH_SHORT).show()
+				Toaster.show(requireContext(), getString(R.string.ur_not_a_developer))
 				true
 			}
 
@@ -76,7 +76,7 @@ class SettingsActivity : AppCompatActivity()
 					startActivityForResult(eqIntent, INTENT_LAUNCH_EQ)
 				}
 				else
-					Toast.makeText(context, getString(R.string.no_eq_found), Toast.LENGTH_SHORT).show()
+					Toaster.show(requireContext(), getString(R.string.no_eq_found))
 
 				true
 			}
@@ -128,7 +128,7 @@ class SettingsActivity : AppCompatActivity()
 					apply()
 				}
 
-				Toast.makeText(context, "Will set to $current", Toast.LENGTH_SHORT).show()
+				Toaster.show(requireContext(), "Will set to $current")
 
 				true
 			}

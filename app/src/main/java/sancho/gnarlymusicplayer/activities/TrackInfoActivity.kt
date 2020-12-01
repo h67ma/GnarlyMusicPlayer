@@ -8,7 +8,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ScrollView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_settings.toolbar
 import kotlinx.android.synthetic.main.activity_track_info.*
@@ -19,6 +18,7 @@ import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.TagExtractor
+import sancho.gnarlymusicplayer.Toaster
 import wseemann.media.FFmpegMediaMetadataRetriever
 
 class TrackInfoActivity : AppCompatActivity()
@@ -40,7 +40,7 @@ class TrackInfoActivity : AppCompatActivity()
 
 		if (trackPath == null)
 		{
-			Toast.makeText(this, getString(R.string.no_track), Toast.LENGTH_SHORT).show()
+			Toaster.show(this, getString(R.string.no_track))
 			finish()
 			return
 		}
@@ -97,7 +97,7 @@ class TrackInfoActivity : AppCompatActivity()
 			val meta = f()
 			GlobalScope.launch(Dispatchers.Main) {
 				if (meta == null)
-					Toast.makeText(applicationContext, getString(R.string.no_track), Toast.LENGTH_SHORT).show()
+					Toaster.show(this@TrackInfoActivity, getString(R.string.no_track))
 				else
 					updateTableView(meta.first, meta.second)
 			}

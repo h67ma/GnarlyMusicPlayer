@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.explorer_group_item.view.*
 import kotlinx.android.synthetic.main.explorer_item.view.*
@@ -15,6 +14,7 @@ import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.FileSupportChecker
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
+import sancho.gnarlymusicplayer.Toaster
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesAndDirsComparator
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
 import sancho.gnarlymusicplayer.comparators.FilesComparator
@@ -123,7 +123,7 @@ class ExplorerAdapter(
 
 		if (!file.exists())
 		{
-			Toast.makeText(_context, _context.getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+			Toaster.show(_context, _context.getString(R.string.file_doesnt_exist))
 			return
 		}
 
@@ -147,7 +147,7 @@ class ExplorerAdapter(
 
 		if (!file.exists())
 		{
-			Toast.makeText(_context, _context.getString(R.string.file_doesnt_exist), Toast.LENGTH_SHORT).show()
+			Toaster.show(_context, _context.getString(R.string.file_doesnt_exist))
 			return
 		}
 
@@ -163,10 +163,10 @@ class ExplorerAdapter(
 					QueueItem(track.absolutePath, track.nameWithoutExtension)
 				})
 
-				Toast.makeText(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
+				Toaster.show(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size))
 			}
 			else
-				Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+				Toaster.show(_context, _context.getString(R.string.file_list_error))
 		}
 		else if (FileSupportChecker.isFileSupportedAndPlaylist(file.path))
 		{
@@ -179,10 +179,10 @@ class ExplorerAdapter(
 					QueueItem(track.absolutePath, track.nameWithoutExtension)
 				})
 
-				Toast.makeText(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size), Toast.LENGTH_SHORT).show()
+				Toaster.show(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size))
 			}
 			else
-				Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+				Toaster.show(_context, _context.getString(R.string.file_list_error))
 		}
 		else
 		{
@@ -287,7 +287,7 @@ class ExplorerAdapter(
 					_setDirListLoading(false)
 				}
 				else
-					Toast.makeText(_context, _context.getString(R.string.file_list_error), Toast.LENGTH_SHORT).show()
+					Toaster.show(_context, _context.getString(R.string.file_list_error))
 			}
 		}
 	}
