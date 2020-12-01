@@ -292,7 +292,7 @@ class ExplorerAdapter(
 		}
 	}
 
-	private fun updateDirectoryViewShowStorage(): MutableList<ExplorerViewItem>?
+	private fun updateDirectoryViewShowStorage(): MutableList<ExplorerViewItem>
 	{
 		return _mountedDevices
 	}
@@ -307,7 +307,7 @@ class ExplorerAdapter(
 		return viewList
 	}
 
-	private fun updateDirectoryViewPlaylist(newPath: File): List<ExplorerViewItem>?
+	private fun updateDirectoryViewPlaylist(newPath: File): List<ExplorerViewItem>
 	{
 		val list = mutableListOf<ExplorerViewItem>()
 
@@ -340,6 +340,9 @@ class ExplorerAdapter(
 			if (track.exists() && !track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
 				list.add(track)
 		}
+
+		if (list.size == 0)
+			return null
 
 		return list
 	}
