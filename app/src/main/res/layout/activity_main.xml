@@ -25,14 +25,22 @@
                 android:background="?android:colorPrimary"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
-                <TextView
-                    android:id="@+id/toolbar_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:textColor="?android:textColorPrimary"
-                    android:singleLine="true"
-                    android:ellipsize="start"/>
+                <HorizontalScrollView
+                    android:id="@+id/toolbar_scroller"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:scrollbars="none">
+
+                    <TextView
+                        android:id="@+id/toolbar_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:textSize="18sp"
+                        android:textColor="?android:textColorPrimary"
+                        android:singleLine="true"
+                        android:gravity="center_vertical"/>
+
+                </HorizontalScrollView>
 
             </androidx.appcompat.widget.Toolbar>
 

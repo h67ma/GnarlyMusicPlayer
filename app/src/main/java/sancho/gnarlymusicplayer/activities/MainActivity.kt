@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.HorizontalScrollView
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -120,6 +121,10 @@ class MainActivity : AppCompatActivity()
 	private fun setToolbarText(text: String)
 	{
 		toolbar_title.text = text
+		toolbar_scroller.scrollTo(HorizontalScrollView.FOCUS_RIGHT, 0)
+		toolbar_scroller.post {
+			toolbar_scroller.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
+		}
 	}
 
 	private fun setDirListLoading(loading: Boolean)
