@@ -121,6 +121,7 @@ class TrackInfoActivity : AppCompatActivity()
 		}
 
 		val metaDict = TagExtractor.lowercaseTagNames(mediaInfo.metadata.all)
+		mediaInfo.release()
 
 		val tagList = mutableListOf<Pair<String, String>>()
 
@@ -129,7 +130,7 @@ class TrackInfoActivity : AppCompatActivity()
 			tagList.add(Pair(tag.key, tag.value))
 		}
 
-		mediaInfo.release()
+		tagList.sortBy { elem -> elem.first }
 
 		return Pair(tagList, null)
 	}
