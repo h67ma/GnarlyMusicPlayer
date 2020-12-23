@@ -209,6 +209,11 @@ class TrackInfoActivity : AppCompatActivity()
 
 		val cover = TagExtractor.getTrackBitmap(_trackPath, mediaInfo.embeddedPicture)
 
+		if (("video_width" in metaDict && "video_height" in metaDict))
+			tagList.add(Pair("Cover size", "%sx%s".format(metaDict["video_width"], metaDict["video_height"])))
+		else if (cover != null)
+			tagList.add(Pair("Cover size", "%dx%d".format(cover.width, cover.height)))
+
 		if (mediaInfo.embeddedPicture != null)
 			tagList.add(Pair("Cover src", "Tag"))
 		else if (cover != null)
