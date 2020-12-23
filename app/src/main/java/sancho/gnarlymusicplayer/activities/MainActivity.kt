@@ -90,6 +90,15 @@ class MainActivity : AppCompatActivity()
 		requestReadPermishon() // check for permissions and initial update of file list
 	}
 
+	override fun onWindowFocusChanged(hasFocus: Boolean)
+	{
+		super.onWindowFocusChanged(hasFocus)
+		if (hasFocus)
+		{
+			toolbarScrollRight() // needs to be done here for when activity is created/switching between activities
+		}
+	}
+
 	override fun onResume()
 	{
 		super.onResume()
@@ -123,7 +132,14 @@ class MainActivity : AppCompatActivity()
 	private fun setToolbarText(text: String)
 	{
 		toolbar_title.text = text
+		toolbarScrollRight()
+	}
+
+	private fun toolbarScrollRight()
+	{
 		toolbar_scroller.scrollTo(HorizontalScrollView.FOCUS_RIGHT, 0)
+
+		// idk why, but this also needs to be done for it to work in *release* build
 		toolbar_scroller.post {
 			toolbar_scroller.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
 		}
