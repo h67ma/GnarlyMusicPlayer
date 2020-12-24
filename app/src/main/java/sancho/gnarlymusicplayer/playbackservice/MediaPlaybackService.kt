@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.media.session.MediaSessionManager
@@ -304,6 +305,7 @@ class MediaPlaybackService : Service()
 				TagExtractor.setTrackMeta(_track)
 				_player.reset()
 				_player.setDataSource(_track.path)
+				_player.setAudioAttributes(AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
 				_player.prepare()
 			}
 			else
