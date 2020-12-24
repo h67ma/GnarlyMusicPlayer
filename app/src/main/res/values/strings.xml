@@ -38,4 +38,7 @@
     <string name="pref_ignoreaf">sancho.gnarlymusicplayer.preference.ignoreaf</string>
     <string name="no_track">No track</string>
     <string name="nice">Nice</string>
+    <string name="q_clear_queue">Clear queue?</string>
+    <string name="q_clear_queue_below">Clear queue below selected track?</string>
+    <string name="q_clear_queue_above">Clear queue above selected track?</string>
 </resources>

@@ -70,19 +70,21 @@ object PlaybackQueue
 	}
 
 	// returns number of cleared items
-	fun removeBeforeCurrent(): Int
+	fun removeAbove(idx: Int): Int
 	{
-		if (currentIdx != NO_TRACK && currentIdx > 0)
+		if (idx > 0 && idx < size) // note: idxValid checks if idx >= 0, here clearing "before 0" should do nothing
 		{
-			// there are items to clear before current track
+			// there are items to clear before idx
 
-			for (i in 0 until currentIdx)
+			for (i in 0..idx - 1)
 				queue.removeAt(0)
 
-			val removedCnt = currentIdx
-			currentIdx = 0
+			currentIdx -= idx
+			if (currentIdx < 0)
+				currentIdx = 0
+
 			hasChanged = true
-			return removedCnt
+			return idx // = removed cnt
 		}
 		return 0
 	}
@@ -102,17 +104,18 @@ object PlaybackQueue
 	}
 
 	// returns number of cleared items
-	fun removeAfterCurrent(): Int
+	fun removeAfter(idx: Int): Int
 	{
-		if (currentIdx != NO_TRACK && currentIdx < lastIdx)
+		if (idx >= 0 && idx < lastIdx) // note: idxValid checks if idx < size, here clearing "after last item" should do nothing
 		{
 			// there are items to clear at the end
 
-			val removedCnt = lastIdx - currentIdx
-			for (i in lastIdx downTo currentIdx + 1)
-				queue.removeAt(i)
+			val removedCnt = lastIdx - idx
+			for (i in idx+1..lastIdx)
+				queue.removeAt(idx+1)
 
-			currentIdx = lastIdx
+			if (currentIdx > idx) // current track was in cleared range, should now be last item in queue
+				currentIdx = lastIdx
 			hasChanged = true
 			return removedCnt
 		}
@@ -139,48 +142,53 @@ object PlaybackQueue
 		}
 	}
 
-	fun trackExists(pos: Int): Boolean
+	fun trackExists(idx: Int): Boolean
 	{
-		if (pos < 0 || pos >= queue.size) return false
-		return File(queue[pos].path).exists()
+		if (!idxValid(idx)) return false
+		return File(queue[idx].path).exists()
 	}
 
 	fun getCurrentTrackPath(): String?
 	{
-		if (trackSelected())
-			return queue[currentIdx].path
-
-		return null
+		return getTrackPath(currentIdx)
 	}
 
-	fun getCurrentTrackName(): String?
+	fun getTrackPath(idx: Int): String?
 	{
-		if (trackSelected())
-			return queue[currentIdx].name
+		if (!idxValid(idx))
+			return null
 
-		return null
+		return queue[idx].path
 	}
 
 	fun getCurrentTrack(): QueueItem?
 	{
-		if (trackSelected())
-			return queue[currentIdx]
+		if (!idxValid(currentIdx))
+			return null
 
-		return null
+		return queue[currentIdx]
 	}
 
-	fun getCurrentTrackDir(): File?
+	fun getTrackParent(idx: Int): File?
 	{
-		val track = File(queue[currentIdx].path)
+		if (!idxValid(idx))
+			return null
+
+		val track = File(queue[idx].path)
 		if (track.parentFile?.exists() == true)
 			return track.parentFile
 
 		return null
 	}
 
-	fun trackSelected(): Boolean
+	fun currentIdxValid(): Boolean
 	{
-		return size > 0 && currentIdx < size && currentIdx != NO_TRACK
+		return idxValid(currentIdx)
+	}
+
+	private fun idxValid(idx: Int): Boolean
+	{
+		return idx >= 0 && idx < size
 	}
 
 	// changing idx doesn't mean queue has changed

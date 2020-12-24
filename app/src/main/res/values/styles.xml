@@ -4,6 +4,7 @@
         <item name="android:colorPrimary">#000000</item>
         <item name="android:colorPrimaryDark">#000000</item>
         <item name="android:textColor">#FFFFFF</item>
+        <item name="android:itemBackground">#111</item> <!-- context menu bg -->
     </style>
 
     <style name="AppThemeLime" parent="AppThemeBlack">

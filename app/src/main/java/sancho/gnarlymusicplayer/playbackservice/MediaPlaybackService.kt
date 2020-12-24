@@ -300,7 +300,7 @@ class MediaPlaybackService : Service()
 		var error = false
 		try
 		{
-			if (PlaybackQueue.trackSelected())
+			if (PlaybackQueue.currentIdxValid())
 			{
 				TagExtractor.setTrackMeta(_track)
 				_player.reset()

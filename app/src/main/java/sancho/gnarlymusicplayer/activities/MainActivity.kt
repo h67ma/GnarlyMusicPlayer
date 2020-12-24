@@ -1,4 +1,5 @@
 package sancho.gnarlymusicplayer.activities
+
 import android.Manifest
 import android.app.AlertDialog
 import android.content.ComponentName
@@ -300,6 +301,31 @@ class MainActivity : AppCompatActivity()
 		touchHelper.attachToRecyclerView(queue_list_view)
 	}
 
+	override fun onContextItemSelected(menuItem: MenuItem): Boolean
+	{
+		// menuItem.menuInfo is null, need some way to determine which menu this is.
+		// wrapping all menu items in group and checking group id is the easiest way
+		if (menuItem.groupId == R.id.queue_group)
+		{
+			val selectedIdx = _queueAdapter.selectedPosition // will be set in adapter
+			when (menuItem.itemId)
+			{
+				R.id.queue_goto_parent -> gotoTrackDir(selectedIdx)
+				R.id.queue_moveto_top -> TODO("move to top")
+				R.id.queue_moveto_after -> TODO("move to after")
+				R.id.queue_moveto_bottom -> TODO("move to bottom")
+				R.id.queue_clear_above -> clearAbove(selectedIdx)
+				R.id.queue_clear_below -> clearBelow(selectedIdx)
+				R.id.queue_clear_all -> clearAll()
+				R.id.queue_details -> showTrackInfo(selectedIdx)
+				else -> return false
+			}
+			return true
+		}
+
+		return super.onContextItemSelected(menuItem)
+	}
+
 	private fun playTrack(newPosition: Int)
 	{
 		if (!PlaybackQueue.trackExists(newPosition))
@@ -420,20 +446,11 @@ class MainActivity : AppCompatActivity()
 
 		// search thing
 		_actionSearch = menu.findItem(R.id.action_search)
-		val actionClearMenu = menu.findItem(R.id.action_menu_clear)
 
 		val menuElementsToToggle = listOf(
 			menu.findItem(R.id.action_seek),
-			menu.findItem(R.id.action_currenttrack_info),
-			menu.findItem(R.id.action_goto_folder),
-			actionClearMenu,
-			menu.findItem(R.id.action_clearprev),
-			menu.findItem(R.id.action_clearall),
-			menu.findItem(R.id.action_clearafter),
 			menu.findItem(R.id.action_settings)
 		)
-
-		actionClearMenu.subMenu.clearHeader() // don't show header
 
 		val searchThing = _actionSearch?.actionView as SearchView
 		searchThing.queryHint = getString(R.string.search_bar_hint)
@@ -479,11 +496,6 @@ class MainActivity : AppCompatActivity()
 		when (item.itemId)
 		{
 			R.id.action_seek -> showSeekDialog()
-			R.id.action_currenttrack_info -> showCurrTrackInfo()
-			R.id.action_goto_folder -> gotoCurrentTrackDir()
-			R.id.action_clearprev -> clearPrev()
-			R.id.action_clearall -> clearAll()
-			R.id.action_clearafter -> clearAfter()
 			R.id.action_settings -> launchSettings()
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -494,32 +506,17 @@ class MainActivity : AppCompatActivity()
 
 	//region MENU ACTIONS
 
-	private fun showCurrTrackInfo()
+	private fun showTrackInfo(idx: Int)
 	{
-		if (!PlaybackQueue.trackSelected())
-		{
-			Toaster.show(this, getString(R.string.no_track_selected))
-			return
-		}
-
 		val intent = Intent(this, TrackInfoActivity::class.java)
-		intent.putExtra(EXTRA_TRACK_DETAIL_PATH, PlaybackQueue.getCurrentTrackPath())
+		intent.putExtra(EXTRA_TRACK_DETAIL_PATH, PlaybackQueue.getTrackPath(idx))
 		startActivity(intent)
 	}
 
-	private fun gotoCurrentTrackDir()
+	private fun gotoTrackDir(idx: Int)
 	{
-		if (!PlaybackQueue.trackSelected())
-		{
-			Toaster.show(this, getString(R.string.no_track_selected))
-			return
-		}
-
-		val dir = PlaybackQueue.getCurrentTrackDir()
-		if (dir != null)
-			_explorerAdapter.updateDirectoryView(dir)
-		else
-			Toaster.show(this, getString(R.string.dir_doesnt_exist))
+		_explorerAdapter.updateDirectoryView(PlaybackQueue.getTrackParent(idx))
+		drawer_layout.closeDrawer(GravityCompat.START)
 	}
 
 	private fun showSeekDialog()
@@ -591,19 +588,64 @@ class MainActivity : AppCompatActivity()
 		_seekDialog?.show()
 	}
 
-	private fun clearPrev()
+	private fun confirmDialog(message: String, callback: () -> Unit)
 	{
-		val clearedCnt = PlaybackQueue.removeBeforeCurrent()
-		if (clearedCnt > 0)
+		AlertDialog.Builder(this)
+			.setMessage(message)
+			.setPositiveButton(android.R.string.ok) { _, _ -> callback() }
+			.setNegativeButton(android.R.string.cancel, null)
+			.show()
+	}
+
+	private fun clearAbove(idx: Int)
+	{
+		confirmDialog(getString(R.string.q_clear_queue_above))
 		{
-			_queueAdapter.notifyItemRangeRemoved(0, clearedCnt)
+			val oldCurrIdx = PlaybackQueue.currentIdx
+
+			val clearedCnt = PlaybackQueue.removeAbove(idx)
+			if (clearedCnt > 0)
+			{
+				_queueAdapter.notifyItemRangeRemoved(0, idx)
+				_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx) // could've changed to selected
+			}
+
 			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
+
+			if (oldCurrIdx - clearedCnt != PlaybackQueue.currentIdx)
+			{
+				if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
+					_service?.setTrack(false)
+			}
+		}
+	}
+
+	private fun clearBelow(idx: Int)
+	{
+		confirmDialog(getString(R.string.q_clear_queue_below))
+		{
+			val oldCurrIdx = PlaybackQueue.currentIdx
+
+			val clearedCnt = PlaybackQueue.removeAfter(idx)
+			if (clearedCnt > 0)
+			{
+				_queueAdapter.notifyItemRangeRemoved(idx + 1, clearedCnt)
+				_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx) // could've changed to selected
+			}
+
+			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
+
+			if (oldCurrIdx != PlaybackQueue.currentIdx)
+			{
+				if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
+					_service?.setTrack(false)
+			}
 		}
 	}
 
 	private fun clearAll()
 	{
-		if (PlaybackQueue.size > 0)
+		confirmDialog(getString(R.string.q_clear_queue))
 		{
 			// gotta stop service before removing all
 			if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
@@ -612,17 +654,6 @@ class MainActivity : AppCompatActivity()
 			val clearedCnt = PlaybackQueue.removeAll()
 
 			_queueAdapter.notifyItemRangeRemoved(0, clearedCnt)
-			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
-		}
-	}
-
-	private fun clearAfter()
-	{
-		val removedFromIdx = PlaybackQueue.currentIdx + 1
-		val clearedCnt = PlaybackQueue.removeAfterCurrent()
-		if (clearedCnt > 0)
-		{
-			_queueAdapter.notifyItemRangeRemoved(removedFromIdx, clearedCnt)
 			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
 		}
 	}

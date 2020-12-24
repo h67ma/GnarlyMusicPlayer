@@ -16,39 +16,8 @@
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/action_currenttrack_info"
-        android:title="Current track info"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_goto_folder"
-        android:title="Go to current track's directory"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_menu_clear"
-        android:title="Clear queue"
-        app:showAsAction="never">
-
-        <menu>
-            <item
-                android:id="@+id/action_clearprev"
-                android:title="Clear before current track"
-                app:showAsAction="never"/>
-            <item
-                android:id="@+id/action_clearall"
-                android:title="Clear all"
-                app:showAsAction="never"/>
-            <item
-                android:id="@+id/action_clearafter"
-                android:title="Clear after current track"
-                app:showAsAction="never"/>
-        </menu>
-
-    </item>
-
-    <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
-        app:showAsAction="never"/>
+        android:icon="@drawable/settings"
+        app:showAsAction="always"/>
 </menu>
