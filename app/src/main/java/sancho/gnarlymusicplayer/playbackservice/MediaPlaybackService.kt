@@ -114,7 +114,7 @@ class MediaPlaybackService : Service()
 		}
 	}
 
-	override fun onBind(intent: Intent): IBinder?
+	override fun onBind(intent: Intent): IBinder
 	{
 		return _binder
 	}
