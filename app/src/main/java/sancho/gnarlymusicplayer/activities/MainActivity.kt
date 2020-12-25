@@ -161,8 +161,15 @@ class MainActivity : AppCompatActivity()
 
 	private fun setupFileList()
 	{
-		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::playTrack, ::setToolbarText, ::setDirListLoading)
+		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::setToolbarText, ::setDirListLoading)
 		library_list_view.adapter = _explorerAdapter
+
+		library_list_view.setOnCreateContextMenuListener{ menu, _, _ ->
+			menuInflater.inflate(R.menu.explorer_item, menu)
+			menu?.setHeaderTitle(_dirList[_explorerAdapter.selectedPosition].displayName) // selectedPosition will be set in adapter
+			menu?.setGroupDividerEnabled(true)
+			_whichMenuIsOpen = WhichMenu.EXPLORER
+		}
 	}
 
 	private fun setupBookmarks()
@@ -319,14 +326,28 @@ class MainActivity : AppCompatActivity()
 			val selectedIdx = _queueAdapter.selectedPosition // will be set in adapter
 			when (menuItem.itemId)
 			{
-				R.id.queue_goto_parent -> gotoTrackDir(selectedIdx)
+				R.id.queue_goto_parent -> gotoQueueTrackDir(selectedIdx)
 				R.id.queue_moveto_after -> moveAfterCurrentTrack(selectedIdx)
 				R.id.queue_moveto_top -> moveQueueItem(selectedIdx, 0)
 				R.id.queue_moveto_bottom -> moveQueueItem(selectedIdx, PlaybackQueue.lastIdx)
 				R.id.queue_clear_above -> clearAbove(selectedIdx)
 				R.id.queue_clear_below -> clearBelow(selectedIdx)
 				R.id.queue_clear_all -> clearAll()
-				R.id.queue_details -> showTrackInfo(selectedIdx)
+				R.id.queue_details -> showQueueTrackInfo(selectedIdx)
+				else -> return false
+			}
+			return true
+		}
+		else if (_whichMenuIsOpen == WhichMenu.EXPLORER)
+		{
+			val selectedIdx = _explorerAdapter.selectedPosition // will be set in adapter
+			val itemPath = _dirList[selectedIdx].path
+			when (menuItem.itemId)
+			{
+				R.id.explorer_details -> showExplorerTrackInfo(itemPath)
+				R.id.explorer_goto_parent -> gotoExplorerTrackDir(itemPath)
+				R.id.explorer_addto_top -> addToQueueAt(0, itemPath)
+				R.id.explorer_addto_after_current -> addToQueueAt(PlaybackQueue.currentIdx + 1, itemPath)
 				else -> return false
 			}
 			return true
@@ -515,7 +536,7 @@ class MainActivity : AppCompatActivity()
 
 	//region MENU ACTIONS
 
-	private fun showTrackInfo(idx: Int)
+	private fun showQueueTrackInfo(idx: Int)
 	{
 		if (!PlaybackQueue.trackExists(idx))
 		{
@@ -523,12 +544,28 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
+		showTrackInfo(PlaybackQueue.getTrackPath(idx))
+	}
+
+	private fun showExplorerTrackInfo(path: String)
+	{
+		if (!File(path).exists())
+		{
+			Toaster.show(this, getString(R.string.file_doesnt_exist))
+			return
+		}
+
+		showTrackInfo(path)
+	}
+
+	private fun showTrackInfo(path: String?)
+	{
 		val intent = Intent(this, TrackInfoActivity::class.java)
-		intent.putExtra(EXTRA_TRACK_DETAIL_PATH, PlaybackQueue.getTrackPath(idx))
+		intent.putExtra(EXTRA_TRACK_DETAIL_PATH, path)
 		startActivity(intent)
 	}
 
-	private fun gotoTrackDir(idx: Int)
+	private fun gotoQueueTrackDir(idx: Int)
 	{
 		if (!PlaybackQueue.trackExists(idx))
 		{
@@ -538,6 +575,32 @@ class MainActivity : AppCompatActivity()
 
 		_explorerAdapter.updateDirectoryView(PlaybackQueue.getTrackParent(idx))
 		drawer_layout.closeDrawer(GravityCompat.START)
+	}
+
+	private fun gotoExplorerTrackDir(path: String)
+	{
+		val parent = File(path).parentFile
+		if (parent?.exists() != true)
+		{
+			Toaster.show(this, getString(R.string.file_doesnt_exist))
+			return
+		}
+		_explorerAdapter.updateDirectoryView(parent)
+	}
+
+	private fun addToQueueAt(idx: Int, path: String)
+	{
+		val file = File(path)
+
+		if (!file.exists())
+		{
+			Toaster.show(this, getString(R.string.file_doesnt_exist))
+			return
+		}
+
+		PlaybackQueue.addAt(idx, QueueItem(file.absolutePath, file.nameWithoutExtension))
+		_queueAdapter.notifyItemInserted(idx)
+		_queueAdapter.notifyItemRangeChanged(idx, PlaybackQueue.lastIdx) // need to update indexes in tail
 	}
 
 	private fun showSeekDialog()

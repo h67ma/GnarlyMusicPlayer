@@ -23,6 +23,17 @@ object PlaybackQueue
 		hasChanged = true
 	}
 
+	fun addAt(idx: Int, item: QueueItem)
+	{
+		queue.add(idx, item)
+		hasChanged = true
+
+		if (idx <= currentIdx)
+		{
+			currentIdx += 1
+		}
+	}
+
 	fun add(trackList: List<QueueItem>)
 	{
 		queue.addAll(trackList)

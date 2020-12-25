@@ -30,13 +30,13 @@ class ExplorerAdapter(
 	private val _dirList: MutableList<ExplorerViewItem>,
 	private val _queueAdapter: QueueAdapter,
 	private val _restoreListScrollPos: (String?) -> Unit,
-	private val _playTrack: (Int) -> Unit,
 	private val _setToolbarText: (String) -> Unit,
 	private val _setDirListLoading: (Boolean) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	private val _mountedDevices: MutableList<ExplorerViewItem> = mutableListOf()
 	var currentExplorerPath: File? = null
 	var searchResultsOpen = false
+	var selectedPosition: Int = -1
 
 	private var _fileLoaderJob: Job? = null
 
@@ -52,7 +52,44 @@ class ExplorerAdapter(
 
 	override fun onBindViewHolder(holder: FileHolder, position: Int)
 	{
-		holder.bind(_dirList[position], ::singleClick, ::longClick)
+		val file = _dirList[position]
+
+		if (file.isHeader)
+		{
+			holder.itemView.explorer_header_text.text = file.displayName
+		}
+		else
+		{
+			holder.itemView.explorer_text.text = file.displayName
+
+			val icon = when
+			{
+				file.isDirectory -> R.drawable.folder
+				file.isError -> R.drawable.warning
+				FileSupportChecker.isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
+				else -> R.drawable.note
+			}
+
+			holder.itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
+
+			holder.itemView.setOnClickListener { singleClick(file) }
+			holder.itemView.setOnLongClickListener {
+				if (file.isHeader)
+				{
+					true // no need to do anything for headers
+				}
+				else if (file.isDirectory || FileSupportChecker.isFileSupportedAndPlaylist(file.path))
+				{
+					longClick(file) // directory or playlist
+					true // don't show context menu
+				}
+				else
+				{
+					selectedPosition = holder.adapterPosition // track - context menu
+					false // show context menu
+				}
+			}
+		}
 	}
 
 	override fun getItemCount() = _dirList.size
@@ -67,35 +104,6 @@ class ExplorerAdapter(
 	}
 
 	class FileHolder(view: View) : RecyclerView.ViewHolder(view)
-	{
-		fun bind(file: ExplorerViewItem, clickListener: (ExplorerViewItem) -> Unit, longClickListener: (ExplorerViewItem) -> Unit)
-		{
-			if (file.isHeader)
-			{
-				itemView.explorer_header_text.text = file.displayName
-			}
-			else
-			{
-				itemView.explorer_text.text = file.displayName
-
-				val icon = when
-				{
-					file.isDirectory -> R.drawable.folder
-					file.isError -> R.drawable.warning
-					FileSupportChecker.isFileSupportedAndPlaylist(file.path) -> R.drawable.playlist
-					else -> R.drawable.note
-				}
-
-				itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
-
-				itemView.setOnClickListener { clickListener(file) }
-				itemView.setOnLongClickListener {
-					longClickListener(file)
-					true // callback consumed long press
-				}
-			}
-		}
-	}
 
 	override fun getItemViewType(pos: Int): Int
 	{
@@ -147,7 +155,7 @@ class ExplorerAdapter(
 
 		if (!file.exists())
 		{
-			Toaster.show(_context, _context.getString(R.string.file_doesnt_exist))
+			Toaster.show(_context, _context.getString(R.string.dir_doesnt_exist))
 			return
 		}
 
@@ -183,12 +191,6 @@ class ExplorerAdapter(
 			}
 			else
 				Toaster.show(_context, _context.getString(R.string.file_list_error))
-		}
-		else
-		{
-			// audio file
-			addToQueue(QueueItem(file.absolutePath, file.nameWithoutExtension))
-			_playTrack(PlaybackQueue.lastIdx)
 		}
 	}
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/explorer_cat_general">
+        <item android:id="@+id/explorer_details"
+            android:title="Details"/>
+
+        <item android:id="@+id/explorer_goto_parent"
+            android:title="Open parent directory"/>
+    </group>
+    <group android:id="@+id/explorer_cat_addto">
+        <item android:id="@+id/explorer_addto_after_current"
+            android:title="Insert track after current track"/>
+
+        <item android:id="@+id/explorer_addto_top"
+            android:title="Insert track on top of queue"/>
+    </group>
+</menu>
