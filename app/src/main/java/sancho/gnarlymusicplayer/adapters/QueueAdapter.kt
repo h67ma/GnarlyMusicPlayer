@@ -19,11 +19,11 @@ class QueueAdapter(
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
-		holder.itemView.queue_text.text = PlaybackQueue.queue[position].name
+		holder.itemView.queue_text.text = PlaybackQueue.queue[holder.adapterPosition].name
 
-		holder.itemView.isSelected = PlaybackQueue.currentIdx == position
+		holder.itemView.isSelected = PlaybackQueue.currentIdx == holder.adapterPosition
 
-		holder.itemView.setOnClickListener { cliccListener(position) }
+		holder.itemView.setOnClickListener { cliccListener(holder.adapterPosition) }
 
 		holder.itemView.setOnLongClickListener {
 			selectedPosition = holder.adapterPosition

@@ -85,7 +85,7 @@ class ExplorerAdapter(
 				}
 				else
 				{
-					selectedPosition = holder.adapterPosition // track - context menu
+					selectedPosition = position // track - context menu
 					false // show context menu
 				}
 			}

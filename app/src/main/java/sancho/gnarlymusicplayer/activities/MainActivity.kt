@@ -700,9 +700,8 @@ class MainActivity : AppCompatActivity()
 			val clearedCnt = PlaybackQueue.removeAbove(idx)
 			if (clearedCnt > 0)
 			{
-				// pretty much have to rebuild entire list, as items were removed from top
-				// and the tail has to be updated with new indexes
-				_queueAdapter.notifyDataSetChanged()
+				_queueAdapter.notifyItemRangeRemoved(0, idx)
+				_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx) // could've changed to selected
 			}
 
 			Toaster.show(this, getString(R.string.cleared_n_tracks, clearedCnt))
