@@ -101,7 +101,7 @@ object PlaybackQueue
 	}
 
 	// returns number of cleared items
-	fun removeAfter(idx: Int): Int
+	fun removeBelow(idx: Int): Int
 	{
 		if (idx >= 0 && idx < lastIdx) // note: idxValid checks if idx < size, here clearing "after last item" should do nothing
 		{

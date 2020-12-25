@@ -657,7 +657,7 @@ class MainActivity : AppCompatActivity()
 		{
 			val oldCurrIdx = PlaybackQueue.currentIdx
 
-			val clearedCnt = PlaybackQueue.removeAfter(idx)
+			val clearedCnt = PlaybackQueue.removeBelow(idx)
 			if (clearedCnt > 0)
 			{
 				_queueAdapter.notifyItemRangeRemoved(idx + 1, clearedCnt)
