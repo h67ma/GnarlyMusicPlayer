@@ -269,8 +269,7 @@ class MainActivity : AppCompatActivity()
 			{
 				val fromPosition = viewHolder.adapterPosition
 				val toPosition = target.adapterPosition
-				_queueAdapter.onItemMoved(fromPosition, toPosition)
-				PlaybackQueue.updateIdxAfterItemMoved(fromPosition, toPosition)
+				moveQueueItem(fromPosition, toPosition)
 
 				return true
 			}
@@ -311,9 +310,9 @@ class MainActivity : AppCompatActivity()
 			when (menuItem.itemId)
 			{
 				R.id.queue_goto_parent -> gotoTrackDir(selectedIdx)
-				R.id.queue_moveto_top -> TODO("move to top")
-				R.id.queue_moveto_after -> TODO("move to after")
-				R.id.queue_moveto_bottom -> TODO("move to bottom")
+				R.id.queue_moveto_top -> moveQueueItem(selectedIdx, 0)
+				R.id.queue_moveto_after -> moveAfterCurrentTrack(selectedIdx)
+				R.id.queue_moveto_bottom -> moveQueueItem(selectedIdx, PlaybackQueue.lastIdx)
 				R.id.queue_clear_above -> clearAbove(selectedIdx)
 				R.id.queue_clear_below -> clearBelow(selectedIdx)
 				R.id.queue_clear_all -> clearAll()
@@ -586,6 +585,25 @@ class MainActivity : AppCompatActivity()
 			.create()
 
 		_seekDialog?.show()
+	}
+
+	private fun moveAfterCurrentTrack(fromPosition: Int)
+	{
+		// current track and track after that will be ignored
+		val toPosition = PlaybackQueue.currentIdx
+		if (fromPosition > toPosition + 1)
+			moveQueueItem(fromPosition, toPosition + 1)
+		else if (fromPosition < toPosition)
+			moveQueueItem(fromPosition, toPosition)
+	}
+
+	private fun moveQueueItem(fromPosition: Int, toPosition: Int)
+	{
+		if (fromPosition == toPosition)
+			return
+
+		_queueAdapter.onItemMoved(fromPosition, toPosition)
+		PlaybackQueue.updateIdxAfterItemMoved(fromPosition, toPosition)
 	}
 
 	private fun confirmDialog(message: String, callback: () -> Unit)
