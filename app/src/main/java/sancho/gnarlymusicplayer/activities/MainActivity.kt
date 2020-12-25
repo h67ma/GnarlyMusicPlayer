@@ -628,18 +628,9 @@ class MainActivity : AppCompatActivity()
 		PlaybackQueue.updateIdxAfterItemMoved(fromPosition, toPosition)
 	}
 
-	private fun confirmDialog(message: String, callback: () -> Unit)
-	{
-		AlertDialog.Builder(this)
-			.setMessage(message)
-			.setPositiveButton(android.R.string.ok) { _, _ -> callback() }
-			.setNegativeButton(android.R.string.cancel, null)
-			.show()
-	}
-
 	private fun clearAbove(idx: Int)
 	{
-		confirmDialog(getString(R.string.q_clear_queue_above, PlaybackQueue.getTrackName(idx)))
+		ConfirmDialog.show(this, getString(R.string.q_clear_queue_above, PlaybackQueue.getTrackName(idx)))
 		{
 			val oldCurrIdx = PlaybackQueue.currentIdx
 
@@ -662,7 +653,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun clearBelow(idx: Int)
 	{
-		confirmDialog(getString(R.string.q_clear_queue_below, PlaybackQueue.getTrackName(idx)))
+		ConfirmDialog.show(this, getString(R.string.q_clear_queue_below, PlaybackQueue.getTrackName(idx)))
 		{
 			val oldCurrIdx = PlaybackQueue.currentIdx
 
@@ -685,7 +676,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun clearAll()
 	{
-		confirmDialog(getString(R.string.q_clear_queue))
+		ConfirmDialog.show(this, getString(R.string.q_clear_queue))
 		{
 			// gotta stop service before removing all
 			if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
