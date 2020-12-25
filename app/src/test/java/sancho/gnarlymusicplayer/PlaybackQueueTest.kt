@@ -88,9 +88,9 @@ class PlaybackQueueTest
 	}
 
 	@Test
-	fun removeBeforeHasChanged()
+	fun removeAboveCurrentHasChanged()
 	{
-		PlaybackQueue.removeBeforeCurrent()
+		PlaybackQueue.removeAbove(PlaybackQueue.currentIdx)
 		assertTrue(PlaybackQueue.hasChanged)
 	}
 
@@ -98,14 +98,14 @@ class PlaybackQueueTest
 	fun removeZeroBeforeHasntChanged()
 	{
 		PlaybackQueue.currentIdx = 0
-		PlaybackQueue.removeBeforeCurrent()
+		PlaybackQueue.removeAbove(PlaybackQueue.currentIdx)
 		assertFalse(PlaybackQueue.hasChanged)
 	}
 
 	@Test
-	fun removeAfterHasChanged()
+	fun removeAfterCurrentHasChanged()
 	{
-		PlaybackQueue.removeAfterCurrent()
+		PlaybackQueue.removeBelow(PlaybackQueue.currentIdx)
 		assertTrue(PlaybackQueue.hasChanged)
 	}
 
@@ -113,7 +113,7 @@ class PlaybackQueueTest
 	fun removeZeroAfterHasntChanged()
 	{
 		PlaybackQueue.currentIdx = PlaybackQueue.size - 1
-		PlaybackQueue.removeAfterCurrent()
+		PlaybackQueue.removeBelow(PlaybackQueue.currentIdx)
 		assertFalse(PlaybackQueue.hasChanged)
 	}
 
@@ -175,7 +175,7 @@ class PlaybackQueueTest
 		PlaybackQueue.removeCurrent()
 		PlaybackQueue.removeCurrent()
 		PlaybackQueue.removeCurrent()
-		assertEquals(NO_TRACK, PlaybackQueue.currentIdx)
+		assertEquals(0, PlaybackQueue.currentIdx) // should return to default 0
 	}
 
 	@Test
@@ -213,7 +213,7 @@ class PlaybackQueueTest
 	@Test
 	fun removeBeforeCurrent()
 	{
-		PlaybackQueue.removeBeforeCurrent()
+		PlaybackQueue.removeAbove(PlaybackQueue.currentIdx)
 		assertArrayEquals(listOf(
 			QueueItem("c", "3"),
 			QueueItem("d", "4"),
@@ -224,7 +224,7 @@ class PlaybackQueueTest
 	@Test
 	fun removeAfterCurrent()
 	{
-		PlaybackQueue.removeAfterCurrent()
+		PlaybackQueue.removeBelow(PlaybackQueue.currentIdx)
 		assertArrayEquals(listOf(
 			QueueItem("a", "1"),
 			QueueItem("b", "2"),
@@ -235,32 +235,32 @@ class PlaybackQueueTest
 	@Test
 	fun removeBeforeCurrentRetval()
 	{
-		var retval = PlaybackQueue.removeBeforeCurrent()
+		var retval = PlaybackQueue.removeAbove(PlaybackQueue.currentIdx)
 		assertEquals(2, retval)
-		retval = PlaybackQueue.removeBeforeCurrent()
+		retval = PlaybackQueue.removeAbove(PlaybackQueue.currentIdx)
 		assertEquals(0, retval)
 	}
 
 	@Test
 	fun removeAfterCurrentRetval()
 	{
-		var retval = PlaybackQueue.removeAfterCurrent()
+		var retval = PlaybackQueue.removeBelow(PlaybackQueue.currentIdx)
 		assertEquals(2, retval)
-		retval = PlaybackQueue.removeAfterCurrent()
+		retval = PlaybackQueue.removeBelow(PlaybackQueue.currentIdx)
 		assertEquals(0, retval)
 	}
 
 	@Test
 	fun removeBeforeCurrentIndex()
 	{
-		PlaybackQueue.removeBeforeCurrent()
+		PlaybackQueue.removeAbove(PlaybackQueue.currentIdx)
 		assertEquals(0, PlaybackQueue.currentIdx) // should be first
 	}
 
 	@Test
 	fun removeAfterCurrentIndex()
 	{
-		PlaybackQueue.removeAfterCurrent()
+		PlaybackQueue.removeBelow(PlaybackQueue.currentIdx)
 		assertEquals(2, PlaybackQueue.currentIdx) // should stay the same
 	}
 
@@ -269,7 +269,7 @@ class PlaybackQueueTest
 	{
 		PlaybackQueue.removeAll()
 		assertTrue(PlaybackQueue.queue.isEmpty())
-		assertEquals(NO_TRACK, PlaybackQueue.currentIdx)
+		assertEquals(0, PlaybackQueue.currentIdx)
 	}
 
 	@Test
@@ -333,6 +333,38 @@ class PlaybackQueueTest
 	{
 		PlaybackQueue.updateIdxAfterItemMoved(2, 1)
 		assertEquals(1, PlaybackQueue.currentIdx)
+	}
+
+	@Test
+	fun idxValidNegative()
+	{
+		PlaybackQueue.currentIdx = -1
+		val valid = PlaybackQueue.currentIdxValid()
+		assertFalse(valid)
+	}
+
+	@Test
+	fun idxValidGreaterThanSize()
+	{
+		PlaybackQueue.currentIdx = 5
+		val valid = PlaybackQueue.currentIdxValid()
+		assertFalse(valid)
+	}
+
+	@Test
+	fun idxValidOkMin()
+	{
+		PlaybackQueue.currentIdx = 0
+		val valid = PlaybackQueue.currentIdxValid()
+		assertTrue(valid)
+	}
+
+	@Test
+	fun idxValidOkMax()
+	{
+		PlaybackQueue.currentIdx = 3
+		val valid = PlaybackQueue.currentIdxValid()
+		assertTrue(valid)
 	}
 
 	@Test
