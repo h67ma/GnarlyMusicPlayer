@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:id="@+id/queue_group">
-        <item android:id="@+id/queue_goto_parent"
-            android:title="Open parent directory" />
-
-        <item android:id="@+id/queue_moveto_top"
-            android:title="Move to top of queue" />
-
-        <item android:id="@+id/queue_moveto_after"
-            android:title="Move after current track" />
-
-        <item android:id="@+id/queue_moveto_bottom"
-            android:title="Move to bottom of queue" />
-
-        <item android:id="@+id/queue_clear_above"
-            android:title="Clear tracks above" />
-
-        <item android:id="@+id/queue_clear_below"
-            android:title="Clear tracks below" />
-
-        <item android:id="@+id/queue_clear_all"
-            android:title="Clear queue" />
-
+    <group android:id="@+id/queue_cat_one">
         <item android:id="@+id/queue_details"
             android:title="Details"/>
+
+        <item android:id="@+id/queue_goto_parent"
+            android:title="Open parent directory"/>
+    </group>
+    <group android:id="@+id/queue_cat_two">
+        <item android:id="@+id/queue_moveto_after"
+            android:title="Move after current track"/>
+
+        <item android:id="@+id/queue_moveto_top"
+            android:title="Move to top of queue"/>
+
+        <item android:id="@+id/queue_moveto_bottom"
+            android:title="Move to bottom of queue"/>
+    </group>
+    <group android:id="@+id/queue_cat_three">
+        <item android:id="@+id/queue_clear_above"
+            android:title="Clear tracks above"/>
+
+        <item android:id="@+id/queue_clear_below"
+            android:title="Clear tracks below"/>
+
+        <item android:id="@+id/queue_clear_all"
+            android:title="Clear queue"/>
     </group>
 </menu>

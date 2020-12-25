@@ -161,6 +161,14 @@ object PlaybackQueue
 		return queue[idx].path
 	}
 
+	fun getTrackName(idx: Int): String?
+	{
+		if (!idxValid(idx))
+			return null
+
+		return queue[idx].name
+	}
+
 	fun getCurrentTrack(): QueueItem?
 	{
 		if (!idxValid(currentIdx))

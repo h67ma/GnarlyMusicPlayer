@@ -22,10 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_seek.view.*
-import sancho.gnarlymusicplayer.AppSettingsManager
-import sancho.gnarlymusicplayer.PlaybackQueue
-import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.Toaster
+import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
@@ -61,6 +58,8 @@ class MainActivity : AppCompatActivity()
 
 	private var _service: MediaPlaybackService? = null
 	private lateinit var _serviceConn: ServiceConnection
+
+	private var _whichMenuIsOpen = WhichMenu.NONE
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -298,20 +297,31 @@ class MainActivity : AppCompatActivity()
 		})
 		_queueAdapter.touchHelper = touchHelper
 		touchHelper.attachToRecyclerView(queue_list_view)
+
+		queue_list_view.setOnCreateContextMenuListener{ menu, _, _ ->
+			menuInflater.inflate(R.menu.queue_item, menu)
+			menu?.setHeaderTitle(PlaybackQueue.getTrackName(_queueAdapter.selectedPosition)) // selectedPosition will be set in adapter
+			menu?.setGroupDividerEnabled(true)
+			_whichMenuIsOpen = WhichMenu.QUEUE
+		}
 	}
 
 	override fun onContextItemSelected(menuItem: MenuItem): Boolean
 	{
 		// menuItem.menuInfo is null, need some way to determine which menu this is.
-		// wrapping all menu items in group and checking group id is the easiest way
-		if (menuItem.groupId == R.id.queue_group)
+		// although you can extend RecyclerView and override getContextMenuInfo()
+		// to get menu info, this approach is far simpler and cleaner.
+		// another approach is to wrap all menu items in group and check group id,
+		// but then you loose the ability to add separators in context menu
+
+		if (_whichMenuIsOpen == WhichMenu.QUEUE)
 		{
 			val selectedIdx = _queueAdapter.selectedPosition // will be set in adapter
 			when (menuItem.itemId)
 			{
 				R.id.queue_goto_parent -> gotoTrackDir(selectedIdx)
-				R.id.queue_moveto_top -> moveQueueItem(selectedIdx, 0)
 				R.id.queue_moveto_after -> moveAfterCurrentTrack(selectedIdx)
+				R.id.queue_moveto_top -> moveQueueItem(selectedIdx, 0)
 				R.id.queue_moveto_bottom -> moveQueueItem(selectedIdx, PlaybackQueue.lastIdx)
 				R.id.queue_clear_above -> clearAbove(selectedIdx)
 				R.id.queue_clear_below -> clearBelow(selectedIdx)
@@ -617,7 +627,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun clearAbove(idx: Int)
 	{
-		confirmDialog(getString(R.string.q_clear_queue_above))
+		confirmDialog(getString(R.string.q_clear_queue_above, PlaybackQueue.getTrackName(idx)))
 		{
 			val oldCurrIdx = PlaybackQueue.currentIdx
 
@@ -640,7 +650,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun clearBelow(idx: Int)
 	{
-		confirmDialog(getString(R.string.q_clear_queue_below))
+		confirmDialog(getString(R.string.q_clear_queue_below, PlaybackQueue.getTrackName(idx)))
 		{
 			val oldCurrIdx = PlaybackQueue.currentIdx
 

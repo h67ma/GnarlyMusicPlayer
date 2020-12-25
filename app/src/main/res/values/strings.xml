@@ -39,6 +39,6 @@
     <string name="no_track">No track</string>
     <string name="nice">Nice</string>
     <string name="q_clear_queue">Clear queue?</string>
-    <string name="q_clear_queue_below">Clear queue below selected track?</string>
-    <string name="q_clear_queue_above">Clear queue above selected track?</string>
+    <string name="q_clear_queue_below">Clear queue below \"%1$s\"?</string>
+    <string name="q_clear_queue_above">Clear queue above \"%1$s\"?</string>
 </resources>

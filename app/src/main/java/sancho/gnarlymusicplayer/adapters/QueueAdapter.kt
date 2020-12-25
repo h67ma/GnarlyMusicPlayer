@@ -3,7 +3,6 @@ package sancho.gnarlymusicplayer.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.*
-import android.view.ContextMenu.ContextMenuInfo
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.queue_item.view.*
@@ -51,27 +50,7 @@ class QueueAdapter(
 		return TrackHolder(LayoutInflater.from(context).inflate(R.layout.queue_item, parent, false))
 	}
 
-	class TrackHolder(view: View) : RecyclerView.ViewHolder(view), View.OnCreateContextMenuListener
-	{
-		init
-		{
-			itemView.setOnCreateContextMenuListener(this)
-		}
-
-		override fun onCreateContextMenu(menu: ContextMenu?, v: View, menuInfo: ContextMenuInfo?)
-		{
-			// popupmenu - I don't know how to show header and menu position is messed up :/
-			// if u want to use this, implement PopupMenu.OnMenuItemClickListener
-			//val popup = PopupMenu(v.context, v)
-			//popup.menuInflater.inflate(R.menu.queue_item, popup.menu)
-			//popup.setOnMenuItemClickListener(this)
-			//popup.show()
-
-			val inflater = MenuInflater(v.context)
-			inflater.inflate(R.menu.queue_item, menu)
-			menu?.setHeaderTitle(PlaybackQueue.queue[adapterPosition].name)
-		}
-	}
+	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
 
 	fun onItemMoved(fromPosition: Int, toPosition: Int)
 	{
