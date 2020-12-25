@@ -1,16 +1,13 @@
 package sancho.gnarlymusicplayer
 
-import androidx.recyclerview.widget.RecyclerView
 import sancho.gnarlymusicplayer.models.QueueItem
 import java.io.File
-
-const val NO_TRACK = RecyclerView.NO_POSITION
 
 object PlaybackQueue
 {
 	var queue = mutableListOf<QueueItem>()
 
-	var currentIdx: Int = NO_TRACK
+	var currentIdx: Int = 0
 	var autoClean: Boolean = false
 	var hasChanged: Boolean = false
 
@@ -57,7 +54,7 @@ object PlaybackQueue
 			if (size <= 0)
 			{
 				// no other track available
-				currentIdx = NO_TRACK
+				currentIdx = 0
 			}
 			else if (pos >= size)
 			{
@@ -96,7 +93,7 @@ object PlaybackQueue
 		{
 			val removedCnt = size
 			queue.clear()
-			currentIdx = NO_TRACK
+			currentIdx = 0
 			hasChanged = true
 			return removedCnt
 		}

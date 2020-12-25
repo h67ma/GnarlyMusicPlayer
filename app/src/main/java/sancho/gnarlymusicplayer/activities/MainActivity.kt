@@ -517,6 +517,12 @@ class MainActivity : AppCompatActivity()
 
 	private fun showTrackInfo(idx: Int)
 	{
+		if (!PlaybackQueue.trackExists(idx))
+		{
+			Toaster.show(this, getString(R.string.file_doesnt_exist))
+			return
+		}
+
 		val intent = Intent(this, TrackInfoActivity::class.java)
 		intent.putExtra(EXTRA_TRACK_DETAIL_PATH, PlaybackQueue.getTrackPath(idx))
 		startActivity(intent)
@@ -524,6 +530,12 @@ class MainActivity : AppCompatActivity()
 
 	private fun gotoTrackDir(idx: Int)
 	{
+		if (!PlaybackQueue.trackExists(idx))
+		{
+			Toaster.show(this, getString(R.string.file_doesnt_exist))
+			return
+		}
+
 		_explorerAdapter.updateDirectoryView(PlaybackQueue.getTrackParent(idx))
 		drawer_layout.closeDrawer(GravityCompat.START)
 	}
