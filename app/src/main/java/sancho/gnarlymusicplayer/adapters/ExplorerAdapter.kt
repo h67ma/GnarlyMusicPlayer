@@ -74,11 +74,8 @@ class ExplorerAdapter(
 
 			holder.itemView.setOnClickListener { singleClick(file) }
 			holder.itemView.setOnLongClickListener {
-				if (file.isHeader)
-				{
-					true // no need to do anything for headers
-				}
-				else if (file.isDirectory || FileSupportChecker.isFileSupportedAndPlaylist(file.path))
+				// don't worry about header items, they are unclickable (famous last words)
+				if (file.isDirectory || FileSupportChecker.isFileSupportedAndPlaylist(file.path))
 				{
 					longClick(file) // directory or playlist
 					true // don't show context menu
