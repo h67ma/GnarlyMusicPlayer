@@ -25,8 +25,16 @@ object PlaybackQueue
 
 	fun addAt(idx: Int, item: QueueItem)
 	{
-		queue.add(idx, item)
 		hasChanged = true
+
+		if (idx > size) // illegal, just do normal add instead
+		{
+			queue.add(item)
+			// currentIdx didn't change
+			return
+		}
+
+		queue.add(idx, item)
 
 		if (idx <= currentIdx)
 		{
