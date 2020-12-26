@@ -9,9 +9,9 @@
     </group>
     <group android:id="@+id/explorer_cat_addto">
         <item android:id="@+id/explorer_addto_after_current"
-            android:title="Insert track after current track"/>
+            android:title="Insert after current track"/>
 
         <item android:id="@+id/explorer_addto_top"
-            android:title="Insert track on top of queue"/>
+            android:title="Insert on top of queue"/>
     </group>
 </menu>

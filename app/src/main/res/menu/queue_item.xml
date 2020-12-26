@@ -9,22 +9,22 @@
     </group>
     <group android:id="@+id/queue_cat_two">
         <item android:id="@+id/queue_moveto_after"
-            android:title="Move after current track"/>
+            android:title="Move after current"/>
 
         <item android:id="@+id/queue_moveto_top"
-            android:title="Move to top of queue"/>
+            android:title="Move to top"/>
 
         <item android:id="@+id/queue_moveto_bottom"
-            android:title="Move to bottom of queue"/>
+            android:title="Move to bottom"/>
     </group>
     <group android:id="@+id/queue_cat_three">
         <item android:id="@+id/queue_clear_above"
-            android:title="Clear tracks above"/>
+            android:title="Clear above"/>
 
         <item android:id="@+id/queue_clear_below"
-            android:title="Clear tracks below"/>
+            android:title="Clear below"/>
 
         <item android:id="@+id/queue_clear_all"
-            android:title="Clear queue"/>
+            android:title="Clear all"/>
     </group>
 </menu>
