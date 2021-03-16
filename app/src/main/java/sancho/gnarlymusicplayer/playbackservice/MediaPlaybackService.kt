@@ -58,6 +58,7 @@ class MediaPlaybackService : Service()
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
 
 	private var _setTrackJob: Job? = null
+	private var _trackLoading = false
 
 	private val _noisyAudioReceiver = object : BroadcastReceiver()
 	{
@@ -174,9 +175,11 @@ class MediaPlaybackService : Service()
 			mediaPlaybackServiceStarted = true
 
 			_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
-				setTrackJob()
+				val success = setTrackJob()
 
-				_sessionCallback.onPlay()
+				if (success)
+					_sessionCallback.onPlay()
+
 				_notificationMaker.updateNotification(_player.isPlaying, _track)
 			}
 		}
@@ -295,8 +298,11 @@ class MediaPlaybackService : Service()
 		setTrack(false)
 	}
 
-	private fun setTrackJob()
+	// returns: whether track loading was successful
+	private fun setTrackJob(): Boolean
 	{
+		_trackLoading = true
+
 		var error = false
 		try
 		{
@@ -324,24 +330,32 @@ class MediaPlaybackService : Service()
 			error = true
 		}
 
+		_trackLoading = false
+
 		if (error) // this is so bad
 		{
 			GlobalScope.launch(Dispatchers.Main) {
 				Toaster.show(applicationContext, getString(R.string.cant_play_track))
 			}
+			return false
 		}
+
+		return true
 	}
 
 	fun setTrack(forcePlay: Boolean)
 	{
-		if (_setTrackJob?.isActive == true)
+		if (_trackLoading)
 			return // better let it finish
 
 		val wasPlaying = _player.isPlaying
 
 		_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
-			setTrackJob()
-			if (forcePlay || wasPlaying) _sessionCallback.onPlay()
+			val success = setTrackJob()
+
+			if (success && (forcePlay || wasPlaying))
+				_sessionCallback.onPlay()
+
 			_notificationMaker.updateNotification(_player.isPlaying, _track)
 		}
 	}
@@ -354,7 +368,7 @@ class MediaPlaybackService : Service()
 
 	fun playPause()
 	{
-		if (_setTrackJob?.isActive == true)
+		if (_trackLoading)
 			return // mission failed, we'll get em next time
 
 		if (_player.isPlaying)
