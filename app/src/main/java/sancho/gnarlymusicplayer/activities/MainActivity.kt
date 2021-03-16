@@ -575,6 +575,7 @@ class MainActivity : AppCompatActivity()
 
 		_explorerAdapter.updateDirectoryView(PlaybackQueue.getTrackParent(idx))
 		drawer_layout.closeDrawer(GravityCompat.START)
+		_actionSearch?.collapseActionView() // collapse searchbar thing
 	}
 
 	private fun gotoExplorerTrackDir(path: String)
@@ -586,6 +587,7 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 		_explorerAdapter.updateDirectoryView(parent)
+		_actionSearch?.collapseActionView() // collapse searchbar thing
 	}
 
 	private fun addToQueueAt(idx: Int, path: String)
