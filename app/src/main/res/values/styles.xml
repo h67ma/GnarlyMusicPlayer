@@ -61,6 +61,24 @@
         <item name="android:colorPrimaryDark">#F06292</item>
     </style>
 
+        <style name="AppThemeYello" parent="AppThemeBlack">
+        <item name="android:colorPrimary">#E8CD58</item>
+        <item name="android:colorAccent">#E8CD58</item>
+        <item name="android:colorPrimaryDark">#D8B220</item>
+    </style>
+
+    <style name="AppThemeLavender" parent="AppThemeBlack">
+        <item name="android:colorPrimary">#D3A0EA</item>
+        <item name="android:colorAccent">#D3A0EA</item>
+        <item name="android:colorPrimaryDark">#AA77C7</item>
+    </style>
+
+    <style name="AppThemeGrey" parent="AppThemeBlack">
+        <item name="android:colorPrimary">#9E9E9E</item>
+        <item name="android:colorAccent">#9E9E9E</item>
+        <item name="android:colorPrimaryDark">#808080</item>
+    </style>
+
     <style name="AppThemeMacintoshPlus" parent="Theme.AppCompat.NoActionBar">
         <item name="android:colorPrimary">#54B797</item>
         <item name="android:colorAccent">#54B797</item>

@@ -38,6 +38,9 @@ object AppSettingsManager
 		"cherri" to R.style.AppThemeCherri,
 		"purpl" to R.style.AppThemePurpl,
 		"pink" to R.style.AppThemePink,
+		"yello" to R.style.AppThemeYello,
+		"lavender" to R.style.AppThemeLavender,
+		"grey" to R.style.AppThemeGrey,
 		"macintosh" to R.style.AppThemeMacintoshPlus
 	)
 
