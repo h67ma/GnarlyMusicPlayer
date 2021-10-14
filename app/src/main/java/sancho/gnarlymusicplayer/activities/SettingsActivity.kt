@@ -38,6 +38,15 @@ class SettingsActivity : AppCompatActivity()
 
 	class SettingsFragment : PreferenceFragmentCompat()
 	{
+		private fun setupLinkItem(key: String, url: String)
+		{
+			findPreference<Preference>(key)?.setOnPreferenceClickListener { _ ->
+				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+				startActivity(browserIntent)
+				true
+			}
+		}
+
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?)
 		{
 			setPreferencesFromResource(R.xml.root_preferences, rootKey)
@@ -133,17 +142,9 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
-			findPreference<Preference>("help")?.setOnPreferenceClickListener { _ ->
-				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer/wiki/Help"))
-				startActivity(browserIntent)
-				true
-			}
-
-			findPreference<Preference>("repo")?.setOnPreferenceClickListener { _ ->
-				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/szycikm/GnarlyMusicPlayer"))
-				startActivity(browserIntent)
-				true
-			}
+			setupLinkItem("help", "https://github.com/h67ma/GnarlyMusicPlayer/wiki/Help")
+			setupLinkItem("bugreport", "https://github.com/h67ma/GnarlyMusicPlayer/issues")
+			setupLinkItem("repo", "https://github.com/h67ma/GnarlyMusicPlayer")
 		}
 
 		private fun updateAudioService()

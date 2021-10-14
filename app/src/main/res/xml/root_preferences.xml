@@ -85,6 +85,13 @@
             app:iconSpaceReserved="false"/>
 
         <Preference
+            app:title="Report a bug"
+            app:summary="It will really help!"
+            app:key="bugreport"
+            app:persistent="false"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
             app:title="Project repository"
             app:summary="Open webpage"
             app:key="repo"
@@ -94,7 +101,7 @@
         <Preference
             app:title="Created by"
             app:persistent="false"
-            app:summary="Sancho 2019-2020"
+            app:summary="Sancho 2019-2021"
             app:iconSpaceReserved="false"/>
 
         <Preference
