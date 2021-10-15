@@ -149,7 +149,7 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			setupLinkItem("help", "https://github.com/h67ma/GnarlyMusicPlayer/wiki/Help")
-			setupLinkItem("bugreport", "https://github.com/h67ma/GnarlyMusicPlayer/issues")
+			setupLinkItem("bugreport", "https://github.com/h67ma/GnarlyMusicPlayer/issues/new")
 			setupLinkItem("repo", "https://github.com/h67ma/GnarlyMusicPlayer")
 		}
 

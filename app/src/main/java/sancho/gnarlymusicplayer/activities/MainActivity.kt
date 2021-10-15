@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity()
 		library_list_view.setOnCreateContextMenuListener{ menu, _, _ ->
 			menuInflater.inflate(R.menu.explorer_item, menu)
 			menu?.setHeaderTitle(_dirList[_explorerAdapter.selectedPosition].displayName) // selectedPosition will be set in adapter
-			menu?.setGroupDividerEnabled(true)
+			menu?.setGroupDividerEnabled(true) // requires min api 28. sooo... why does it work then?
 			_whichMenuIsOpen = WhichMenu.EXPLORER
 		}
 	}
@@ -308,7 +308,7 @@ class MainActivity : AppCompatActivity()
 		queue_list_view.setOnCreateContextMenuListener{ menu, _, _ ->
 			menuInflater.inflate(R.menu.queue_item, menu)
 			menu?.setHeaderTitle(PlaybackQueue.getTrackName(_queueAdapter.selectedPosition)) // selectedPosition will be set in adapter
-			menu?.setGroupDividerEnabled(true)
+			menu?.setGroupDividerEnabled(true) // requires min api 28. sooo... why does it work then?
 			_whichMenuIsOpen = WhichMenu.QUEUE
 		}
 	}

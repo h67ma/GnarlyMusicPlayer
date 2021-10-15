@@ -41,7 +41,7 @@
             app:iconSpaceReserved="false"/>
 
         <CheckBoxPreference
-            app:title="Enable Bluetooth cracking workaround"
+            app:title="Enable Bluetooth popping workaround"
             app:summary="Battery usage might be increased. You need to restart the audio playback service for this option to take effect. Read more on the help page."
             app:key="@string/pref_btcrackworkaround"
             app:iconSpaceReserved="false"/>
