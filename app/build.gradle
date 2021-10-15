@@ -28,7 +28,9 @@ android {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.31'
+    // 1.4.20+ breaks updating main activity header when search thing closes. go figure.
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.20'
+
     implementation 'com.google.android.material:material:1.1.0' // 1.1.0+ breaks NotificationCompat.Action icon updating
     implementation 'androidx.media2:media2:1.0.0-alpha04'
     implementation 'com.google.code.gson:gson:2.8.6'
