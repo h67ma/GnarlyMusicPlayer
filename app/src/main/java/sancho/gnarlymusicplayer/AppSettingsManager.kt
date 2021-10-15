@@ -41,8 +41,7 @@ object AppSettingsManager
 		"pink" to R.style.AppThemePink,
 		"yello" to R.style.AppThemeYello,
 		"lavender" to R.style.AppThemeLavender,
-		"grey" to R.style.AppThemeGrey,
-		"macintosh" to R.style.AppThemeMacintoshPlus
+		"grey" to R.style.AppThemeGrey
 	)
 
 	private val QUEUEITEM_COLLECTION_TYPE = object : TypeToken<Collection<QueueItem>>() {}.type

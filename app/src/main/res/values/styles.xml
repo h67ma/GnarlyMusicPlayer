@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="AppThemeBlack" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppThemeBlack" parent="Theme.AppCompat.NoActionBar"> <!-- also can be Theme.MaterialComponents.NoActionBar -->
         <item name="android:colorPrimary">#000</item>
         <item name="android:colorPrimaryDark">#000</item>
         <item name="android:textColor">#FFF</item>
@@ -11,6 +11,7 @@
         <item name="android:colorPrimary">#AAED39</item>
         <item name="android:colorAccent">#AAED39</item>
         <item name="android:colorPrimaryDark">#88D13B</item>
+
     </style>
 
     <style name="AppThemeGreen" parent="AppThemeBlack">
@@ -77,15 +78,6 @@
         <item name="android:colorPrimary">#9E9E9E</item>
         <item name="android:colorAccent">#9E9E9E</item>
         <item name="android:colorPrimaryDark">#808080</item>
-    </style>
-
-    <style name="AppThemeMacintoshPlus" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:colorPrimary">#54B797</item>
-        <item name="android:colorAccent">#54B797</item>
-        <item name="android:colorPrimaryDark">#54B797</item>
-        <item name="android:textColor">#6CFFB5</item>
-        <item name="android:windowBackground">#FF8199</item>
-        <item name="android:colorBackground">#FF8199</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
