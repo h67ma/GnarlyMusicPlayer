@@ -10,7 +10,7 @@ android {
         applicationId "sancho.gnarlymusicplayer"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 16
+        versionCode 17
         versionName "1.10.0-pre" // major.minor.patch[-pre] ([-debug] added automatically if needed)
     }
 

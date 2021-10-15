@@ -787,7 +787,8 @@ class MainActivity : AppCompatActivity()
 
 		_lastSelectedTrack = PlaybackQueue.currentIdx
 
-		_actionSearch?.collapseActionView() // collapse searchbar thing
+		if (_actionSearch?.isActionViewExpanded == true)
+			_actionSearch?.collapseActionView() // collapse searchbar thing
 
 		AppSettingsManager.saveToPrefs(this, _bookmarksChanged, _explorerAdapter.currentExplorerPath?.absolutePath, _bookmarks)
 
