@@ -21,6 +21,7 @@ object AppSettingsManager
 	private var accentColorKey: String = DEFAULT_ACCENTCOLOR
 
 	var ignoreAf = false
+	var bluetoothCrackingWorkaround = false
 
 	var volumeStepsTotal: Int = 30
 	var volumeInappEnabled: Boolean = false
@@ -95,6 +96,7 @@ object AppSettingsManager
 		PlaybackQueue.autoClean = sharedPref.getBoolean(context.getString(R.string.pref_autoclean), false)
 
 		ignoreAf = sharedPref.getBoolean(context.getString(R.string.pref_ignoreaf), false)
+		bluetoothCrackingWorkaround = sharedPref.getBoolean(context.getString(R.string.pref_btcrackworkaround), false)
 
 		volumeStepsTotal = sharedPref.getInt(context.getString(R.string.pref_totalsteps), 30)
 		volumeInappEnabled = sharedPref.getBoolean(context.getString(R.string.pref_inappenabled), false)

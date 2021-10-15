@@ -36,6 +36,7 @@
     <string name="pref_lockvolume">sancho.gnarlymusicplayer.preference.volume.lock</string>
     <string name="pref_autoclean">sancho.gnarlymusicplayer.preference.autoclean</string>
     <string name="pref_ignoreaf">sancho.gnarlymusicplayer.preference.ignoreaf</string>
+    <string name="pref_btcrackworkaround">sancho.gnarlymusicplayer.preference.btcrackworkaround</string>
     <string name="no_track">No track</string>
     <string name="nice">Nice</string>
     <string name="q_clear_queue">Clear queue?</string>

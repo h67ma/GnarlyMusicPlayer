@@ -96,6 +96,12 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			findPreference<CheckBoxPreference>(getString(R.string.pref_btcrackworkaround))?.setOnPreferenceChangeListener { _, newValue ->
+				AppSettingsManager.bluetoothCrackingWorkaround = (newValue as Boolean) == true
+
+				true
+			}
+
 			findPreference<CheckBoxPreference>(getString(R.string.pref_inappenabled))?.setOnPreferenceChangeListener { _, newValue ->
 				AppSettingsManager.volumeInappEnabled = (newValue as Boolean) == true
 

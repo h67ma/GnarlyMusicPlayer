@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 16
-        versionName "1.9.1-pre" // major.minor.patch[-pre]
+        versionName "1.10.0-pre" // major.minor.patch[-pre] ([-debug] added automatically if needed)
     }
 
     buildTypes {
@@ -29,7 +29,7 @@ android {
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.31'
-    implementation 'com.google.android.material:material:1.1.0' // 1.2.0 breaks NotificationCompat.Action icon
+    implementation 'com.google.android.material:material:1.1.0' // 1.1.0+ breaks NotificationCompat.Action icon updating
     implementation 'androidx.media2:media2:1.0.0-alpha04'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'androidx.preference:preference-ktx:1.1.1'

@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.models.Track
 import java.io.IOException
+import android.media.SoundPool
 
 private const val MIN_TRACK_TIME_S_TO_SAVE = 30
 const val ACTION_START_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.startplayback"
@@ -49,6 +50,14 @@ class MediaPlaybackService : Service()
 
 	private lateinit var _player: AudioPlayer
 
+	// playing silence is a workaround for bluetooth cracks. see the help page
+	private lateinit var _soundPool: SoundPool
+	private var _silenceSoundId: Int = 0
+	private var _silenceStreamId: Int = 0
+	private var _playSilenceEnabled = false
+
+	private var _ignoreAf = false
+
 	private val _track: Track = Track()
 
 	private lateinit var _mediaSession: MediaSessionCompat
@@ -64,7 +73,7 @@ class MediaPlaybackService : Service()
 	{
 		override fun onReceive(context: Context?, intent: Intent?)
 		{
-			if (!AppSettingsManager.ignoreAf)
+			if (!_ignoreAf)
 				_sessionCallback.onPause()
 		}
 	}
@@ -75,11 +84,11 @@ class MediaPlaybackService : Service()
 		val afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
 			when (focusChange) {
 				AudioManager.AUDIOFOCUS_LOSS -> {
-					if (!AppSettingsManager.ignoreAf)
+					if (!_ignoreAf)
 						_sessionCallback.onPause()
 				}
 				AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-					if (!AppSettingsManager.ignoreAf)
+					if (!_ignoreAf)
 						_sessionCallback.onPause()
 				}
 				AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
@@ -130,8 +139,17 @@ class MediaPlaybackService : Service()
 		prepareMediaSession()
 
 		_player = AudioPlayer(this, _mediaSession, ::nextTrack) // now this is a weird lookin operator
-
 		_player.setVolumeProvider()
+
+		// get the setting value on service startup and don't react to
+		// the user changing the setting while playback service is running
+		// need to restart the service for the setting to take place
+		_playSilenceEnabled = AppSettingsManager.bluetoothCrackingWorkaround
+		prepareSilencePlayer()
+
+		// same thing, store this locally and changes will be
+		// active only after restarting the service
+		_ignoreAf = AppSettingsManager.ignoreAf
 
 		_notificationMaker = MediaNotificationMaker(this, _mediaSession)
 	}
@@ -182,6 +200,8 @@ class MediaPlaybackService : Service()
 
 				_notificationMaker.updateNotification(_player.isPlaying, _track)
 			}
+
+			// initially the actual audio will start playing, so no need to start the "silence player"
 		}
 		else
 		{
@@ -195,6 +215,41 @@ class MediaPlaybackService : Service()
 		_player.seekTo(0)
 		if (!_player.isPlaying)
 			_sessionCallback.onPlay()
+	}
+
+	private fun prepareSilencePlayer()
+	{
+		if (!_playSilenceEnabled)
+			return
+
+		_soundPool = SoundPool.Builder().setMaxStreams(1).build()
+		_silenceSoundId = _soundPool.load(applicationContext, R.raw.sound_of_silence_mono, 1)
+	}
+
+	private fun playSilence()
+	{
+		if (!_playSilenceEnabled)
+			return
+
+		_silenceStreamId = _soundPool.play(_silenceSoundId, 0f, 0f, 0, -1, 1f)
+	}
+
+	private fun pauseSilence()
+	{
+		if (!_playSilenceEnabled)
+			return
+
+		_soundPool.pause(_silenceStreamId)
+	}
+
+	private fun cleanupSilencePlayer()
+	{
+		if (!_playSilenceEnabled)
+			return
+
+		_soundPool.stop(_silenceStreamId)
+		_soundPool.unload(_silenceSoundId)
+		_soundPool.release()
 	}
 
 	private fun prepareMediaSession()
@@ -226,7 +281,10 @@ class MediaPlaybackService : Service()
 			{
 				val result = AudioManagerCompat.requestAudioFocus(_audioManager, _focusRequest)
 
-				if (AppSettingsManager.ignoreAf || result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+				if (_ignoreAf || result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED)
+				{
+					pauseSilence()
+
 					_player.start()
 					_notificationMaker.updateNotification(_player.isPlaying)
 					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0L, 1f)
@@ -243,6 +301,8 @@ class MediaPlaybackService : Service()
 				_mediaSession.setPlaybackState(playbackStateBuilder.build())
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
 				unregisterNoisyReceiver()
+
+				playSilence()
 			}
 
 			override fun onStop()
@@ -444,6 +504,8 @@ class MediaPlaybackService : Service()
 		audioSessionId = AudioManager.ERROR
 		_player.reset()
 		_player.release()
+
+		cleanupSilencePlayer()
 
 		mediaPlaybackServiceStarted = false
 		stopForeground(true)

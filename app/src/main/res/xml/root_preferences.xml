@@ -36,12 +36,25 @@
 
         <CheckBoxPreference
             app:title="Ignore audio focus"
-            app:summary="Audio playback will not stop e.g. when other media is played. You might have to restart the media playback service for this option to take effect"
+            app:summary="Audio playback will not stop e.g. when other media is played. You need to restart the media playback service for this option to take effect."
             app:key="@string/pref_ignoreaf"
             app:iconSpaceReserved="false"/>
 
         <CheckBoxPreference
-            app:title="In-app volume control"
+            app:title="Enable Bluetooth cracking workaround"
+            app:summary="Battery usage might be increased. You need to restart the audio playback service for this option to take effect. Read more on the help page."
+            app:key="@string/pref_btcrackworkaround"
+            app:iconSpaceReserved="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="In-app volume control"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true">
+
+        <CheckBoxPreference
+            app:title="Enable in-app volume control"
             app:summary="Tired of having only 15 volume steps? When enabled, volume keys will change in-app volume instead of global media volume"
             app:key="@string/pref_inappenabled"
             app:iconSpaceReserved="false"/>
