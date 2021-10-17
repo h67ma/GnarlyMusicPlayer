@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:itemBackground">
+
+    <TextView
+        android:id="@+id/sheet_explorer_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:textSize="18sp"
+        android:maxLines="4"
+        android:ellipsize="end"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:weekSeparatorLineColor"/>
+
+    <TextView
+        android:id="@+id/sheet_explorer_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Details"
+        android:padding="12dp"
+        android:drawableLeft="@drawable/info"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:drawablePadding="10dp"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/sheet_explorer_goto_parent_dir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open parent directory"
+        android:padding="12dp"
+        android:drawableLeft="@drawable/folder_nopad"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:drawablePadding="10dp"
+        android:textSize="18sp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:weekSeparatorLineColor"/>
+
+    <TextView
+        android:id="@+id/sheet_explorer_insert_at_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Insert at the top of queue"
+        android:padding="12dp"
+        android:drawableLeft="@drawable/subdirectory_arrow_top"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:drawablePadding="10dp"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/sheet_explorer_insert_after_current"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Insert after current track"
+        android:padding="12dp"
+        android:drawableLeft="@drawable/insert_in_middle"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:drawablePadding="10dp"
+        android:textSize="18sp"/>
+
+</LinearLayout>

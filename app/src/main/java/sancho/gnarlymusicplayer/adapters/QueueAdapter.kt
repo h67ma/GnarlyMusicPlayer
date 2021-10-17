@@ -6,16 +6,17 @@ import android.view.*
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.queue_item.view.*
+import sancho.gnarlymusicplayer.BottomSheetDialogCtxMenu
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
 import java.util.Collections.swap
 
 class QueueAdapter(
-	private val context: Context,
-	private val cliccListener: (Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
+	private val _context: Context,
+	private val _playTrack: (Int) -> Unit,
+	private val _setupExplorerCtxMenu: (BottomSheetDialogCtxMenu, String, Int) -> Unit) : RecyclerView.Adapter<QueueAdapter.TrackHolder>()
 {
 	var touchHelper: ItemTouchHelper? = null
-	var selectedPosition: Int = -1
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
@@ -23,11 +24,14 @@ class QueueAdapter(
 
 		holder.itemView.isSelected = PlaybackQueue.currentIdx == holder.adapterPosition
 
-		holder.itemView.setOnClickListener { cliccListener(holder.adapterPosition) }
+		holder.itemView.setOnClickListener { _playTrack(holder.adapterPosition) }
 
 		holder.itemView.setOnLongClickListener {
-			selectedPosition = holder.adapterPosition
-			false
+			val dialog = BottomSheetDialogCtxMenu(_context, R.layout.bottom_sheet_queue)
+			// note: can't simply use position, as items might get removed/rearranged without refreshing whole dataset
+			_setupExplorerCtxMenu(dialog, PlaybackQueue.queue[holder.adapterPosition].name, holder.adapterPosition)
+			dialog.show()
+			true // consumed long press
 		}
 
 		@SuppressLint("ClickableViewAccessibility") // we don't want to click the track, only drag
@@ -47,7 +51,7 @@ class QueueAdapter(
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackHolder
 	{
-		return TrackHolder(LayoutInflater.from(context).inflate(R.layout.queue_item, parent, false))
+		return TrackHolder(LayoutInflater.from(_context).inflate(R.layout.queue_item, parent, false))
 	}
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)

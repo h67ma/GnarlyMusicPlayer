@@ -5,6 +5,7 @@
         <item name="android:colorPrimaryDark">#000</item>
         <item name="android:textColor">#FFF</item>
         <item name="android:itemBackground">#333</item> <!-- context menu bg -->
+        <item name="android:weekSeparatorLineColor">#555</item> <!-- whatever, just some separator -->
     </style>
 
     <style name="AppThemeLime" parent="AppThemeBlack">

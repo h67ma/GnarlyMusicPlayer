@@ -34,6 +34,7 @@ import sancho.gnarlymusicplayer.playbackservice.BoundServiceListeners
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 import java.io.File
 
+
 private const val REQUEST_READ_STORAGE = 42
 private const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
 private const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
@@ -58,8 +59,6 @@ class MainActivity : AppCompatActivity()
 
 	private var _service: MediaPlaybackService? = null
 	private lateinit var _serviceConn: ServiceConnection
-
-	private var _whichMenuIsOpen = WhichMenu.NONE
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -159,17 +158,19 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
+	private fun setupExplorerCtxMenu(dialog: BottomSheetDialogCtxMenu, displayName: String, path: String)
+	{
+		dialog.setHeaderText(R.id.sheet_explorer_item_name, displayName)
+		dialog.setBottomSheetItemOnClick(R.id.sheet_explorer_details) { showExplorerTrackInfo(path) }
+		dialog.setBottomSheetItemOnClick(R.id.sheet_explorer_goto_parent_dir) { gotoExplorerTrackDir(path) }
+		dialog.setBottomSheetItemOnClick(R.id.sheet_explorer_insert_at_top) { addToQueueAt(0, path) }
+		dialog.setBottomSheetItemOnClick(R.id.sheet_explorer_insert_after_current) { addToQueueAt(PlaybackQueue.currentIdx + 1, path) }
+	}
+
 	private fun setupFileList()
 	{
-		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::setToolbarText, ::setDirListLoading)
+		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::setToolbarText, ::setDirListLoading, ::setupExplorerCtxMenu)
 		library_list_view.adapter = _explorerAdapter
-
-		library_list_view.setOnCreateContextMenuListener{ menu, _, _ ->
-			menuInflater.inflate(R.menu.explorer_item, menu)
-			menu?.setHeaderTitle(_dirList[_explorerAdapter.selectedPosition].displayName) // selectedPosition will be set in adapter
-			menu?.setGroupDividerEnabled(true) // requires min api 28. sooo... why does it work then?
-			_whichMenuIsOpen = WhichMenu.EXPLORER
-		}
 	}
 
 	private fun setupBookmarks()
@@ -252,11 +253,22 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
+	private fun setupQueueCtxMenu(dialog: BottomSheetDialogCtxMenu, displayName: String, selectedIdx: Int)
+	{
+		dialog.setHeaderText(R.id.sheet_queue_item_name, displayName)
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_details) { showQueueTrackInfo(selectedIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_goto_parent_dir) { gotoQueueTrackDir(selectedIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_to_top) { moveQueueItem(selectedIdx, 0)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_after_current) { moveAfterCurrentTrack(selectedIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_to_bottom) { moveQueueItem(selectedIdx, PlaybackQueue.lastIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_clear_above) { clearAbove(selectedIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_clear_below) { clearBelow(selectedIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_clear_all) { clearAll()}
+	}
+
 	private fun setupQueue()
 	{
-		_queueAdapter = QueueAdapter(this) { position ->
-			playTrack(position)
-		}
+		_queueAdapter = QueueAdapter(this, ::playTrack, ::setupQueueCtxMenu)
 		queue_list_view.adapter = _queueAdapter
 
 		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
@@ -304,56 +316,6 @@ class MainActivity : AppCompatActivity()
 		})
 		_queueAdapter.touchHelper = touchHelper
 		touchHelper.attachToRecyclerView(queue_list_view)
-
-		queue_list_view.setOnCreateContextMenuListener{ menu, _, _ ->
-			menuInflater.inflate(R.menu.queue_item, menu)
-			menu?.setHeaderTitle(PlaybackQueue.getTrackName(_queueAdapter.selectedPosition)) // selectedPosition will be set in adapter
-			menu?.setGroupDividerEnabled(true) // requires min api 28. sooo... why does it work then?
-			_whichMenuIsOpen = WhichMenu.QUEUE
-		}
-	}
-
-	override fun onContextItemSelected(menuItem: MenuItem): Boolean
-	{
-		// menuItem.menuInfo is null, need some way to determine which menu this is.
-		// although you can extend RecyclerView and override getContextMenuInfo()
-		// to get menu info, this approach is far simpler and cleaner.
-		// another approach is to wrap all menu items in group and check group id,
-		// but then you loose the ability to add separators in context menu
-
-		if (_whichMenuIsOpen == WhichMenu.QUEUE)
-		{
-			val selectedIdx = _queueAdapter.selectedPosition // will be set in adapter
-			when (menuItem.itemId)
-			{
-				R.id.queue_goto_parent -> gotoQueueTrackDir(selectedIdx)
-				R.id.queue_moveto_after -> moveAfterCurrentTrack(selectedIdx)
-				R.id.queue_moveto_top -> moveQueueItem(selectedIdx, 0)
-				R.id.queue_moveto_bottom -> moveQueueItem(selectedIdx, PlaybackQueue.lastIdx)
-				R.id.queue_clear_above -> clearAbove(selectedIdx)
-				R.id.queue_clear_below -> clearBelow(selectedIdx)
-				R.id.queue_clear_all -> clearAll()
-				R.id.queue_details -> showQueueTrackInfo(selectedIdx)
-				else -> return false
-			}
-			return true
-		}
-		else if (_whichMenuIsOpen == WhichMenu.EXPLORER)
-		{
-			val selectedIdx = _explorerAdapter.selectedPosition // will be set in adapter
-			val itemPath = _dirList[selectedIdx].path
-			when (menuItem.itemId)
-			{
-				R.id.explorer_details -> showExplorerTrackInfo(itemPath)
-				R.id.explorer_goto_parent -> gotoExplorerTrackDir(itemPath)
-				R.id.explorer_addto_top -> addToQueueAt(0, itemPath)
-				R.id.explorer_addto_after_current -> addToQueueAt(PlaybackQueue.currentIdx + 1, itemPath)
-				else -> return false
-			}
-			return true
-		}
-
-		return super.onContextItemSelected(menuItem)
 	}
 
 	private fun playTrack(newPosition: Int)

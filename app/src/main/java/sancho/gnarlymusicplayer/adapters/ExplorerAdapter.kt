@@ -11,10 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sancho.gnarlymusicplayer.FileSupportChecker
-import sancho.gnarlymusicplayer.PlaybackQueue
-import sancho.gnarlymusicplayer.R
-import sancho.gnarlymusicplayer.Toaster
+import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesAndDirsComparator
 import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
 import sancho.gnarlymusicplayer.comparators.FilesComparator
@@ -31,12 +28,12 @@ class ExplorerAdapter(
 	private val _queueAdapter: QueueAdapter,
 	private val _restoreListScrollPos: (String?) -> Unit,
 	private val _setToolbarText: (String) -> Unit,
-	private val _setDirListLoading: (Boolean) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
+	private val _setDirListLoading: (Boolean) -> Unit,
+	private val _setupExplorerCtxMenu: (BottomSheetDialogCtxMenu, String, String) -> Unit) : RecyclerView.Adapter<ExplorerAdapter.FileHolder>()
 {
 	private val _mountedDevices: MutableList<ExplorerViewItem> = mutableListOf()
 	var currentExplorerPath: File? = null
 	var searchResultsOpen = false
-	var selectedPosition: Int = -1
 
 	private var _fileLoaderJob: Job? = null
 
@@ -78,13 +75,15 @@ class ExplorerAdapter(
 				if (file.isDirectory || FileSupportChecker.isFileSupportedAndPlaylist(file.path))
 				{
 					longClick(file) // directory or playlist
-					true // don't show context menu
 				}
 				else
 				{
-					selectedPosition = position // track - context menu
-					false // show context menu
+					val dialog = BottomSheetDialogCtxMenu(_context, R.layout.bottom_sheet_explorer)
+					_setupExplorerCtxMenu(dialog, file.displayName, file.path)
+					dialog.show()
 				}
+
+				true // consumed long press
 			}
 		}
 	}
