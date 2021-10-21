@@ -80,7 +80,7 @@
         android:id="@+id/sheet_queue_move_to_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Move to bottom"
+        android:text="Move to the bottom"
         android:padding="12dp"
         android:drawableLeft="@drawable/subdirectory_arrow_bottom"
         android:background="?selectableItemBackground"
