@@ -1,7 +1,10 @@
+@file:Suppress("ConvertTwoComparisonsToRangeCheck") // just let me focus on the logic
+
 package sancho.gnarlymusicplayer
 
 import sancho.gnarlymusicplayer.models.QueueItem
 import java.io.File
+import java.util.Collections
 
 object PlaybackQueue
 {
@@ -86,6 +89,7 @@ object PlaybackQueue
 	}
 
 	// returns number of cleared items
+	@Suppress("ReplaceRangeToWithUntil")
 	fun removeAbove(idx: Int): Int
 	{
 		if (idx > 0 && idx < size) // note: idxValid checks if idx >= 0, here clearing "before 0" should do nothing
@@ -138,24 +142,40 @@ object PlaybackQueue
 		return 0
 	}
 
-	// changing idx doesn't mean queue has changed
-	fun updateIdxAfterItemMoved(fromPosition: Int, toPosition: Int)
+	fun moveItem(fromPosition: Int, toPosition: Int)
 	{
 		if (fromPosition == toPosition)
-			return
+			return // no need to update anything
+
+		if (fromPosition < toPosition)
+		{
+			for (i in fromPosition until toPosition)
+			{
+				Collections.swap(queue, i, i + 1)
+			}
+		}
+		else
+		{
+			for (i in fromPosition downTo toPosition + 1)
+			{
+				Collections.swap(queue, i, i - 1)
+			}
+		}
 
 		if (fromPosition == currentIdx)
 		{
-			currentIdx = toPosition
+			currentIdx = toPosition // item moved to current idx
 		}
 		else if (toPosition >= currentIdx && fromPosition < currentIdx)
 		{
-			currentIdx--
+			currentIdx-- // item moved from behind to after current idx
 		}
 		else if (toPosition <= currentIdx && fromPosition > currentIdx)
 		{
-			currentIdx++
+			currentIdx++ // item moved from after to behind current idx
 		}
+
+		hasChanged = true
 	}
 
 	fun trackExists(idx: Int): Boolean

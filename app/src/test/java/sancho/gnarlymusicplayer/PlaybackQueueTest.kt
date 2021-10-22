@@ -134,10 +134,10 @@ class PlaybackQueueTest
 	}
 
 	@Test
-	fun moveHasntChanged()
+	fun moveHasChanged()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(0, 2)
-		assertFalse(PlaybackQueue.hasChanged)
+		PlaybackQueue.moveItem(0, 2)
+		assertTrue(PlaybackQueue.hasChanged)
 	}
 
 	@Test
@@ -282,56 +282,56 @@ class PlaybackQueueTest
 	@Test
 	fun moveFromBeforeToBeforeIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(0, 1)
+		PlaybackQueue.moveItem(0, 1)
 		assertEquals(2, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveFromBeforeToCurrentIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(0, 2)
+		PlaybackQueue.moveItem(0, 2)
 		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveFromBeforeToAfterIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(0, 3)
+		PlaybackQueue.moveItem(0, 3)
 		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveFromAfterToAfterIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(4, 3)
+		PlaybackQueue.moveItem(4, 3)
 		assertEquals(2, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveFromAfterToCurrentIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(4, 2)
+		PlaybackQueue.moveItem(4, 2)
 		assertEquals(3, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveFromAfterToBeforeIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(4, 0)
+		PlaybackQueue.moveItem(4, 0)
 		assertEquals(3, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveCurrentUpIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(2, 4)
+		PlaybackQueue.moveItem(2, 4)
 		assertEquals(4, PlaybackQueue.currentIdx)
 	}
 
 	@Test
 	fun moveCurrentDownIdx()
 	{
-		PlaybackQueue.updateIdxAfterItemMoved(2, 1)
+		PlaybackQueue.moveItem(2, 1)
 		assertEquals(1, PlaybackQueue.currentIdx)
 	}
 

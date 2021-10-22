@@ -9,7 +9,6 @@ import kotlinx.android.synthetic.main.queue_item.view.*
 import sancho.gnarlymusicplayer.BottomSheetDialogCtxMenu
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
-import java.util.Collections.swap
 
 class QueueAdapter(
 	private val _context: Context,
@@ -55,23 +54,4 @@ class QueueAdapter(
 	}
 
 	class TrackHolder(view: View) : RecyclerView.ViewHolder(view)
-
-	fun onItemMoved(fromPosition: Int, toPosition: Int)
-	{
-		if (fromPosition < toPosition)
-		{
-			for (i in fromPosition until toPosition)
-			{
-				swap(PlaybackQueue.queue, i, i + 1)
-			}
-		}
-		else
-		{
-			for (i in fromPosition downTo toPosition + 1)
-			{
-				swap(PlaybackQueue.queue, i, i - 1)
-			}
-		}
-		notifyItemMoved(fromPosition, toPosition)
-	}
 }

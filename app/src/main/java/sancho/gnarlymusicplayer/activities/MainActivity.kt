@@ -651,8 +651,8 @@ class MainActivity : AppCompatActivity()
 		if (fromPosition == toPosition)
 			return
 
-		_queueAdapter.onItemMoved(fromPosition, toPosition)
-		PlaybackQueue.updateIdxAfterItemMoved(fromPosition, toPosition)
+		PlaybackQueue.moveItem(fromPosition, toPosition)
+		_queueAdapter.notifyItemMoved(fromPosition, toPosition)
 	}
 
 	private fun clearAbove(idx: Int)
