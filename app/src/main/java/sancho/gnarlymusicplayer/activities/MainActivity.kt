@@ -414,6 +414,7 @@ class MainActivity : AppCompatActivity()
 				requestReadPermishon()
 			}
 		}
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 	}
 
 	// call with null to scroll to top
