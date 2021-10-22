@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity()
 	private var _service: MediaPlaybackService? = null
 	private lateinit var _serviceConn: ServiceConnection
 
+	private lateinit var _seekMenuItem: MenuItem
+
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		AppSettingsManager.restoreFromPrefs(this)
@@ -341,6 +343,8 @@ class MainActivity : AppCompatActivity()
 			startService(intent)
 
 			bindService()
+
+			setSeekBtnVisibility(true)
 		}
 		else
 		{
@@ -378,6 +382,8 @@ class MainActivity : AppCompatActivity()
 							_seekDialog?.dismiss()
 
 						unbindService()
+
+						setSeekBtnVisibility(false)
 					}
 				})
 			}
@@ -445,6 +451,10 @@ class MainActivity : AppCompatActivity()
 			menu.findItem(R.id.action_settings)
 		)
 
+		_seekMenuItem = menu.findItem(R.id.action_seek) // for manipulation outside onCreateOptionsMenu
+		if(MediaPlaybackService.mediaPlaybackServiceStarted)
+			setSeekBtnVisibility(true)
+
 		val searchThing = _actionSearch?.actionView as SearchView
 		searchThing.queryHint = getString(R.string.search_bar_hint)
 		searchThing.maxWidth = Int.MAX_VALUE
@@ -493,6 +503,11 @@ class MainActivity : AppCompatActivity()
 			else -> return super.onOptionsItemSelected(item)
 		}
 		return true
+	}
+
+	private fun setSeekBtnVisibility(visible: Boolean)
+	{
+		_seekMenuItem.isVisible = visible
 	}
 
 	//endregion

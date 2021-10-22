@@ -13,7 +13,8 @@
         android:id="@+id/action_seek"
         android:title="@string/seek_restore_position"
         android:icon="@drawable/seek"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_settings"
