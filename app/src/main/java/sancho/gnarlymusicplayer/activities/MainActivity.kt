@@ -1,7 +1,6 @@
 package sancho.gnarlymusicplayer.activities
 
 import android.Manifest
-import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -13,7 +12,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.HorizontalScrollView
-import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -22,12 +20,12 @@ import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
 import sancho.gnarlymusicplayer.databinding.ActivityMainBinding
-import sancho.gnarlymusicplayer.databinding.DialogSeekBinding
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.QueueItem
@@ -56,7 +54,7 @@ class MainActivity : AppCompatActivity()
 
 	private var _actionSearch: MenuItem? = null
 
-	private var _seekDialog: AlertDialog? = null
+	private var _seekDialog: BottomSheetDialog? = null
 
 	private var _service: MediaPlaybackService? = null
 	private lateinit var _serviceConn: ServiceConnection
@@ -605,64 +603,7 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
-		val seekBinding = DialogSeekBinding.inflate(layoutInflater)
-
-		// set current/total time
-		val currentTime = _service?.getCurrentTime() ?: 0
-		val totalTime = _service?.getTotalTime() ?: 0
-		val totalTimeMinutes = totalTime / 60
-		val totalTimeSeconds = totalTime % 60
-		seekBinding.seekSeekbar.max = totalTime
-		seekBinding.seekSeekbar.progress = currentTime
-		seekBinding.seekCurrenttotaltime.text = getString(
-			R.string.seek_total_time,
-			currentTime / 60,
-			currentTime % 60,
-			totalTimeMinutes,
-			totalTimeSeconds
-		)
-
-		val savedTrack = File(AppSettingsManager.savedTrackPath)
-		if (savedTrack.exists() && PlaybackQueue.getCurrentTrackPath() == AppSettingsManager.savedTrackPath)
-		{
-			seekBinding.seekLoadbtn.visibility = View.VISIBLE
-			seekBinding.seekLoadbtn.setOnClickListener{
-				seekBinding.seekSeekbar.progress = AppSettingsManager.savedTrackTime
-				_service?.seekAndPlay(seekBinding.seekSeekbar.progress)
-			}
-		}
-
-		seekBinding.seekSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
-			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
-			{
-				seekBinding.seekCurrenttotaltime.text = getString(
-					R.string.seek_total_time,
-					progress / 60,
-					progress % 60,
-					totalTimeMinutes,
-					totalTimeSeconds
-				)
-			}
-
-			override fun onStartTrackingTouch(seekbar: SeekBar?) {}
-
-			override fun onStopTrackingTouch(seekbar: SeekBar?)
-			{
-				if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
-				{
-					_service?.seekAndPlay(seekBinding.seekSeekbar.progress)
-				}
-				else
-					Toaster.show(this@MainActivity, getString(R.string.playback_service_not_running))
-			}
-		})
-
-		_seekDialog = AlertDialog.Builder(this)
-			.setTitle(getString(R.string.seek_restore_position))
-			.setView(seekBinding.root)
-			.setNegativeButton(R.string.close, null)
-			.create()
-
+		_seekDialog = BottomSheetDialogSeek(this, _service, layoutInflater)
 		_seekDialog?.show()
 	}
 

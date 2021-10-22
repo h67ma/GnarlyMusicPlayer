@@ -3,14 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingVertical="30dp"
+    android:background="?android:colorBackground">
 
     <TextView
         android:id="@+id/seek_currenttotaltime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="15pt"/>
+        android:textSize="20pt"/>
 
     <SeekBar
         android:id="@+id/seek_seekbar"
