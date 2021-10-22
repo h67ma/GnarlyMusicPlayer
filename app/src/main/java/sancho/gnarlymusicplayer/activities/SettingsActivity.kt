@@ -17,8 +17,6 @@ import sancho.gnarlymusicplayer.databinding.ActivitySettingsBinding
 import sancho.gnarlymusicplayer.playbackservice.ACTION_UPDATE_MAX_VOLUME
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 
-private const val INTENT_LAUNCH_EQ = 1337
-
 class SettingsActivity : AppCompatActivity()
 {
 	override fun onCreate(savedInstanceState: Bundle?)
@@ -71,6 +69,7 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			// note: package name is hardcoded in manifest <queries>
 			findPreference<Preference>("eq")?.setOnPreferenceClickListener { _ ->
 				val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
 
@@ -83,7 +82,10 @@ class SettingsActivity : AppCompatActivity()
 
 					eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context?.packageName)
 					eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-					startActivityForResult(eqIntent, INTENT_LAUNCH_EQ)
+
+					// documentation recommends using startActivityForResult but it's deprecated
+					// looks to be working alrite with startActivity
+					startActivity(eqIntent)
 				}
 				else
 					Toaster.show(requireContext(), getString(R.string.no_eq_found))
