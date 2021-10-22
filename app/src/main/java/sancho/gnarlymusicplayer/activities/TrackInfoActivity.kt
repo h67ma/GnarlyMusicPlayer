@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_track_info.*
 import kotlinx.android.synthetic.main.track_details_row.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.R
@@ -25,6 +26,7 @@ class TrackInfoActivity : AppCompatActivity()
 {
 	private lateinit var _trackPath: String
 	private var _raw = false
+	private var _loadingJob: Job? = null
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -93,7 +95,10 @@ class TrackInfoActivity : AppCompatActivity()
 
 	private fun asyncGetTrackInfos(f: () -> Pair<List<Pair<String, String>>, Bitmap?>?)
 	{
-		GlobalScope.launch(Dispatchers.IO) {
+		if (_loadingJob?.isActive == true)
+			_loadingJob?.cancel()
+
+		_loadingJob = GlobalScope.launch(Dispatchers.IO) {
 			val meta = f()
 			GlobalScope.launch(Dispatchers.Main) {
 				if (meta == null)
@@ -245,5 +250,11 @@ class TrackInfoActivity : AppCompatActivity()
 
 		progress_circle.visibility = View.GONE
 		meta_layout.visibility = View.VISIBLE
+	}
+
+	override fun onPause()
+	{
+		_loadingJob?.cancel()
+		super.onPause()
 	}
 }
