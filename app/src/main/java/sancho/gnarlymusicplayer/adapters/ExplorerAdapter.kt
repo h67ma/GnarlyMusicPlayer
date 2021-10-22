@@ -4,9 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.explorer_group_item.view.*
-import kotlinx.android.synthetic.main.explorer_item.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -53,11 +52,11 @@ class ExplorerAdapter(
 
 		if (file.isHeader)
 		{
-			holder.itemView.explorer_header_text.text = file.displayName
+			holder.itemView.findViewById<TextView>(R.id.explorer_header_text).text = file.displayName
 		}
 		else
 		{
-			holder.itemView.explorer_text.text = file.displayName
+			holder.itemView.findViewById<TextView>(R.id.explorer_text).text = file.displayName
 
 			val icon = when
 			{
@@ -67,7 +66,7 @@ class ExplorerAdapter(
 				else -> R.drawable.note
 			}
 
-			holder.itemView.explorer_text.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
+			holder.itemView.findViewById<TextView>(R.id.explorer_text).setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
 
 			holder.itemView.setOnClickListener { singleClick(file) }
 			holder.itemView.setOnLongClickListener {

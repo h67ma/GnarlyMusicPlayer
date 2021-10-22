@@ -1,7 +1,6 @@
 package sancho.gnarlymusicplayer.activities
 
 import android.Manifest
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
@@ -23,12 +22,12 @@ import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.dialog_seek.view.*
 import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.adapters.BookmarksAdapter
 import sancho.gnarlymusicplayer.adapters.ExplorerAdapter
 import sancho.gnarlymusicplayer.adapters.QueueAdapter
+import sancho.gnarlymusicplayer.databinding.ActivityMainBinding
+import sancho.gnarlymusicplayer.databinding.DialogSeekBinding
 import sancho.gnarlymusicplayer.models.ExplorerItem
 import sancho.gnarlymusicplayer.models.ExplorerViewItem
 import sancho.gnarlymusicplayer.models.QueueItem
@@ -66,6 +65,8 @@ class MainActivity : AppCompatActivity()
 
 	private lateinit var _activityKappaLauncher: ActivityResultLauncher<Intent>
 
+	private lateinit var _binding: ActivityMainBinding
+
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		AppSettingsManager.restoreFromPrefs(this)
@@ -78,11 +79,12 @@ class MainActivity : AppCompatActivity()
 			_lastSelectedTrack = savedInstanceState.getInt(BUNDLE_LASTSELECTEDTRACK, RecyclerView.NO_POSITION)
 
 		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_main)
-		setSupportActionBar(toolbar)
+		_binding = ActivityMainBinding.inflate(layoutInflater)
+		setContentView(_binding.root)
+		setSupportActionBar(_binding.toolbar)
 		title = ""
 
-		toolbar_scroller.isSmoothScrollingEnabled = false
+		_binding.toolbarScroller.isSmoothScrollingEnabled = false
 
 		setupServiceConnection()
 
@@ -144,17 +146,17 @@ class MainActivity : AppCompatActivity()
 
 	private fun setToolbarText(text: String)
 	{
-		toolbar_title.text = text
+		_binding.toolbarTitle.text = text
 		toolbarScrollRight()
 	}
 
 	private fun toolbarScrollRight()
 	{
-		toolbar_scroller.scrollTo(HorizontalScrollView.FOCUS_RIGHT, 0)
+		_binding.toolbarScroller.scrollTo(HorizontalScrollView.FOCUS_RIGHT, 0)
 
 		// idk why, but this also needs to be done for it to work in *release* build
-		toolbar_scroller.post {
-			toolbar_scroller.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
+		_binding.toolbarScroller.post {
+			_binding.toolbarScroller.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
 		}
 	}
 
@@ -162,13 +164,13 @@ class MainActivity : AppCompatActivity()
 	{
 		if (loading)
 		{
-			progress_horizontal.visibility = View.VISIBLE
-			library_list_view.visibility = View.INVISIBLE
+			_binding.progressHorizontal.visibility = View.VISIBLE
+			_binding.libraryListView.visibility = View.INVISIBLE
 		}
 		else
 		{
-			progress_horizontal.visibility = View.INVISIBLE
-			library_list_view.visibility = View.VISIBLE
+			_binding.progressHorizontal.visibility = View.INVISIBLE
+			_binding.libraryListView.visibility = View.VISIBLE
 		}
 	}
 
@@ -184,7 +186,7 @@ class MainActivity : AppCompatActivity()
 	private fun setupFileList()
 	{
 		_explorerAdapter = ExplorerAdapter(this, _dirList, _queueAdapter, ::restoreListScrollPos, ::setToolbarText, ::setDirListLoading, ::setupExplorerCtxMenu)
-		library_list_view.adapter = _explorerAdapter
+		_binding.libraryListView.adapter = _explorerAdapter
 	}
 
 	private fun setupBookmarks()
@@ -193,7 +195,7 @@ class MainActivity : AppCompatActivity()
 
 			if (bookmark.path == _explorerAdapter.currentExplorerPath?.absolutePath)
 			{
-				drawer_layout.closeDrawer(GravityCompat.END)
+				_binding.drawerLayout.closeDrawer(GravityCompat.END)
 				return@BookmarksAdapter // already open
 			}
 
@@ -202,13 +204,13 @@ class MainActivity : AppCompatActivity()
 			{
 				_explorerAdapter.updateDirectoryView(item)
 
-				drawer_layout.closeDrawer(GravityCompat.END)
+				_binding.drawerLayout.closeDrawer(GravityCompat.END)
 				_actionSearch?.collapseActionView() // collapse searchbar thing
 			}
 			else
 				Toaster.show(this, getString(R.string.dir_doesnt_exist))
 		}
-		bookmark_list_view.adapter = adapter
+		_binding.bookmarkListView.adapter = adapter
 
 		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
 		{
@@ -238,9 +240,9 @@ class MainActivity : AppCompatActivity()
 			}
 		})
 		adapter.touchHelper = touchHelper
-		touchHelper.attachToRecyclerView(bookmark_list_view)
+		touchHelper.attachToRecyclerView(_binding.bookmarkListView)
 
-		bookmark_add_btn.setOnClickListener {
+		_binding.bookmarkAddBtn.setOnClickListener {
 			val path = _explorerAdapter.currentExplorerPath?.absolutePath
 			val label = _explorerAdapter.currentExplorerPath?.name
 			if (path != null && label != null)
@@ -261,9 +263,9 @@ class MainActivity : AppCompatActivity()
 				Toaster.show(this, getString(R.string.cant_add_root_dir))
 		}
 
-		bookmark_root.setOnClickListener {
+		_binding.bookmarkRoot.setOnClickListener {
 			_explorerAdapter.updateDirectoryView(null)
-			drawer_layout.closeDrawer(GravityCompat.END)
+			_binding.drawerLayout.closeDrawer(GravityCompat.END)
 		}
 	}
 
@@ -283,7 +285,7 @@ class MainActivity : AppCompatActivity()
 	private fun setupQueue()
 	{
 		_queueAdapter = QueueAdapter(this, ::playTrack, ::setupQueueCtxMenu)
-		queue_list_view.adapter = _queueAdapter
+		_binding.queueListView.adapter = _queueAdapter
 
 		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
 		{
@@ -329,7 +331,7 @@ class MainActivity : AppCompatActivity()
 			}
 		})
 		_queueAdapter.touchHelper = touchHelper
-		touchHelper.attachToRecyclerView(queue_list_view)
+		touchHelper.attachToRecyclerView(_binding.queueListView)
 	}
 
 	private fun playTrack(newPosition: Int)
@@ -442,10 +444,10 @@ class MainActivity : AppCompatActivity()
 		{
 			// find previous dir (child) in current dir list, scroll to it
 			val pos = _dirList.indexOf(ExplorerItem(oldPath, "", true))
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 200)
+			(_binding.libraryListView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 200)
 		}
 		else
-			(library_list_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+			(_binding.libraryListView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
 	}
 
 	//region MENU
@@ -564,7 +566,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		_explorerAdapter.updateDirectoryView(PlaybackQueue.getTrackParent(idx))
-		drawer_layout.closeDrawer(GravityCompat.START)
+		_binding.drawerLayout.closeDrawer(GravityCompat.START)
 		_actionSearch?.collapseActionView() // collapse searchbar thing
 	}
 
@@ -603,16 +605,16 @@ class MainActivity : AppCompatActivity()
 			return
 		}
 
-		val seekView = View.inflate(this, R.layout.dialog_seek, null)
+		val seekBinding = DialogSeekBinding.inflate(layoutInflater)
 
 		// set current/total time
 		val currentTime = _service?.getCurrentTime() ?: 0
 		val totalTime = _service?.getTotalTime() ?: 0
 		val totalTimeMinutes = totalTime / 60
 		val totalTimeSeconds = totalTime % 60
-		seekView.seek_seekbar.max = totalTime
-		seekView.seek_seekbar.progress = currentTime
-		seekView.seek_currenttotaltime.text = getString(
+		seekBinding.seekSeekbar.max = totalTime
+		seekBinding.seekSeekbar.progress = currentTime
+		seekBinding.seekCurrenttotaltime.text = getString(
 			R.string.seek_total_time,
 			currentTime / 60,
 			currentTime % 60,
@@ -623,17 +625,17 @@ class MainActivity : AppCompatActivity()
 		val savedTrack = File(AppSettingsManager.savedTrackPath)
 		if (savedTrack.exists() && PlaybackQueue.getCurrentTrackPath() == AppSettingsManager.savedTrackPath)
 		{
-			seekView.seek_loadbtn.visibility = View.VISIBLE
-			seekView.seek_loadbtn.setOnClickListener{
-				seekView.seek_seekbar.progress = AppSettingsManager.savedTrackTime
-				_service?.seekAndPlay(seekView.seek_seekbar.progress)
+			seekBinding.seekLoadbtn.visibility = View.VISIBLE
+			seekBinding.seekLoadbtn.setOnClickListener{
+				seekBinding.seekSeekbar.progress = AppSettingsManager.savedTrackTime
+				_service?.seekAndPlay(seekBinding.seekSeekbar.progress)
 			}
 		}
 
-		seekView.seek_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+		seekBinding.seekSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
 			override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean)
 			{
-				seekView.seek_currenttotaltime.text = getString(
+				seekBinding.seekCurrenttotaltime.text = getString(
 					R.string.seek_total_time,
 					progress / 60,
 					progress % 60,
@@ -648,7 +650,7 @@ class MainActivity : AppCompatActivity()
 			{
 				if (MediaPlaybackService.mediaPlaybackServiceStarted && _service != null)
 				{
-					_service?.seekAndPlay(seekView.seek_seekbar.progress)
+					_service?.seekAndPlay(seekBinding.seekSeekbar.progress)
 				}
 				else
 					Toaster.show(this@MainActivity, getString(R.string.playback_service_not_running))
@@ -657,7 +659,7 @@ class MainActivity : AppCompatActivity()
 
 		_seekDialog = AlertDialog.Builder(this)
 			.setTitle(getString(R.string.seek_restore_position))
-			.setView(seekView)
+			.setView(seekBinding.root)
 			.setNegativeButton(R.string.close, null)
 			.create()
 
@@ -789,10 +791,10 @@ class MainActivity : AppCompatActivity()
 	override fun onBackPressed()
 	{
 		@Suppress("CascadeIf")
-		if (drawer_layout.isDrawerOpen(GravityCompat.START))
-			drawer_layout.closeDrawer(GravityCompat.START)
-		else if (drawer_layout.isDrawerOpen(GravityCompat.END))
-			drawer_layout.closeDrawer(GravityCompat.END)
+		if (_binding.drawerLayout.isDrawerOpen(GravityCompat.START))
+			_binding.drawerLayout.closeDrawer(GravityCompat.START)
+		else if (_binding.drawerLayout.isDrawerOpen(GravityCompat.END))
+			_binding.drawerLayout.closeDrawer(GravityCompat.END)
 		else if (_explorerAdapter.searchResultsOpen)
 		{
 			_explorerAdapter.updateDirectoryView(_explorerAdapter.currentExplorerPath)

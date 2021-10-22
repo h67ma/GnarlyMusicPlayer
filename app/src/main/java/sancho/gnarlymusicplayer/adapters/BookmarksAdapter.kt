@@ -7,7 +7,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.bookmark_item.view.*
+import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.models.QueueItem
 import java.util.Collections.swap
@@ -35,11 +36,11 @@ class BookmarksAdapter(
 	{
 		fun bind(bookmark: QueueItem, clickListener: (QueueItem) -> Unit, touchHelper: ItemTouchHelper?)
 		{
-			itemView.bookmark_text.text = bookmark.name
+			itemView.findViewById<TextView>(R.id.bookmark_text).text = bookmark.name
 			itemView.setOnClickListener { clickListener(bookmark)}
 			if(touchHelper != null)
 			{
-				itemView.bookmark_reorder.setOnTouchListener { _, event ->
+				itemView.findViewById<AppCompatImageView>(R.id.bookmark_reorder).setOnTouchListener { _, event ->
 					if (event.action == MotionEvent.ACTION_DOWN)
 					{
 						touchHelper.startDrag(this)

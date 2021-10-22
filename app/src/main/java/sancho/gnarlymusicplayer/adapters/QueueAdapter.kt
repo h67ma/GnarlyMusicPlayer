@@ -3,9 +3,10 @@ package sancho.gnarlymusicplayer.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.*
+import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.queue_item.view.*
 import sancho.gnarlymusicplayer.BottomSheetDialogCtxMenu
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
@@ -19,7 +20,7 @@ class QueueAdapter(
 
 	override fun onBindViewHolder(holder: TrackHolder, position: Int)
 	{
-		holder.itemView.queue_text.text = PlaybackQueue.queue[holder.adapterPosition].name
+		holder.itemView.findViewById<TextView>(R.id.queue_text).text = PlaybackQueue.queue[holder.adapterPosition].name
 
 		holder.itemView.isSelected = PlaybackQueue.currentIdx == holder.adapterPosition
 
@@ -36,7 +37,7 @@ class QueueAdapter(
 		@SuppressLint("ClickableViewAccessibility") // we don't want to click the track, only drag
 		if(touchHelper != null)
 		{
-			holder.itemView.queue_reorder.setOnTouchListener { _, event ->
+			holder.itemView.findViewById<AppCompatImageView>(R.id.queue_reorder).setOnTouchListener { _, event ->
 				if (event.action == MotionEvent.ACTION_DOWN)
 				{
 					touchHelper?.startDrag(holder)

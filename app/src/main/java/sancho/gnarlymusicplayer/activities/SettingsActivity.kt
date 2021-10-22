@@ -9,11 +9,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
-import kotlinx.android.synthetic.main.activity_settings.*
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.PlaybackQueue
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.Toaster
+import sancho.gnarlymusicplayer.databinding.ActivitySettingsBinding
 import sancho.gnarlymusicplayer.playbackservice.ACTION_UPDATE_MAX_VOLUME
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
 
@@ -26,8 +26,9 @@ class SettingsActivity : AppCompatActivity()
 		setTheme(AppSettingsManager.restoreAndGetStyleFromPrefs(this))
 
 		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_settings)
-		setSupportActionBar(toolbar)
+		val binding = ActivitySettingsBinding.inflate(layoutInflater)
+		setContentView(binding.root)
+		setSupportActionBar(binding.toolbar)
 		supportActionBar?.setDisplayHomeAsUpEnabled(true) // enable "up" action bar action
 
 		supportFragmentManager

@@ -8,10 +8,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ScrollView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_settings.toolbar
-import kotlinx.android.synthetic.main.activity_track_info.*
-import kotlinx.android.synthetic.main.track_details_row.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -20,6 +18,7 @@ import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.R
 import sancho.gnarlymusicplayer.TagExtractor
 import sancho.gnarlymusicplayer.Toaster
+import sancho.gnarlymusicplayer.databinding.ActivityTrackInfoBinding
 import wseemann.media.FFmpegMediaMetadataRetriever
 
 class TrackInfoActivity : AppCompatActivity()
@@ -27,15 +26,17 @@ class TrackInfoActivity : AppCompatActivity()
 	private lateinit var _trackPath: String
 	private var _raw = false
 	private var _loadingJob: Job? = null
+	private lateinit var _binding: ActivityTrackInfoBinding
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		setTheme(AppSettingsManager.restoreAndGetStyleFromPrefs(this))
 
 		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_track_info)
+		_binding = ActivityTrackInfoBinding.inflate(layoutInflater)
+		setContentView(_binding.root)
 
-		setSupportActionBar(toolbar)
+		setSupportActionBar(_binding.toolbar)
 		supportActionBar?.setDisplayHomeAsUpEnabled(true) // enable "up" action bar action
 
 		val trackPath = intent.getStringExtra(EXTRA_TRACK_DETAIL_PATH)
@@ -74,10 +75,10 @@ class TrackInfoActivity : AppCompatActivity()
 	private fun switchMode()
 	{
 		// clear table and show loading state (like on initial activity launch)
-		meta_layout.visibility = View.GONE
-		progress_circle.visibility = View.VISIBLE
-		meta_layout.fullScroll(ScrollView.FOCUS_UP) // have to do this before removing elements for some reason
-		table_main.removeAllViews()
+		_binding.metaLayout.visibility = View.GONE
+		_binding.progressCircle.visibility = View.VISIBLE
+		_binding.metaLayout.fullScroll(ScrollView.FOCUS_UP) // have to do this before removing elements for some reason
+		_binding.tableMain.removeAllViews()
 
 		_raw = !_raw
 		invalidateOptionsMenu() // update navbar btn
@@ -234,22 +235,22 @@ class TrackInfoActivity : AppCompatActivity()
 	{
 		if (cover != null)
 		{
-			img_cover.setImageBitmap(cover)
-			img_cover.visibility = View.VISIBLE
+			_binding.imgCover.setImageBitmap(cover)
+			_binding.imgCover.visibility = View.VISIBLE
 		}
 		else
-			img_cover.visibility = View.GONE
+			_binding.imgCover.visibility = View.GONE
 
 		for (row in metaDict)
 		{
-			val view = LayoutInflater.from(this).inflate(R.layout.track_details_row, table_main, false)
-			view.text_key.text = row.first
-			view.text_value.text = row.second
-			table_main.addView(view)
+			val view = LayoutInflater.from(this).inflate(R.layout.track_details_row, _binding.tableMain, false)
+			view.findViewById<TextView>(R.id.text_key).text = row.first
+			view.findViewById<TextView>(R.id.text_value).text = row.second
+			_binding.tableMain.addView(view)
 		}
 
-		progress_circle.visibility = View.GONE
-		meta_layout.visibility = View.VISIBLE
+		_binding.progressCircle.visibility = View.GONE
+		_binding.metaLayout.visibility = View.VISIBLE
 	}
 
 	override fun onPause()
