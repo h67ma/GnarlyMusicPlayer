@@ -1,6 +1,7 @@
 package sancho.gnarlymusicplayer.activities
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
@@ -14,6 +15,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.HorizontalScrollView
 import android.widget.SeekBar
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
@@ -36,7 +39,6 @@ import java.io.File
 
 
 private const val REQUEST_READ_STORAGE = 42
-private const val INTENT_LAUNCH_FOR_RESULT_SETTINGS = 1613
 private const val BUNDLE_LASTSELECTEDTRACK = "sancho.gnarlymusicplayer.bundle.lastselectedtrack"
 const val EXTRA_TRACK_DETAIL_PATH = "sancho.gnarlymusicplayer.extra.trackdetailpath"
 
@@ -61,6 +63,8 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _serviceConn: ServiceConnection
 
 	private lateinit var _seekMenuItem: MenuItem
+
+	private lateinit var _activityKappaLauncher: ActivityResultLauncher<Intent>
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -87,6 +91,8 @@ class MainActivity : AppCompatActivity()
 		setupQueue()
 
 		setupFileList()
+
+		setupActivityLauncher()
 
 		requestReadPermishon() // check for permissions and initial update of file list
 	}
@@ -122,12 +128,18 @@ class MainActivity : AppCompatActivity()
 		outState.putInt(BUNDLE_LASTSELECTEDTRACK, _lastSelectedTrack)
 	}
 
-	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+	private fun setupActivityLauncher()
 	{
-		super.onActivityResult(requestCode, resultCode, data)
+		// this is only used for the settings activity
+		_activityKappaLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+			/* to get intent data (but which intent would that be?):
+			result ->
+			val data: Intent? = result.data
+			can also check if (result.resultCode == Activity.RESULT_OK) but it's not ok :()
+			*/
 
-		if (requestCode == INTENT_LAUNCH_FOR_RESULT_SETTINGS)
 			recreate() // must call onCreate after changing theme
+		}
 	}
 
 	private fun setToolbarText(text: String)
@@ -734,7 +746,8 @@ class MainActivity : AppCompatActivity()
 
 	private fun launchSettings()
 	{
-		startActivityForResult(Intent(this, SettingsActivity::class.java), INTENT_LAUNCH_FOR_RESULT_SETTINGS)
+		val intent = Intent(this, SettingsActivity::class.java)
+		_activityKappaLauncher.launch(intent)
 	}
 
 	//endregion
@@ -775,6 +788,7 @@ class MainActivity : AppCompatActivity()
 
 	override fun onBackPressed()
 	{
+		@Suppress("CascadeIf")
 		if (drawer_layout.isDrawerOpen(GravityCompat.START))
 			drawer_layout.closeDrawer(GravityCompat.START)
 		else if (drawer_layout.isDrawerOpen(GravityCompat.END))
