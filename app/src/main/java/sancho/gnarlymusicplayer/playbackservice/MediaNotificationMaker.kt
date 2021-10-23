@@ -22,35 +22,35 @@ private const val NOTIFICATION_CHANNEL_ID = "sancho.gnarlymusicplayer.notificati
 class MediaNotificationMaker(private val _context: Context, private val _session: MediaSessionCompat)
 {
 	private val _builder: NotificationCompat.Builder
-	private val _playPauseAction: NotificationCompat.Action
+
+	private val _replayIntent: PendingIntent
+	private val _prevIntent: PendingIntent
+	private val _playPauseIntent: PendingIntent
+	private val _nextIntent: PendingIntent
+	private val _closeIntent: PendingIntent
 
 	init
 	{
 		val pcontentIntent = PendingIntent.getActivity(_context, 0, Intent(_context, MainActivity::class.java), 0)
 
-		val replayIntent = makePendingIntent(ACTION_REPLAY_TRACK)
-		val prevIntent = makePendingIntent(ACTION_PREV_TRACK)
-		val playPauseIntent = makePendingIntent(ACTION_PLAYPAUSE)
-		val nextIntent = makePendingIntent(ACTION_NEXT_TRACK)
-		val closeIntent = makePendingIntent(ACTION_STOP_PLAYBACK_SERVICE)
-
-		_playPauseAction = NotificationCompat.Action(R.drawable.pause, _context.getString(R.string.play_pause), playPauseIntent)
+		_replayIntent = makePendingIntent(ACTION_REPLAY_TRACK)
+		_prevIntent = makePendingIntent(ACTION_PREV_TRACK)
+		_playPauseIntent = makePendingIntent(ACTION_PLAYPAUSE)
+		_nextIntent = makePendingIntent(ACTION_NEXT_TRACK)
+		_closeIntent = makePendingIntent(ACTION_STOP_PLAYBACK_SERVICE)
 
 		val style = object : androidx.media.app.NotificationCompat.MediaStyle() {}
 		style.setMediaSession(_session.sessionToken)
 			.setShowActionsInCompactView(2, 3, 4)
-			.setCancelButtonIntent(closeIntent)
+			.setCancelButtonIntent(_closeIntent)
 
 		_builder = NotificationCompat.Builder(_context, NOTIFICATION_CHANNEL_ID)
 			.setContentIntent(pcontentIntent)
 			.setOngoing(true)
 			.setStyle(style)
 			.setShowWhen(false)
-			.addAction(R.drawable.replay, _context.getString(R.string.reset), replayIntent)
-			.addAction(R.drawable.prev, _context.getString(R.string.previous), prevIntent)
-			.addAction(_playPauseAction)
-			.addAction(R.drawable.next, _context.getString(R.string.next), nextIntent)
-			.addAction(R.drawable.close, _context.getString(R.string.close), closeIntent)
+
+		setActions(R.drawable.pause)
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 			createNotificationChannel()
@@ -98,12 +98,22 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 		return PendingIntent.getService(_context, 0, intent, 0)
 	}
 
+	private fun setActions(playPauseResource: Int)
+	{
+		_builder
+			.clearActions()
+			.addAction(R.drawable.replay, _context.getString(R.string.reset), _replayIntent)
+			.addAction(R.drawable.prev, _context.getString(R.string.previous), _prevIntent)
+			.addAction(playPauseResource, _context.getString(R.string.play_pause), _playPauseIntent)
+			.addAction(R.drawable.next, _context.getString(R.string.next), _nextIntent)
+			.addAction(R.drawable.close, _context.getString(R.string.close), _closeIntent)
+	}
+
 	private fun updateNotificationStatus(playing: Boolean)
 	{
-		_playPauseAction.icon = if (playing) R.drawable.pause else R.drawable.play
-		_builder.addAction(_playPauseAction)
-			.setSmallIcon(if (playing) R.drawable.play else R.drawable.pause)
-			// .setOngoing(playing) // doesn't work as notification was started with startForeground, would have to stop service to make it dismissible
+		setActions(if (playing) R.drawable.pause else R.drawable.play)
+		_builder.setSmallIcon(if (playing) R.drawable.play else R.drawable.pause)
+		// .setOngoing(playing) // doesn't work as notification was started with startForeground, would have to stop service to make it dismissible
 	}
 
 	@RequiresApi(Build.VERSION_CODES.O)
