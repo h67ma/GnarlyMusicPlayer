@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity()
 	private var _service: MediaPlaybackService? = null
 	private lateinit var _serviceConn: ServiceConnection
 
-	private lateinit var _seekMenuItem: MenuItem
+	private var _seekMenuItem: MenuItem? = null
 
 	private lateinit var _activityKappaLauncher: ActivityResultLauncher<Intent>
 
@@ -111,6 +111,11 @@ class MainActivity : AppCompatActivity()
 		super.onResume()
 
 		_queueAdapter.notifyDataSetChanged() // in case service modified queue and we didn't go through onCreate() (e.g. screen off/on)
+
+		// if initially starting the activity, _seekMenuItem will be null and nothing will happen
+		// however if returning to activity, onCreateOptionsMenu won't get called to set visibility,
+		// so it needs to be done here
+		setSeekBtnVisibility(MediaPlaybackService.mediaPlaybackServiceStarted)
 
 		if(MediaPlaybackService.mediaPlaybackServiceStarted)
 			bindService()
@@ -464,8 +469,7 @@ class MainActivity : AppCompatActivity()
 		)
 
 		_seekMenuItem = menu.findItem(R.id.action_seek) // for manipulation outside onCreateOptionsMenu
-		if(MediaPlaybackService.mediaPlaybackServiceStarted)
-			setSeekBtnVisibility(true)
+		setSeekBtnVisibility(MediaPlaybackService.mediaPlaybackServiceStarted)
 
 		val searchThing = _actionSearch?.actionView as SearchView
 		searchThing.queryHint = getString(R.string.search_bar_hint)
@@ -519,7 +523,7 @@ class MainActivity : AppCompatActivity()
 
 	private fun setSeekBtnVisibility(visible: Boolean)
 	{
-		_seekMenuItem.isVisible = visible
+		_seekMenuItem?.isVisible = visible
 	}
 
 	//endregion
