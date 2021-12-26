@@ -58,7 +58,7 @@ object TagExtractor
 	{
 		track.path = ""
 		track.title = ""
-		track.artist = ""
+		track.artist = null
 		track.year = null
 		track.cover = null
 	}
@@ -97,8 +97,8 @@ object TagExtractor
 		}
 
 		track.title = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: queueItem.name
-		track.artist = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: ""
-		track.year = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)?.toIntOrNull() // I won't accept some weird timestamps, only a year
+		track.artist = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+		track.year = mediaInfo.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
 
 		track.cover = getTrackBitmap(queueItem.path, mediaInfo.embeddedPicture)
 
