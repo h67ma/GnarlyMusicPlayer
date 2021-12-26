@@ -16,7 +16,6 @@ import sancho.gnarlymusicplayer.comparators.ExplorerViewFilesComparator
 import sancho.gnarlymusicplayer.comparators.FilesComparator
 import sancho.gnarlymusicplayer.models.*
 import java.io.File
-import java.util.*
 
 private const val EXPLORER_NORMAL_ITEM = 0
 private const val EXPLORER_GROUP_ITEM = 1
@@ -205,12 +204,12 @@ class ExplorerAdapter(
 		{
 			val searchResultList = mutableListOf<ExplorerViewItem>()
 
-			val queryButLower = query.toLowerCase(Locale.getDefault())
+			val queryButLower = query.lowercase()
 
 			// add results from current dir
 			searchResultList.addAll(prevDirList
 				.filter { file ->
-					file.displayName.toLowerCase(Locale.getDefault()).contains(queryButLower)
+					file.displayName.lowercase().contains(queryButLower)
 				}
 				.sortedWith(ExplorerViewFilesComparator())
 			)
@@ -223,7 +222,7 @@ class ExplorerAdapter(
 				val results = dir
 					.listFiles { file ->
 						(file.isDirectory || FileSupportChecker.isFileSupported(file.name))
-								&& file.name.toLowerCase(Locale.getDefault()).contains(queryButLower)
+								&& file.name.lowercase().contains(queryButLower)
 					}
 					?.map { file -> ExplorerItem(file.path, file.name, file.isDirectory) }
 					?.sortedWith(ExplorerViewFilesComparator())

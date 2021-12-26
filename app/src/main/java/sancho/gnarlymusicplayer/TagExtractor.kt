@@ -6,7 +6,6 @@ import android.media.MediaMetadataRetriever
 import sancho.gnarlymusicplayer.models.Track
 import wseemann.media.FFmpegMediaMetadataRetriever
 import java.io.File
-import java.util.*
 
 object TagExtractor
 {
@@ -110,7 +109,7 @@ object TagExtractor
 		val lowercasedDict = mutableMapOf<String, String>()
 		for (item in tagDict)
 		{
-			lowercasedDict[item.key.toLowerCase(Locale.getDefault())] = item.value
+			lowercasedDict[item.key.lowercase()] = item.value
 		}
 		return lowercasedDict
 	}
