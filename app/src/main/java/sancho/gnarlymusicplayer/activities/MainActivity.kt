@@ -463,11 +463,6 @@ class MainActivity : AppCompatActivity()
 		// search thing
 		_actionSearch = menu.findItem(R.id.action_search)
 
-		val menuElementsToToggle = listOf(
-			menu.findItem(R.id.action_seek),
-			menu.findItem(R.id.action_settings)
-		)
-
 		_seekMenuItem = menu.findItem(R.id.action_seek) // for manipulation outside onCreateOptionsMenu
 		setSeekBtnVisibility(MediaPlaybackService.mediaPlaybackServiceStarted)
 
@@ -480,14 +475,16 @@ class MainActivity : AppCompatActivity()
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
 			override fun onMenuItemActionCollapse(item: MenuItem?): Boolean
 			{
-				menuElementsToToggle.forEach { elem -> elem.isVisible = true }
+				menu.findItem(R.id.action_settings).isVisible = true
+				setSeekBtnVisibility(MediaPlaybackService.mediaPlaybackServiceStarted)
 				_explorerAdapter.searchClose()
 				return true
 			}
 
 			override fun onMenuItemActionExpand(item: MenuItem?): Boolean
 			{
-				menuElementsToToggle.forEach { elem -> elem.isVisible = false }
+				menu.findItem(R.id.action_settings).isVisible = false
+				setSeekBtnVisibility(false)
 				return true
 			}
 		})
