@@ -161,9 +161,7 @@ class ExplorerAdapter(
 			if (files != null)
 			{
 				files.sortWith(FilesComparator())
-				addToQueue(files.map { track ->
-					QueueItem(track.absolutePath, track.nameWithoutExtension)
-				})
+				addToQueue(files.map { QueueItem(it.absolutePath, it.nameWithoutExtension) })
 
 				Toaster.show(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size))
 			}
@@ -175,16 +173,11 @@ class ExplorerAdapter(
 			// add all tracks in playlist (not recursive)
 			val files = listPlaylist(file)
 
-			if (files != null)
-			{
-				addToQueue(files.map { track ->
-					QueueItem(track.absolutePath, track.nameWithoutExtension)
-				})
+			files.removeAll { !it.exists() } // we're not interested in paths to non-existent files
 
-				Toaster.show(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size))
-			}
-			else
-				Toaster.show(_context, _context.getString(R.string.file_list_error))
+			addToQueue(files.map { QueueItem(it.absolutePath, it.nameWithoutExtension) })
+
+			Toaster.show(_context, _context.getString(R.string.n_tracks_added_to_queue, files.size))
 		}
 	}
 
@@ -208,14 +201,12 @@ class ExplorerAdapter(
 
 			// add results from current dir
 			searchResultList.addAll(prevDirList
-				.filter { file ->
-					file.displayName.lowercase().contains(queryButLower)
-				}
+				.filter { it.displayName.lowercase().contains(queryButLower) }
 				.sortedWith(ExplorerViewFilesComparator())
 			)
 
 			// add results from first level dirs (grouped by subdir name)
-			for (elem in prevDirList.filter { file -> file.isDirectory }.sortedWith(ExplorerViewFilesComparator()))
+			for (elem in prevDirList.filter { it.isDirectory }.sortedWith(ExplorerViewFilesComparator()))
 			{
 				val dir = File(elem.path)
 
@@ -224,7 +215,7 @@ class ExplorerAdapter(
 						(file.isDirectory || FileSupportChecker.isFileSupported(file.name))
 								&& file.name.lowercase().contains(queryButLower)
 					}
-					?.map { file -> ExplorerItem(file.path, file.name, file.isDirectory) }
+					?.map { ExplorerItem(it.path, it.name, it.isDirectory) }
 					?.sortedWith(ExplorerViewFilesComparator())
 
 				if (results?.isNotEmpty() == true)
@@ -307,13 +298,13 @@ class ExplorerAdapter(
 	{
 		val list = mutableListOf<ExplorerViewItem>()
 
-		newPath.readLines().forEach {
-			val track = File(newPath.parent, it) // relative to playlist's directory
-			if (!track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
-				if (track.exists())
-					list.add(ExplorerItem(track.path, track.name, track.isDirectory))
-				else
-					list.add(ExplorerErrorItem(track.path, track.name, track.isDirectory))
+		val files = listPlaylist(newPath)
+
+		files.forEach {
+			if (it.exists())
+				list.add(ExplorerItem(it.path, it.name, it.isDirectory))
+			else
+				list.add(ExplorerErrorItem(it.path, it.name, it.isDirectory))
 		}
 
 		return list.toMutableList()
@@ -327,18 +318,15 @@ class ExplorerAdapter(
 		}?.toMutableList()
 	}
 
-	private fun listPlaylist(path: File): MutableList<File>?
+	private fun listPlaylist(path: File): MutableList<File>
 	{
 		val list = mutableListOf<File>()
 
 		path.readLines().forEach {
-			val track = File(path.parent, it) // relative to playlist's directory
-			if (track.exists() && !track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
+			val track = File(path.parent, it).canonicalFile // resolve path (.. and stuff)
+			if (!track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
 				list.add(track)
 		}
-
-		if (list.size == 0)
-			return null
 
 		return list
 	}
