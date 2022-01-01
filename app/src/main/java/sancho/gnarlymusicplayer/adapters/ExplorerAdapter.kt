@@ -323,9 +323,13 @@ class ExplorerAdapter(
 		val list = mutableListOf<File>()
 
 		path.readLines().forEach {
-			val track = File(path.parent, it).canonicalFile // resolve path (.. and stuff)
+			var track = File(path.parent, it)
+
+			if (!track.exists())
+				track = File(it) // maybe it's absolute path
+
 			if (!track.isDirectory && FileSupportChecker.isFileSupportedAndAudio(it))
-				list.add(track)
+				list.add(track.canonicalFile) // resolve path (.. and stuff)
 		}
 
 		return list
