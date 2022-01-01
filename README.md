@@ -11,7 +11,7 @@ Gnarly Music Player is a lightweight directory-based music player for Android, f
 * Seek current track + restore last track position
 * Media buttons support
 * Album art on lockscreen and in notification
-* Tag viewer (based on ffmpeg)
+* Tag viewer (based on [FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever))
 * Designed for convenience and simplicity
 * No ads
 * Option to ignore audio focus changes
@@ -27,6 +27,8 @@ This music player is highly inspired by [Folder Music Player](https://play.googl
 This core functionality the same as in _Folder Music Player_, but there are also many useful tools to efficiently navigate music library and manage playback queue. Visually the app is clean and simplistic, without excessive gradients, margins and animations.
 
 Obviously this app is far from perfect. Code is messy, some functionality is missing, and there are some bugs. This is a hobby project after all. But the ideas behind the UI are pretty solid and the player has proved to be very convenient to use (at least for its creator).
+
+Beware of spaghetti code!
 
 # Changelog #
 
