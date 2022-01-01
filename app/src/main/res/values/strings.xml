@@ -9,6 +9,7 @@
     <string name="file_doesnt_exist">File doesn\'t exist</string>
     <string name="storage_devices">Storage devices</string>
     <string name="about">About</string>
+    <string name="backup">Backup</string>
     <string name="n_tracks_added_to_queue">%1$d tracks added to queue</string>
     <string name="cleared_n_tracks">Cleared %1$d tracks</string>
     <string name="reset">Reset</string>
@@ -42,4 +43,5 @@
     <string name="q_clear_queue">Clear queue?</string>
     <string name="q_clear_queue_below">Clear queue below \"%1$s\"?</string>
     <string name="q_clear_queue_above">Clear queue above \"%1$s\"?</string>
+    <string name="file_save_error">Error writing to external storage</string>
 </resources>

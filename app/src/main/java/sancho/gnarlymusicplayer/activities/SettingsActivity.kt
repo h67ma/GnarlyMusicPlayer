@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.preference.*
 import sancho.gnarlymusicplayer.AppSettingsManager
 import sancho.gnarlymusicplayer.PlaybackQueue
@@ -16,6 +17,10 @@ import sancho.gnarlymusicplayer.Toaster
 import sancho.gnarlymusicplayer.databinding.ActivitySettingsBinding
 import sancho.gnarlymusicplayer.playbackservice.ACTION_UPDATE_MAX_VOLUME
 import sancho.gnarlymusicplayer.playbackservice.MediaPlaybackService
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 
 class SettingsActivity : AppCompatActivity()
 {
@@ -39,7 +44,7 @@ class SettingsActivity : AppCompatActivity()
 	{
 		private fun setupLinkItem(key: String, url: String)
 		{
-			findPreference<Preference>(key)?.setOnPreferenceClickListener { _ ->
+			findPreference<Preference>(key)?.setOnPreferenceClickListener {
 				val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 				startActivity(browserIntent)
 				true
@@ -52,7 +57,7 @@ class SettingsActivity : AppCompatActivity()
 
 			findPreference<Preference>("version")?.summary = getAppVersion()
 
-			findPreference<Preference>("version")?.setOnPreferenceClickListener { _ ->
+			findPreference<Preference>("version")?.setOnPreferenceClickListener {
 				Toaster.show(requireContext(), getString(R.string.ur_not_a_developer))
 				true
 			}
@@ -70,7 +75,7 @@ class SettingsActivity : AppCompatActivity()
 			}
 
 			// note: package name is hardcoded in manifest <queries>
-			findPreference<Preference>("eq")?.setOnPreferenceClickListener { _ ->
+			findPreference<Preference>("eq")?.setOnPreferenceClickListener {
 				val eqIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
 
 				val pm = context?.packageManager
@@ -136,7 +141,7 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
-			findPreference<Preference>("setlockvolume")?.setOnPreferenceClickListener { _ ->
+			findPreference<Preference>("setlockvolume")?.setOnPreferenceClickListener {
 				val manager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 				val current = manager.getStreamVolume(AudioManager.STREAM_MUSIC)
 
@@ -147,6 +152,29 @@ class SettingsActivity : AppCompatActivity()
 				}
 
 				Toaster.show(requireContext(), "Will set to $current")
+
+				true
+			}
+
+			findPreference<Preference>("backupqueue")?.setOnPreferenceClickListener {
+				val externalStorageVolumes = ContextCompat.getExternalFilesDirs(requireContext(), null)
+				val saveFile = File(externalStorageVolumes[0], "queue.m3u8")
+
+				var toWrite = ""
+				for (item in PlaybackQueue.queue)
+					toWrite += item.path + '\n'
+
+				try
+				{
+					val os: OutputStream = FileOutputStream(saveFile)
+					os.write(toWrite.toByteArray())
+					os.close()
+					Toaster.show(requireContext(), "Saved to ${saveFile.absolutePath}")
+				}
+				catch (e: IOException)
+				{
+					Toaster.show(requireContext(), getString(R.string.file_save_error))
+				}
 
 				true
 			}

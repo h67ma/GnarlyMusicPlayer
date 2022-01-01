@@ -12,6 +12,7 @@ Gnarly Music Player is a lightweight directory-based music player for Android, f
 * Media buttons support
 * Album art on lockscreen and in notification
 * Tag viewer (based on [FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever))
+* Export queue to playlist
 * Designed for convenience and simplicity
 * No ads
 * Option to ignore audio focus changes

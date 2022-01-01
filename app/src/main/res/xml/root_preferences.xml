@@ -94,6 +94,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/backup"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true">
+
+        <Preference
+            app:title="Save queue to playlist"
+            android:summary="Will be saved to app's private directory"
+            app:key="backupqueue"
+            app:persistent="false"
+            app:iconSpaceReserved="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/about"
         app:iconSpaceReserved="false"
         app:allowDividerAbove="true">
