@@ -6,6 +6,17 @@
         <item name="android:textColor">#FFF</item>
         <item name="android:itemBackground">#333</item> <!-- context menu bg -->
         <item name="android:weekSeparatorLineColor">#555</item> <!-- whatever, just some separator -->
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
+    </style>
+
+    <style name="AppBottomSheetDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+    </style>
+
+    <style name="AppModalStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="behavior_peekHeight">10000dp</item> <!-- auto-expands bottom sheet. can't find a cleaner way to do this -->
     </style>
 
     <style name="AppThemeLime" parent="AppThemeBlack">
