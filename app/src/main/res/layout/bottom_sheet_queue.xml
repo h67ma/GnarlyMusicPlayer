@@ -95,6 +95,24 @@
         android:background="?android:weekSeparatorLineColor"/>
 
     <TextView
+        android:id="@+id/sheet_queue_move_current_here"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Move current track here"
+        android:padding="12dp"
+        android:drawableLeft="@drawable/move_here"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:drawablePadding="10dp"
+        android:textSize="18sp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:weekSeparatorLineColor"/>
+
+    <TextView
         android:id="@+id/sheet_queue_clear_above"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -280,6 +280,7 @@ class MainActivity : AppCompatActivity()
 		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_to_top) { moveQueueItem(selectedIdx, 0)}
 		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_after_current) { moveAfterCurrentTrack(selectedIdx)}
 		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_to_bottom) { moveQueueItem(selectedIdx, PlaybackQueue.lastIdx)}
+		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_move_current_here) { moveCurrentHere(selectedIdx) }
 		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_clear_above) { clearAbove(selectedIdx)}
 		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_clear_below) { clearBelow(selectedIdx)}
 		dialog.setBottomSheetItemOnClick(R.id.sheet_queue_clear_all) { clearAll()}
@@ -622,6 +623,17 @@ class MainActivity : AppCompatActivity()
 	{
 		if (fromPosition == toPosition)
 			return
+
+		PlaybackQueue.moveItem(fromPosition, toPosition)
+		_queueAdapter.notifyItemMoved(fromPosition, toPosition)
+	}
+
+	private fun moveCurrentHere(toPosition: Int)
+	{
+		val fromPosition = PlaybackQueue.currentIdx
+
+		if (fromPosition == toPosition)
+			return // user selected currently playing item
 
 		PlaybackQueue.moveItem(fromPosition, toPosition)
 		_queueAdapter.notifyItemMoved(fromPosition, toPosition)
