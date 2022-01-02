@@ -7,6 +7,7 @@ import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.*
@@ -169,7 +170,7 @@ class SettingsActivity : AppCompatActivity()
 					val os: OutputStream = FileOutputStream(saveFile)
 					os.write(toWrite.toByteArray())
 					os.close()
-					Toaster.show(requireContext(), "Saved to ${saveFile.absolutePath}")
+					Toaster.show(requireContext(), "Saved to ${saveFile.absolutePath}", Toast.LENGTH_LONG)
 				}
 				catch (e: IOException)
 				{
