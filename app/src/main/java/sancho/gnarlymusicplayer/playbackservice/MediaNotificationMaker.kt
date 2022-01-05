@@ -49,6 +49,15 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 			.setOngoing(true)
 			.setStyle(style)
 			.setShowWhen(false)
+		/* In recent android versions, ongoing flag is ignored if notification has media session
+		 * and notification can be dismissed anyway and service killed. This can happen in 3 cases:
+		 * 1) Audio is paused and notification is dismissed
+		 * 2) Audio is playing, notification is dismissed, but then it is still visible under QS (????).
+		 * 		when it is paused THEN, and notification panel closed, then notification/service will be finished
+		 * 3) Notification has been sitting in paused state for about 10 mins. bruh.
+		 * However there's no need to set .setDeleteIntent(_closeIntent), as OS will call media
+		 * session's onStop() (at least I think that's what is happening).
+		 */
 
 		setActions(R.drawable.pause)
 
