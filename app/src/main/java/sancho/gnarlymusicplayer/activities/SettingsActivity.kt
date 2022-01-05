@@ -113,6 +113,12 @@ class SettingsActivity : AppCompatActivity()
 				true
 			}
 
+			findPreference<CheckBoxPreference>(getString(R.string.pref_dontpausemediasess))?.setOnPreferenceChangeListener { _, newValue ->
+				AppSettingsManager.noPauseMediaSess = (newValue as Boolean) == true
+
+				true
+			}
+
 			findPreference<CheckBoxPreference>(getString(R.string.pref_inappenabled))?.setOnPreferenceChangeListener { _, newValue ->
 				AppSettingsManager.volumeInappEnabled = (newValue as Boolean) == true
 

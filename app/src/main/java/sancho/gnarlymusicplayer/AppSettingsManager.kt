@@ -22,6 +22,7 @@ object AppSettingsManager
 
 	var ignoreAf = false
 	var bluetoothCrackingWorkaround = false
+	var noPauseMediaSess = false
 
 	var volumeStepsTotal: Int = 30
 	var volumeInappEnabled: Boolean = false
@@ -97,6 +98,7 @@ object AppSettingsManager
 
 		ignoreAf = sharedPref.getBoolean(context.getString(R.string.pref_ignoreaf), false)
 		bluetoothCrackingWorkaround = sharedPref.getBoolean(context.getString(R.string.pref_btcrackworkaround), false)
+		noPauseMediaSess = sharedPref.getBoolean(context.getString(R.string.pref_dontpausemediasess), false)
 
 		volumeStepsTotal = sharedPref.getInt(context.getString(R.string.pref_totalsteps), 30)
 		volumeInappEnabled = sharedPref.getBoolean(context.getString(R.string.pref_inappenabled), false)

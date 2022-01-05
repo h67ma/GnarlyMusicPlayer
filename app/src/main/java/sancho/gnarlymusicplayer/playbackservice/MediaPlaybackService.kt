@@ -141,15 +141,14 @@ class MediaPlaybackService : Service()
 		_player = AudioPlayer(this, _mediaSession, ::nextTrack) // now this is a weird lookin operator
 		_player.setVolumeProvider()
 
-		// get the setting value on service startup and don't react to
-		// the user changing the setting while playback service is running
-		// need to restart the service for the setting to take place
-		_playSilenceEnabled = AppSettingsManager.bluetoothCrackingWorkaround
-		prepareSilencePlayer()
-
-		// same thing, store this locally and changes will be
-		// active only after restarting the service
+		// get the values of settings on service startup and don't react to
+		// the user changing the settings while playback service is running,
+		// as it might cause some inconsistencies.
+		// need to restart the service for this settings to take place
 		_ignoreAf = AppSettingsManager.ignoreAf
+		_playSilenceEnabled = AppSettingsManager.bluetoothCrackingWorkaround
+
+		prepareSilencePlayer()
 
 		_notificationMaker = MediaNotificationMaker(this, _mediaSession)
 	}
@@ -297,7 +296,10 @@ class MediaPlaybackService : Service()
 			{
 				_player.pause()
 				_notificationMaker.updateNotification(_player.isPlaying)
-				playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
+
+				if (!AppSettingsManager.noPauseMediaSess)
+					playbackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0L, 0f)
+
 				_mediaSession.setPlaybackState(playbackStateBuilder.build())
 				AudioManagerCompat.abandonAudioFocusRequest(_audioManager, _focusRequest)
 				unregisterNoisyReceiver()
