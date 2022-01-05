@@ -89,9 +89,11 @@ class SettingsActivity : AppCompatActivity()
 					eqIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context?.packageName)
 					eqIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
 
-					// documentation recommends using startActivityForResult but it's deprecated
-					// looks to be working alrite with startActivity
-					startActivity(eqIntent)
+					// from documentation:
+					// "The calling application must use the Activity.startActivityForResult(Intent, int) method"
+					// meanwhile it's deprecated :)
+					// note: startActivity works too on some versions of Android (and is not deprecated)
+					startActivityForResult(eqIntent, 1337)
 				}
 				else
 					Toaster.show(requireContext(), getString(R.string.no_eq_found))
