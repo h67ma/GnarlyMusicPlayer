@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,12 +26,13 @@
         android:layout_height="wrap_content"
         android:text="Details"
         android:padding="12dp"
-        android:drawableLeft="@drawable/info"
+        app:drawableLeftCompat="@drawable/info"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <TextView
         android:id="@+id/sheet_explorer_goto_parent_dir"
@@ -38,12 +40,13 @@
         android:layout_height="wrap_content"
         android:text="Open parent directory"
         android:padding="12dp"
-        android:drawableLeft="@drawable/folder_nopad"
+        app:drawableLeftCompat="@drawable/folder_nopad"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <View
         android:layout_width="match_parent"
@@ -56,12 +59,13 @@
         android:layout_height="wrap_content"
         android:text="Insert at the top of queue"
         android:padding="12dp"
-        android:drawableLeft="@drawable/subdirectory_arrow_top"
+        app:drawableLeftCompat="@drawable/subdirectory_arrow_top"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <TextView
         android:id="@+id/sheet_explorer_insert_after_current"
@@ -69,11 +73,12 @@
         android:layout_height="wrap_content"
         android:text="Insert after current track"
         android:padding="12dp"
-        android:drawableLeft="@drawable/insert_in_middle"
+        app:drawableLeftCompat="@drawable/insert_in_middle"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
 </LinearLayout>

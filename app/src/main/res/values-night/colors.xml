@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text">#FFF</color>
+    <color name="background">#000</color> <!-- amoled black is best black -->
+    <color name="menuBackground">#333</color>
+    <color name="separator">#555</color>
+</resources>

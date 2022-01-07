@@ -31,6 +31,7 @@ object AppSettingsManager
 	var volumeSystemLevel: Int = 7
 
 	private val STYLE_MAP = mapOf(
+		"base" to R.style.AppThemeBase,
 		"lime" to R.style.AppThemeLime,
 		"green" to R.style.AppThemeGreen,
 		"blu" to R.style.AppThemeBlu,
@@ -42,8 +43,7 @@ object AppSettingsManager
 		"pink" to R.style.AppThemePink,
 		"yello" to R.style.AppThemeYello,
 		"lavender" to R.style.AppThemeLavender,
-		"grey" to R.style.AppThemeGrey,
-		"macintosh" to R.style.AppThemeMacintoshPlus
+		"grey" to R.style.AppThemeGrey
 	)
 
 	private val QUEUEITEM_COLLECTION_TYPE = object : TypeToken<Collection<QueueItem>>() {}.type

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -30,12 +31,13 @@
         android:layout_height="wrap_content"
         android:text="Details"
         android:padding="12dp"
-        android:drawableLeft="@drawable/info"
+        app:drawableLeftCompat="@drawable/info"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor" />
 
     <TextView
         android:id="@+id/sheet_queue_goto_parent_dir"
@@ -43,12 +45,13 @@
         android:layout_height="wrap_content"
         android:text="Open parent directory"
         android:padding="12dp"
-        android:drawableLeft="@drawable/folder_nopad"
+        app:drawableLeftCompat="@drawable/folder_nopad"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <View
         android:layout_width="match_parent"
@@ -61,12 +64,13 @@
         android:layout_height="wrap_content"
         android:text="Move to the top"
         android:padding="12dp"
-        android:drawableLeft="@drawable/subdirectory_arrow_top"
+        app:drawableLeftCompat="@drawable/subdirectory_arrow_top"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <TextView
         android:id="@+id/sheet_queue_move_after_current"
@@ -74,12 +78,13 @@
         android:layout_height="wrap_content"
         android:text="Move after current"
         android:padding="12dp"
-        android:drawableLeft="@drawable/insert_in_middle"
+        app:drawableLeftCompat="@drawable/insert_in_middle"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <TextView
         android:id="@+id/sheet_queue_move_to_bottom"
@@ -87,12 +92,13 @@
         android:layout_height="wrap_content"
         android:text="Move to the bottom"
         android:padding="12dp"
-        android:drawableLeft="@drawable/subdirectory_arrow_bottom"
+        app:drawableLeftCompat="@drawable/subdirectory_arrow_bottom"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <View
         android:layout_width="match_parent"
@@ -105,12 +111,13 @@
         android:layout_height="wrap_content"
         android:text="Move current track here"
         android:padding="12dp"
-        android:drawableLeft="@drawable/move_here"
+        app:drawableLeftCompat="@drawable/move_here"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <View
         android:layout_width="match_parent"
@@ -123,12 +130,13 @@
         android:layout_height="wrap_content"
         android:text="Clear above"
         android:padding="12dp"
-        android:drawableLeft="@drawable/delete_forever_white_top"
+        app:drawableLeftCompat="@drawable/delete_forever_white_top"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <TextView
         android:id="@+id/sheet_queue_clear_below"
@@ -136,12 +144,13 @@
         android:layout_height="wrap_content"
         android:text="Clear below"
         android:padding="12dp"
-        android:drawableLeft="@drawable/delete_forever_white_bottom"
+        app:drawableLeftCompat="@drawable/delete_forever_white_bottom"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
     <TextView
         android:id="@+id/sheet_queue_clear_all"
@@ -149,12 +158,13 @@
         android:layout_height="wrap_content"
         android:text="Clear all"
         android:padding="12dp"
-        android:drawableLeft="@drawable/delete_forever_white"
+        app:drawableLeftCompat="@drawable/delete_forever_white"
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:drawablePadding="10dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
 
 </LinearLayout>
 </androidx.core.widget.NestedScrollView>

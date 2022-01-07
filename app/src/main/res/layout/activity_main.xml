@@ -22,8 +22,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?android:colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+                android:background="?android:colorPrimary">
 
                 <HorizontalScrollView
                     android:id="@+id/toolbar_scroller"
@@ -36,7 +35,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="fill_parent"
                         android:textSize="18sp"
-                        android:textColor="?android:textColorPrimary"
+                        android:textColor="?android:textColorPrimaryInverse"
                         android:singleLine="true"
                         android:gravity="center_vertical"/>
 
@@ -58,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                android:indeterminateTint="?android:textColorPrimary"
+                android:indeterminateTint="?android:textColor"
                 android:layout_marginTop="-6dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -85,7 +84,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:background="?backgroundColor"/>
 
     </com.google.android.material.navigation.NavigationView>
 
@@ -99,15 +99,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="?backgroundColor">
 
             <Button
                 android:id="@+id/bookmark_root"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/storage_devices"
-                android:drawableStart="@drawable/sd_card"
-                android:drawableTint="?android:textColor"/>
+                android:drawableLeft="@drawable/sd_card"
+                android:drawableTint="?android:colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_marginHorizontal="5dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/bookmark_list_view"
@@ -122,8 +125,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_current_dir"
-                android:drawableStart="@drawable/plus"
-                android:drawableTint="?android:textColor"/>
+                android:drawableLeft="@drawable/plus"
+                android:drawableTint="?android:colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_marginHorizontal="5dp"/>
 
         </LinearLayout>
 

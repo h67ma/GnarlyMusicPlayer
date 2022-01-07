@@ -1,12 +1,27 @@
 <resources>
 
-    <style name="AppThemeBlack" parent="Theme.AppCompat.NoActionBar"> <!-- also can be Theme.MaterialComponents.NoActionBar -->
-        <item name="android:colorPrimary">#000</item>
-        <item name="android:colorPrimaryDark">#000</item>
-        <item name="android:textColor">#FFF</item>
-        <item name="android:itemBackground">#333</item> <!-- context menu bg -->
-        <item name="android:weekSeparatorLineColor">#555</item> <!-- whatever, just some separator -->
+    <!-- can also be Theme.AppCompat.NoActionBar -->
+    <!-- also can be Theme.MaterialComponents.NoActionBar -->
+    <style name="AppThemeBase" parent="Theme.MaterialComponents.DayNight">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorAccent">?colorPrimary</item>
+
+        <item name="backgroundColor">@color/background</item>
+        <item name="android:itemBackground">@color/menuBackground</item> <!-- context menu bg -->
+
+        <item name="android:statusBarColor">@color/statusBar</item>
+
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textColorPrimaryInverse">@color/textNegative</item>
+
+        <item name="android:weekSeparatorLineColor">@color/separator</item> <!-- whatever, just some separator -->
+        <item name="android:buttonTint">?android:colorPrimary</item>
+
+        <item name="android:textCursorDrawable">@null</item> <!-- makes the cursor white, not primary color -->
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
+
+        <item name="windowActionBar">false</item> <!-- idk what's this but app crashes otherwise -->
+        <item name="windowNoTitle">true</item> <!-- idk what's this but app crashes otherwise -->
     </style>
 
     <style name="AppBottomSheetDialogTheme"
@@ -14,95 +29,68 @@
         <item name="bottomSheetStyle">@style/AppModalStyle</item>
     </style>
 
-    <style name="AppModalStyle"
-        parent="Widget.Design.BottomSheet.Modal">
+    <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="behavior_peekHeight">10000dp</item> <!-- auto-expands bottom sheet. can't find a cleaner way to do this -->
     </style>
 
-    <style name="AppThemeLime" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#AAED39</item>
-        <item name="android:colorAccent">#AAED39</item>
-        <item name="android:colorPrimaryDark">#88D13B</item>
-
+    <style name="AppThemeLime" parent="AppThemeBase">
+        <item name="colorPrimary">#AAED39</item>
+        <item name="android:statusBarColor">#88D13B</item>
     </style>
 
-    <style name="AppThemeGreen" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#4CAF50</item>
-        <item name="android:colorAccent">#4CAF50</item>
-        <item name="android:colorPrimaryDark">#388E3C</item>
+    <style name="AppThemeGreen" parent="AppThemeBase">
+        <item name="colorPrimary">#4CAF50</item>
+        <item name="android:statusBarColor">#388E3C</item>
     </style>
 
-    <style name="AppThemeBlu" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#2196F3</item>
-        <item name="android:colorAccent">#2196F3</item>
-        <item name="android:colorPrimaryDark">#1976D2</item>
+    <style name="AppThemeBlu" parent="AppThemeBase">
+        <item name="colorPrimary">#2196F3</item>
+        <item name="android:statusBarColor">#1976D2</item>
     </style>
 
-    <style name="AppThemeCyan" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#00BCD4</item>
-        <item name="android:colorAccent">#00BCD4</item>
-        <item name="android:colorPrimaryDark">#0097A7</item>
+    <style name="AppThemeCyan" parent="AppThemeBase">
+        <item name="colorPrimary">#00BCD4</item>
+        <item name="android:statusBarColor">#0097A7</item>
     </style>
 
-    <style name="AppThemeRed" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#F4292C</item>
-        <item name="android:colorAccent">#F4292C</item>
-        <item name="android:colorPrimaryDark">#D32F2F</item>
+    <style name="AppThemeRed" parent="AppThemeBase">
+        <item name="colorPrimary">#F4292C</item>
+        <item name="android:statusBarColor">#D32F2F</item>
     </style>
 
-    <style name="AppThemeCherri" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#BB2A57</item>
-        <item name="android:colorAccent">#BB2A57</item>
-        <item name="android:colorPrimaryDark">#982345</item>
+    <style name="AppThemeCherri" parent="AppThemeBase">
+        <item name="colorPrimary">#BB2A57</item>
+        <item name="android:statusBarColor">#982345</item>
     </style>
 
-    <style name="AppThemeOrang" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#FF9800</item>
-        <item name="android:colorAccent">#FF9800</item>
-        <item name="android:colorPrimaryDark">#F57C00</item>
+    <style name="AppThemeOrang" parent="AppThemeBase">
+        <item name="colorPrimary">#FF9800</item>
+        <item name="android:statusBarColor">#F57C00</item>
     </style>
 
-    <style name="AppThemePurpl" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#9C27B0</item>
-        <item name="android:colorAccent">#9C27B0</item>
-        <item name="android:colorPrimaryDark">#7B1FA2</item>
+    <style name="AppThemePurpl" parent="AppThemeBase">
+        <item name="colorPrimary">#9C27B0</item>
+        <item name="android:statusBarColor">#7B1FA2</item>
     </style>
 
-    <style name="AppThemePink" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#FF94C2</item>
-        <item name="android:colorAccent">#FF94C2</item>
-        <item name="android:colorPrimaryDark">#F06292</item>
+    <style name="AppThemePink" parent="AppThemeBase">
+        <item name="colorPrimary">#FF94C2</item>
+        <item name="android:statusBarColor">#F06292</item>
     </style>
 
-        <style name="AppThemeYello" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#E8CD58</item>
-        <item name="android:colorAccent">#E8CD58</item>
-        <item name="android:colorPrimaryDark">#D8B220</item>
+        <style name="AppThemeYello" parent="AppThemeBase">
+        <item name="colorPrimary">#E8CD58</item>
+        <item name="android:statusBarColor">#D8B220</item>
     </style>
 
-    <style name="AppThemeLavender" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#D3A0EA</item>
-        <item name="android:colorAccent">#D3A0EA</item>
-        <item name="android:colorPrimaryDark">#AA77C7</item>
+    <style name="AppThemeLavender" parent="AppThemeBase">
+        <item name="colorPrimary">#D3A0EA</item>
+        <item name="android:statusBarColor">#AA77C7</item>
     </style>
 
-    <style name="AppThemeGrey" parent="AppThemeBlack">
-        <item name="android:colorPrimary">#9E9E9E</item>
-        <item name="android:colorAccent">#9E9E9E</item>
-        <item name="android:colorPrimaryDark">#808080</item>
-    </style>
-
-    <style name="AppThemeMacintoshPlus" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:colorPrimary">#54B797</item>
-        <item name="android:colorAccent">#54B797</item>
-        <item name="android:colorPrimaryDark">#54B797</item>
-        <item name="android:textColor">#6CFFB5</item>
-        <item name="android:windowBackground">#FF8199</item>
-        <item name="android:colorBackground">#FF8199</item>
-    </style>
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:textColor">#000</item>
+    <style name="AppThemeGrey" parent="AppThemeBase">
+        <item name="colorPrimary">#9E9E9E</item>
+        <item name="android:statusBarColor">#808080</item>
     </style>
 
 </resources>

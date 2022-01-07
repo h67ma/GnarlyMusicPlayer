@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?android:colorPrimary"
-        app:popupTheme="@style/AppTheme.PopupOverlay"/>
+        app:titleTextColor="?android:textColorPrimaryInverse"/>
 
     <FrameLayout
         android:id="@+id/settings"
