@@ -6,18 +6,20 @@ Gnarly Music Player is a lightweight directory-based music player for Android, f
 * Simple context search
 * Simple directory-based bookmarks
 * Read-only playlist support (m3u/m3u8)
-* Configurable volume step count (in-app volume)
-* Integration with audio equalizer apps
+* Export queue to playlist
+* Integration with the default audio equalizer app
 * Seek current track + restore last track position
 * Media buttons support
 * Album art on lockscreen and in notification
 * Tag viewer (based on [FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever))
-* Export queue to playlist
-* Designed for convenience and simplicity
+* Designed for quick, intuitive use
 * No ads
-* Option to ignore audio focus changes
-* Option to enable Bluetooth cracking workaround (see the [help page](https://github.com/h67ma/GnarlyMusicPlayer/wiki/Help))
-* Customizable accent colour
+* Customizable accent color (including "Material You" on Android 12)
+* (optional) audio-related workarounds (see app settings)
+	* Configurable volume step count (in-app volume)
+	* Ignore audio focus
+	* Bluetooth cracking workaround
+	* Prevent OS from killing playback service
 
 # Download #
 [Latest release .apk](https://github.com/szycikm/GnarlyMusicPlayer/releases/latest)
