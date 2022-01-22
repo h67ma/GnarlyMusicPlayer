@@ -362,7 +362,8 @@ class MainActivity : AppCompatActivity()
 
 			bindService()
 
-			setSeekBtnVisibility(true)
+			if (_actionSearch?.isActionViewExpanded != true)
+				setSeekBtnVisibility(true) // if search thing is open, icon should not be shown
 		}
 		else
 		{
