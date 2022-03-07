@@ -102,15 +102,41 @@
             android:orientation="vertical"
             android:background="?backgroundColor">
 
-            <Button
-                android:id="@+id/bookmark_root"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/storage_devices"
-                android:drawableLeft="@drawable/sd_card"
-                android:drawableTint="?android:colorPrimary"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                android:layout_marginHorizontal="5dp"/>
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bookmarks"
+                    android:textSize="18sp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"/>
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/bookmark_root"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:contentDescription="@string/storage_devices"
+                    android:src="@drawable/sd_card"
+                    android:layout_margin="10dp"
+                    android:padding="3dp"
+                    android:layout_alignParentRight="true"/>
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/bookmark_add_btn"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:contentDescription="@string/add_current_dir"
+                    android:src="@drawable/plus"
+                    android:layout_margin="10dp"
+                    android:padding="3dp"
+                    android:layout_toLeftOf="@id/bookmark_root"/>
+
+            </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/bookmark_list_view"
@@ -119,16 +145,6 @@
                 android:layout_weight="1"
                 android:scrollbars="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-
-            <Button
-                android:id="@+id/bookmark_add_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/add_current_dir"
-                android:drawableLeft="@drawable/plus"
-                android:drawableTint="?android:colorPrimary"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                android:layout_marginHorizontal="5dp"/>
 
         </LinearLayout>
 

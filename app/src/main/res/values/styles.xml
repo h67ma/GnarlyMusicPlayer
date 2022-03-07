@@ -22,6 +22,13 @@
 
         <item name="windowActionBar">false</item> <!-- idk what's this but app crashes otherwise -->
         <item name="windowNoTitle">true</item> <!-- idk what's this but app crashes otherwise -->
+
+        <item name="imageButtonStyle">@style/ImgButtonTheme</item>
+    </style>
+
+    <style name="ImgButtonTheme" parent="Widget.MaterialComponents.Button">
+        <item name="tint">?android:colorPrimary</item>
+        <item name="android:background">?android:selectableItemBackgroundBorderless</item> <!-- who knew "borderless" also made things round -->
     </style>
 
     <style name="AppBottomSheetDialogTheme"
