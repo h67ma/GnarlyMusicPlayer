@@ -133,7 +133,7 @@ class SettingsActivity : AppCompatActivity()
 				AppSettingsManager.volumeStepsTotal = newTotal
 
 				// also save volumestepidx to preference (so MainActivity won't overwrite it if the service is not running)
-				with (PreferenceManager.getDefaultSharedPreferences(context).edit())
+				with (PreferenceManager.getDefaultSharedPreferences(requireContext()).edit())
 				{
 					putInt(AppSettingsManager.PREFERENCE_VOLUME_STEP_IDX, AppSettingsManager.volumeStepIdx)
 					apply()
@@ -154,7 +154,7 @@ class SettingsActivity : AppCompatActivity()
 				val manager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 				val current = manager.getStreamVolume(AudioManager.STREAM_MUSIC)
 
-				with (PreferenceManager.getDefaultSharedPreferences(context).edit())
+				with (PreferenceManager.getDefaultSharedPreferences(requireContext()).edit())
 				{
 					putInt(AppSettingsManager.PREFERENCE_VOLUME_SYSTEM_TO_SET, current)
 					apply()
