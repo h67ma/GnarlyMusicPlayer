@@ -215,16 +215,11 @@ class MainActivity : AppCompatActivity()
 		}
 		_binding.bookmarkListView.adapter = adapter
 
-		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
+		val touchHelper = ItemTouchHelper(object : DragListTouchHelperCallback(this)
 		{
 			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
 			{
 				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
-			}
-
-			override fun isLongPressDragEnabled(): Boolean
-			{
-				return false
 			}
 
 			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
@@ -291,16 +286,11 @@ class MainActivity : AppCompatActivity()
 		_queueAdapter = QueueAdapter(this, ::playTrack, ::setupQueueCtxMenu)
 		_binding.queueListView.adapter = _queueAdapter
 
-		val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback()
+		val touchHelper = ItemTouchHelper(object : DragListTouchHelperCallback(this)
 		{
 			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
 			{
 				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT)
-			}
-
-			override fun isLongPressDragEnabled(): Boolean
-			{
-				return false
 			}
 
 			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean

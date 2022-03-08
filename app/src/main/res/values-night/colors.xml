@@ -4,4 +4,5 @@
     <color name="background">#000</color> <!-- amoled black is best black -->
     <color name="menuBackground">#333</color>
     <color name="separator">#555</color>
+    <color name="itemHighlight">#222</color>
 </resources>

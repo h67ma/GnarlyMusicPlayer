@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@drawable/queueitem"
+    android:background="@drawable/highlightable_item"
     android:foreground="?selectableItemBackground">
 
     <TextView
