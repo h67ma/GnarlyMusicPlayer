@@ -1,6 +1,7 @@
 package sancho.gnarlymusicplayer.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -127,6 +128,7 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
+	@SuppressLint("MissingSuperCall") // what's your problem android studio?
 	override fun onSaveInstanceState(outState: Bundle)
 	{
 		super.onSaveInstanceState(outState)
