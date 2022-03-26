@@ -119,7 +119,7 @@
 
         <Preference
             app:title="Report a bug"
-            app:summary="It really helps!"
+            app:summary="Open webpage"
             app:key="bugreport"
             app:persistent="false"
             app:iconSpaceReserved="false"/>
