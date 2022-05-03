@@ -20,3 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -keep class wseemann.media.** { *; }
+
+# only referenced in xml
+-keep public class * extends sancho.gnarlymusicplayer.settings.NestedSettingsFragment
