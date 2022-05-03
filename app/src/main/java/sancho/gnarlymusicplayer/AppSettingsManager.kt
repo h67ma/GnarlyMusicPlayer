@@ -13,8 +13,6 @@ object AppSettingsManager
 	private const val DEFAULT_ACCENTCOLOR = "lime"
 
 	const val PREFERENCE_VOLUME_STEP_IDX = "sancho.gnarlymusicplayer.preference.volume.currentidx"
-	const val PREFERENCE_VOLUME_SYSTEM_TO_SET = "sancho.gnarlymusicplayer.preference.volume.setsystem"
-
 	var savedTrackPath: String = ""
 	var savedTrackTime: Int = 0
 	var lastDir: File? = null
@@ -103,7 +101,7 @@ object AppSettingsManager
 		volumeStepsTotal = sharedPref.getInt(context.getString(R.string.pref_totalsteps), 30)
 		volumeInappEnabled = sharedPref.getBoolean(context.getString(R.string.pref_inappenabled), false)
 		volumeSystemSet = sharedPref.getBoolean(context.getString(R.string.pref_lockvolume), false)
-		volumeSystemLevel = sharedPref.getInt(PREFERENCE_VOLUME_SYSTEM_TO_SET, 7)
+		volumeSystemLevel = sharedPref.getInt(context.getString(R.string.pref_lockvolume_start), 7)
 
 		// settings that playback service can change
 		// don't load from preferences if playback service is running - will overwrite its settings

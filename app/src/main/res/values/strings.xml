@@ -35,6 +35,7 @@
     <string name="pref_totalsteps">sancho.gnarlymusicplayer.preference.volume.totalsteps</string>
     <string name="pref_accentcolor">sancho.gnarlymusicplayer.preference.accentcolor</string>
     <string name="pref_lockvolume">sancho.gnarlymusicplayer.preference.volume.lock</string>
+    <string name="pref_lockvolume_start">sancho.gnarlymusicplayer.preference.volume.lock.start</string>
     <string name="pref_autoclean">sancho.gnarlymusicplayer.preference.autoclean</string>
     <string name="pref_ignoreaf">sancho.gnarlymusicplayer.preference.ignoreaf</string>
     <string name="pref_btcrackworkaround">sancho.gnarlymusicplayer.preference.btcrackworkaround</string>

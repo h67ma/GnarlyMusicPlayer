@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:defaultValue="lime"
+        app:entries="@array/color_names"
+        app:entryValues="@array/color_values"
+        app:key="@string/pref_accentcolor"
+        app:title="Theme"
+        app:useSimpleSummaryProvider="true"
+        app:iconSpaceReserved="false"/>
+
+    <CheckBoxPreference
+        app:title="Auto-clean queue"
+        app:summary="Auto-remove tracks from queue when they finish playing"
+        app:key="@string/pref_autoclean"
+        app:iconSpaceReserved="false"/>
+
+</PreferenceScreen>

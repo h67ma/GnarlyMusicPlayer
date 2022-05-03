@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:title="Save queue to playlist"
+        android:summary="Will be saved to app's private directory"
+        app:key="backupqueue"
+        app:persistent="false"
+        app:iconSpaceReserved="false"/>
+
+</PreferenceScreen>

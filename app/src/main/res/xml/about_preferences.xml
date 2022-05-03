@@ -1,0 +1,37 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:title="Help"
+        app:summary="Show online help"
+        app:key="help"
+        app:persistent="false"
+        app:iconSpaceReserved="false"/>
+
+    <Preference
+        app:title="Report a bug"
+        app:summary="Open webpage"
+        app:key="bugreport"
+        app:persistent="false"
+        app:iconSpaceReserved="false"/>
+
+    <Preference
+        app:title="Project repository"
+        app:summary="Open webpage"
+        app:key="repo"
+        app:persistent="false"
+        app:iconSpaceReserved="false"/>
+
+    <Preference
+        app:title="Created by"
+        app:persistent="false"
+        app:summary="Sancho 2019-2022"
+        app:iconSpaceReserved="false"/>
+
+    <Preference
+        app:title="Version"
+        app:key="version"
+        app:persistent="false"
+        app:iconSpaceReserved="false"/>
+
+</PreferenceScreen>

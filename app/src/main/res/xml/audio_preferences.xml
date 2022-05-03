@@ -1,0 +1,54 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:title="Equalizer"
+        app:summary="Launch audio FX app"
+        app:key="eq"
+        app:persistent="false"
+        app:iconSpaceReserved="false"/>
+
+    <PreferenceCategory
+        app:title="In-app volume control"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true">
+
+        <CheckBoxPreference
+            app:title="In-app volume control"
+            app:summary="Volume keys will change in-app volume instead of global media volume, allowing for finer volume adjustment."
+            app:key="@string/pref_inappenabled"
+            app:iconSpaceReserved="false"/>
+
+        <SeekBarPreference
+            app:title="In-app volume step count"
+            app:key="@string/pref_totalsteps"
+            app:iconSpaceReserved="false"
+            app:defaultValue="30"
+            android:max="100"
+            app:min="1"
+            app:showSeekBarValue="true"
+            app:dependency="@string/pref_inappenabled"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Auto set volume"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true">
+
+        <CheckBoxPreference
+            app:title="Set system media volume"
+            app:summary="App will always set a specific system media volume when starting music playback. This will be the defacto max volume when using in-app volume control."
+            app:key="@string/pref_lockvolume"
+            app:iconSpaceReserved="false"/>
+
+        <SeekBarPreference
+            app:title="Starting volume level"
+            app:key="@string/pref_lockvolume_start"
+            app:iconSpaceReserved="false"
+            app:showSeekBarValue="true"
+            android:dependency="@string/pref_lockvolume"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,148 +1,34 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        app:title="General"
-        app:iconSpaceReserved="false">
+    <Preference
+        android:title="Look and feel"
+        android:summary="Display and behavior settings"
+        android:icon="@drawable/themable_color"
+        app:fragment="sancho.gnarlymusicplayer.settings.LookFeelSettingsFragment" />
 
-        <ListPreference
-            app:defaultValue="lime"
-            app:entries="@array/color_names"
-            app:entryValues="@array/color_values"
-            app:key="@string/pref_accentcolor"
-            app:title="Theme"
-            app:useSimpleSummaryProvider="true"
-            app:iconSpaceReserved="false"/>
+    <Preference
+        android:title="Audio"
+        android:summary="Audio settings"
+        android:icon="@drawable/themable_audio"
+        app:fragment="sancho.gnarlymusicplayer.settings.AudioSettingsFragment" />
 
-        <CheckBoxPreference
-            app:title="Auto-clean queue"
-            app:summary="Auto-remove tracks from queue when they finish playing"
-            app:key="@string/pref_autoclean"
-            app:iconSpaceReserved="false"/>
+    <Preference
+        android:title="Workarounds"
+        android:summary="Fixes for notifications and audio playback"
+        android:icon="@drawable/themable_workaround"
+        app:fragment="sancho.gnarlymusicplayer.settings.WorkaroundsSettingsFragment" />
 
-        <Preference
-            app:title="Equalizer"
-            app:summary="Launch audio FX app"
-            app:key="eq"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
+    <Preference
+        android:title="Backup"
+        android:summary="Backup settings"
+        android:icon="@drawable/themable_backup"
+        app:fragment="sancho.gnarlymusicplayer.settings.BackupSettingsFragment" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:title="Audio workarounds"
-        app:iconSpaceReserved="false"
-        app:allowDividerAbove="true">
-
-        <CheckBoxPreference
-            app:title="Ignore audio focus"
-            app:summary="Audio playback will not stop e.g. when other media is played. Audio playback service needs to be restarted for this option to take effect."
-            app:key="@string/pref_ignoreaf"
-            app:iconSpaceReserved="false"/>
-
-        <CheckBoxPreference
-            app:title="Bluetooth popping workaround"
-            app:summary="Battery usage might be slightly increased. Read more on the help page. Audio playback service needs to be restarted for this option to take effect."
-            app:key="@string/pref_btcrackworkaround"
-            app:iconSpaceReserved="false"/>
-
-        <CheckBoxPreference
-            app:title="Don't pause media session"
-            app:summary="Don't let system know when playback is paused. In some versions of Android this can prevent the system from killing the playback service after it has been paused for a few minutes."
-            app:key="@string/pref_dontpausemediasess"
-            app:iconSpaceReserved="false"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:title="In-app volume control"
-        app:iconSpaceReserved="false"
-        app:allowDividerAbove="true">
-
-        <CheckBoxPreference
-            app:title="In-app volume control"
-            app:summary="Volume keys will change in-app volume instead of global media volume, allowing for finer volume adjustment."
-            app:key="@string/pref_inappenabled"
-            app:iconSpaceReserved="false"/>
-
-        <SeekBarPreference
-            app:title="In-app volume step count"
-            app:key="@string/pref_totalsteps"
-            app:iconSpaceReserved="false"
-            app:defaultValue="30"
-            android:max="100"
-            app:min="1"
-            app:showSeekBarValue="true"
-            app:dependency="@string/pref_inappenabled"/>
-
-        <CheckBoxPreference
-            app:title="Set system media volume"
-            app:summary="App will always set a specific system media volume when starting music playback. This will be the defacto max volume when using in-app volume control."
-            app:key="@string/pref_lockvolume"
-            app:iconSpaceReserved="false"/>
-
-        <Preference
-            app:title="Set system volume level"
-            app:summary="Tap to set to current system media volume"
-            app:key="setlockvolume"
-            app:persistent="false"
-            app:iconSpaceReserved="false"
-            android:dependency="@string/pref_lockvolume"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:title="@string/backup"
-        app:iconSpaceReserved="false"
-        app:allowDividerAbove="true">
-
-        <Preference
-            app:title="Save queue to playlist"
-            android:summary="Will be saved to app's private directory"
-            app:key="backupqueue"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:title="@string/about"
-        app:iconSpaceReserved="false"
-        app:allowDividerAbove="true">
-
-        <Preference
-            app:title="Help"
-            app:summary="Show online help"
-            app:key="help"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
-
-        <Preference
-            app:title="Report a bug"
-            app:summary="Open webpage"
-            app:key="bugreport"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
-
-        <Preference
-            app:title="Project repository"
-            app:summary="Open webpage"
-            app:key="repo"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
-
-        <Preference
-            app:title="Created by"
-            app:persistent="false"
-            app:summary="Sancho 2019-2022"
-            app:iconSpaceReserved="false"/>
-
-        <Preference
-            app:title="Version"
-            app:key="version"
-            app:persistent="false"
-            app:iconSpaceReserved="false"/>
-
-    </PreferenceCategory>
+    <Preference
+        android:title="About"
+        android:summary="Help, version, credits"
+        android:icon="@drawable/themable_info"
+        app:fragment="sancho.gnarlymusicplayer.settings.AboutSettingsFragment" />
 
 </PreferenceScreen>
