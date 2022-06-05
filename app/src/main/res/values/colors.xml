@@ -7,5 +7,5 @@
     <color name="background">#EEE</color>
     <color name="menuBackground">#DDD</color>
     <color name="separator">#BBB</color>
-    <color name="itemHighlight">#DDD</color>
+    <color name="itemHighlight">#CCC</color>
 </resources>
