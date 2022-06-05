@@ -16,14 +16,11 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.models.Track
 import java.io.IOException
 import android.media.SoundPool
+import kotlinx.coroutines.*
 
 private const val MIN_TRACK_TIME_S_TO_SAVE = 30
 const val ACTION_START_PLAYBACK_SERVICE = "sancho.gnarlymusicplayer.action.startplayback"
@@ -67,7 +64,6 @@ class MediaPlaybackService : Service()
 	private val _intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
 
 	private var _setTrackJob: Job? = null
-	private var _trackLoading = false
 
 	private val _noisyAudioReceiver = object : BroadcastReceiver()
 	{
@@ -174,6 +170,7 @@ class MediaPlaybackService : Service()
 		if(!mediaPlaybackServiceStarted)
 		{
 			// first service call
+			mediaPlaybackServiceStarted = true
 
 			// set media volume
 			if (AppSettingsManager.volumeSystemSet)
@@ -189,24 +186,11 @@ class MediaPlaybackService : Service()
 
 			startForeground(NOTIFICATION_ID, _notificationMaker.makeNotification(true, _track)) // on start show playing icon
 
-			mediaPlaybackServiceStarted = true
-
-			_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
-				val success = setTrackJob()
-
-				if (success)
-					_sessionCallback.onPlay()
-
-				_notificationMaker.updateNotification(_player.isPlaying, _track)
-			}
-
 			// initially the actual audio will start playing, so no need to start the "silence player"
 		}
-		else
-		{
-			// service already running
-			playAndUpdateNotification()
-		}
+
+		// service already started
+		setTrack(true)
 	}
 
 	private fun replay()
@@ -322,6 +306,11 @@ class MediaPlaybackService : Service()
 
 	private fun nextTrack(trackFinished: Boolean)
 	{
+		// for some reason completion callback is called when rapidly clicking queue items,
+		// which results in track being removed
+		if (_setTrackJob?.isActive == true)
+			return
+
 		if (!trackFinished)
 			saveTrackPosition()
 
@@ -360,65 +349,58 @@ class MediaPlaybackService : Service()
 		setTrack(false)
 	}
 
-	// returns: whether track loading was successful
-	private fun setTrackJob(): Boolean
-	{
-		_trackLoading = true
-
-		var error = false
-		try
-		{
-			if (PlaybackQueue.currentIdxValid())
-			{
-				TagExtractor.setTrackMeta(_track)
-				_player.reset()
-				_player.setDataSource(_track.path)
-				_player.setAudioAttributes(AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
-				_player.prepare()
-			}
-			else
-				error = true
-		}
-		catch(_: IOException)
-		{
-			error = true
-		}
-		catch (_: IllegalArgumentException)
-		{
-			error = true
-		}
-		catch (_: IllegalStateException)
-		{
-			error = true
-		}
-
-		_trackLoading = false
-
-		if (error) // this is so bad
-		{
-			GlobalScope.launch(Dispatchers.Main) {
-				Toaster.show(applicationContext, getString(R.string.cant_play_track))
-			}
-			return false
-		}
-
-		return true
-	}
-
 	fun setTrack(forcePlay: Boolean)
 	{
-		if (_trackLoading)
-			return // better let it finish
+		runBlocking {
+			if (_setTrackJob?.isActive == true)
+				_setTrackJob?.join()
+		}
 
 		val wasPlaying = _player.isPlaying
 
-		_setTrackJob = GlobalScope.launch(Dispatchers.IO) {
-			val success = setTrackJob()
+		_setTrackJob = CoroutineScope(Dispatchers.IO).launch {
+			kotlin.runCatching {
+				var error = false
+				try
+				{
+					if (PlaybackQueue.currentIdxValid())
+					{
+						TagExtractor.setTrackMeta(_track)
+						_player.reset()
+						_player.setDataSource(_track.path)
+						_player.setAudioAttributes(AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+						_player.prepare()
+					}
+					else
+						error = true
+				} // this is so bad
+				catch(_: IOException)
+				{
+					error = true
+				}
+				catch (_: IllegalArgumentException)
+				{
+					error = true
+				}
+				catch (_: IllegalStateException)
+				{
+					error = true
+				}
 
-			if (success && (forcePlay || wasPlaying))
-				_sessionCallback.onPlay()
+				if (!error)
+				{
+					if (forcePlay || wasPlaying)
+						_sessionCallback.onPlay()
 
-			_notificationMaker.updateNotification(_player.isPlaying, _track)
+					_notificationMaker.updateNotification(_player.isPlaying, _track)
+				}
+				else
+				{
+					CoroutineScope(Dispatchers.Main).launch {
+						Toaster.show(applicationContext, getString(R.string.cant_play_track))
+					}
+				}
+			}
 		}
 	}
 
@@ -430,7 +412,7 @@ class MediaPlaybackService : Service()
 
 	fun playPause()
 	{
-		if (_trackLoading)
+		if (_setTrackJob?.isActive == true)
 			return // mission failed, we'll get em next time
 
 		if (_player.isPlaying)

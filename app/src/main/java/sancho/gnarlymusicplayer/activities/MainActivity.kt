@@ -344,8 +344,11 @@ class MainActivity : AppCompatActivity()
 
 		val oldPos = PlaybackQueue.currentIdx
 		_queueAdapter.notifyItemChanged(oldPos)
+
+		if (oldPos != newPosition)
+			_queueAdapter.notifyItemChanged(newPosition)
+
 		PlaybackQueue.currentIdx = newPosition
-		_queueAdapter.notifyItemChanged(PlaybackQueue.currentIdx)
 
 		if (!MediaPlaybackService.mediaPlaybackServiceStarted || _service == null)
 		{
