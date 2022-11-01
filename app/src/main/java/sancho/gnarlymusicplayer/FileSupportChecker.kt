@@ -22,7 +22,8 @@ object FileSupportChecker
 		"mp3",
 		"mkv",
 		"wav",
-		"ogg"
+		"ogg",
+		"opus" // although not listed, it seems to be working just fine
 	)
 
 	private val SUPPORTED_PLAYLIST_EXTENSIONS = arrayOf(
