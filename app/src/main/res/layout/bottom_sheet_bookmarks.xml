@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:itemBackground">
+
+    <TextView
+        android:id="@+id/sheet_bookmarks_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:textSize="18sp"
+        android:maxLines="4"
+        android:ellipsize="end"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:weekSeparatorLineColor"/>
+
+    <TextView
+        android:id="@+id/sheet_bookmarks_remove"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Remove bookmark"
+        android:padding="12dp"
+        app:drawableLeftCompat="@drawable/close"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:drawablePadding="10dp"
+        android:textSize="18sp"
+        app:drawableTint="?android:textColor"/>
+
+</LinearLayout>
+</androidx.core.widget.NestedScrollView>

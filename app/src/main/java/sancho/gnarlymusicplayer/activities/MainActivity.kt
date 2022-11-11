@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var _explorerAdapter: ExplorerAdapter
 
 	private lateinit var _queueAdapter: QueueAdapter
+	private lateinit var _bookmarksAdapter: BookmarksAdapter
 	private var _lastSelectedTrack: Int = RecyclerView.NO_POSITION
 
 	private lateinit var _bookmarks: MutableList<QueueItem>
@@ -195,9 +196,19 @@ class MainActivity : AppCompatActivity()
 		_binding.libraryListView.adapter = _explorerAdapter
 	}
 
+	private fun setupBookmarksCtxMenu(dialog: BottomSheetDialogCtxMenu, displayName: String, selectedIdx: Int)
+	{
+		dialog.setHeaderText(R.id.sheet_bookmarks_item_name, displayName)
+		dialog.setBottomSheetItemOnClick(R.id.sheet_bookmarks_remove) {
+			_bookmarksAdapter.onItemRemoved(selectedIdx)
+			_bookmarksChanged = true
+			_bookmarksAdapter.notifyItemRemoved(selectedIdx)
+		}
+	}
+
 	private fun setupBookmarks()
 	{
-		val adapter = BookmarksAdapter(this, _bookmarks) { bookmark ->
+		_bookmarksAdapter = BookmarksAdapter(this, _bookmarks, ::setupBookmarksCtxMenu) { bookmark ->
 
 			if (bookmark.path == _explorerAdapter.currentExplorerPath?.absolutePath)
 			{
@@ -216,31 +227,28 @@ class MainActivity : AppCompatActivity()
 			else
 				Toaster.show(this, getString(R.string.dir_doesnt_exist))
 		}
-		_binding.bookmarkListView.adapter = adapter
+		_binding.bookmarkListView.adapter = _bookmarksAdapter
 
 		val touchHelper = ItemTouchHelper(object : DragListTouchHelperCallback(this)
 		{
 			override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int
 			{
-				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
+				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
 			}
 
 			override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean
 			{
-				adapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+				_bookmarksAdapter.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
 				_bookmarksChanged = true
 				return true
 			}
 
 			override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int)
 			{
-				val position = viewHolder.adapterPosition
-				adapter.onItemRemoved(position)
-				_bookmarksChanged = true
-				adapter.notifyItemRemoved(position)
+				// kappa?
 			}
 		})
-		adapter.touchHelper = touchHelper
+		_bookmarksAdapter.touchHelper = touchHelper
 		touchHelper.attachToRecyclerView(_binding.bookmarkListView)
 
 		_binding.bookmarkAddBtn.setOnClickListener {
@@ -256,9 +264,9 @@ class MainActivity : AppCompatActivity()
 				}
 
 				// also add to bookmark menu
-				adapter.onItemAdded(QueueItem(path, label))
+				_bookmarksAdapter.onItemAdded(QueueItem(path, label))
 				_bookmarksChanged = true
-				adapter.notifyItemInserted(_bookmarks.size - 1)
+				_bookmarksAdapter.notifyItemInserted(_bookmarks.size - 1)
 			}
 			else
 				Toaster.show(this, getString(R.string.cant_add_root_dir))
