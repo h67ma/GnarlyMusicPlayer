@@ -471,7 +471,7 @@ class MainActivity : AppCompatActivity()
 		_actionSearch?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener
 		{
 			// SearchView.OnCloseListener simply doesn't work. THANKS ANDROID
-			override fun onMenuItemActionCollapse(item: MenuItem?): Boolean
+			override fun onMenuItemActionCollapse(item: MenuItem): Boolean
 			{
 				menu.findItem(R.id.action_settings).isVisible = true
 				setSeekBtnVisibility(MediaPlaybackService.mediaPlaybackServiceStarted)
@@ -479,7 +479,7 @@ class MainActivity : AppCompatActivity()
 				return true
 			}
 
-			override fun onMenuItemActionExpand(item: MenuItem?): Boolean
+			override fun onMenuItemActionExpand(item: MenuItem): Boolean
 			{
 				menu.findItem(R.id.action_settings).isVisible = false
 				setSeekBtnVisibility(false)
