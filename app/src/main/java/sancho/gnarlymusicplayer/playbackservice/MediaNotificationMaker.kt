@@ -41,7 +41,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 
 		val style = object : androidx.media.app.NotificationCompat.MediaStyle() {}
 		style.setMediaSession(_session.sessionToken)
-			.setShowActionsInCompactView(2, 3, 4)
+			.setShowActionsInCompactView(0, 2, 4)
 			.setCancelButtonIntent(_closeIntent)
 
 		_builder = NotificationCompat.Builder(_context, NOTIFICATION_CHANNEL_ID)
