@@ -121,7 +121,7 @@ class MediaNotificationMaker(private val _context: Context, private val _session
 	private fun updateNotificationStatus(playing: Boolean)
 	{
 		setActions(if (playing) R.drawable.pause else R.drawable.play)
-		_builder.setSmallIcon(if (playing) R.drawable.play else R.drawable.pause)
+		_builder.setSmallIcon(R.drawable.launcher_adaptive_foreground)
 		// .setOngoing(playing) // doesn't work as notification was started with startForeground, would have to stop service to make it dismissible
 	}
 
