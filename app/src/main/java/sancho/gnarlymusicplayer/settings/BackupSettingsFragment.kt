@@ -19,6 +19,7 @@ class BackupSettingsFragment : NestedSettingsFragment()
 		setPreferencesFromResource(R.xml.backup_preferences, rootKey)
 
 		findPreference<Preference>("backupqueue")?.setOnPreferenceClickListener {
+			// TODO show a system file picker dialog
 			val externalStorageVolumes = ContextCompat.getExternalFilesDirs(requireContext(), null)
 			val saveFile = File(externalStorageVolumes[0], "queue.m3u8")
 
