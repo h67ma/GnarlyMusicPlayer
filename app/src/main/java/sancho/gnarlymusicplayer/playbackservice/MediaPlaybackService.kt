@@ -20,6 +20,7 @@ import sancho.gnarlymusicplayer.*
 import sancho.gnarlymusicplayer.models.Track
 import java.io.IOException
 import android.media.SoundPool
+import android.os.Bundle
 import kotlinx.coroutines.*
 
 private const val MIN_TRACK_TIME_S_TO_SAVE = 30
@@ -240,11 +241,14 @@ class MediaPlaybackService : Service()
 		val playbackStateBuilder = PlaybackStateCompat.Builder()
 			.setActions(
 				PlaybackStateCompat.ACTION_PLAY or
-						PlaybackStateCompat.ACTION_PAUSE or
-						PlaybackStateCompat.ACTION_STOP or
-						PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-						PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+				PlaybackStateCompat.ACTION_PAUSE or
+				PlaybackStateCompat.ACTION_STOP or
+				PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+				PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+			)
 			.setState(PlaybackStateCompat.STATE_STOPPED, 0L, 0f)
+			.addCustomAction(ACTION_REPLAY_TRACK, "Replay", R.drawable.replay)
+			.addCustomAction(ACTION_STOP_PLAYBACK_SERVICE, "Close", R.drawable.close)
 
 		_mediaSession = MediaSessionCompat(this, "shirley")
 
@@ -294,6 +298,15 @@ class MediaPlaybackService : Service()
 			override fun onStop()
 			{
 				end(true)
+			}
+
+			// android 13 specific?
+			override fun onCustomAction(action: String?, extras: Bundle?)
+			{
+				if (action == ACTION_STOP_PLAYBACK_SERVICE)
+					end(true)
+				else if (action == ACTION_REPLAY_TRACK)
+					replay()
 			}
 		}
 

@@ -33,6 +33,9 @@ Obviously this app is far from perfect. Code is messy, some functionality is mis
 
 Beware of spaghetti code!
 
+# Compatibility note #
+This app is not guaranteed to work on all Android versions. These days the API related to how media session interacts with the OS changes frequently, so the app might not work as expected.
+
 # Changelog #
 
 See [release notes](https://github.com/szycikm/GnarlyMusicPlayer/releases) for each release.
