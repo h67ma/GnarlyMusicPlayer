@@ -461,6 +461,12 @@ class MainActivity : AppCompatActivity()
 
 	//region MENU
 
+	// closes search thing and hides keyboard
+	private fun closeSearchThing()
+	{
+		_actionSearch?.collapseActionView()
+	}
+
 	// adds items to toolbar
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
 	{
@@ -500,7 +506,8 @@ class MainActivity : AppCompatActivity()
 			override fun onQueryTextSubmit(query: String): Boolean
 			{
 				_explorerAdapter.searchOpen(query, _prevDirList)
-				return false // do "default action" (dunno what it is but it hides keyboard)
+				searchThing.clearFocus() // hides keyboard
+				return true
 			}
 
 			override fun onQueryTextChange(newText: String): Boolean
@@ -508,6 +515,10 @@ class MainActivity : AppCompatActivity()
 				return true // don't do default action
 			}
 		})
+
+		_explorerAdapter.setOnSingleDirPlalistClick {
+			closeSearchThing()
+		}
 
 		return super.onCreateOptionsMenu(menu)
 	}

@@ -34,6 +34,7 @@ class ExplorerAdapter(
 	var searchResultsOpen = false
 
 	private var _fileLoaderJob: Job? = null
+	private lateinit var _onSingleDirPlaylistClickCallback: () -> Unit
 
 	init
 	{
@@ -119,6 +120,11 @@ class ExplorerAdapter(
 		_queueAdapter.notifyItemRangeInserted(PlaybackQueue.size - trackList.size, trackList.size)
 	}
 
+	fun setOnSingleDirPlalistClick(callback: () -> Unit)
+	{
+		_onSingleDirPlaylistClickCallback = callback
+	}
+
 	private fun singleClick(item: ExplorerViewItem)
 	{
 		val file = File(item.path)
@@ -135,6 +141,7 @@ class ExplorerAdapter(
 			updateDirectoryView(file)
 			_restoreListScrollPos(null)
 			searchResultsOpen = false // in case the dir was from search results
+			_onSingleDirPlaylistClickCallback()
 		}
 		else
 		{
