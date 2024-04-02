@@ -8,6 +8,12 @@
         app:iconSpaceReserved="false"/>
 
     <CheckBoxPreference
+        app:title="Ignore Bluetooth track switch events"
+        app:summary="Do not react to previous/next media keys on Bluetooth devices."
+        app:key="@string/pref_ignoreprevnext"
+        app:iconSpaceReserved="false"/>
+
+    <CheckBoxPreference
         app:title="Bluetooth popping workaround"
         app:summary="Some audio receivers enter a power saving mode after some time of inactivity and when resuming playback a loud cracking/popping sound is produced. To prevent this, play a silent audio track when playback is paused. Battery usage might be slightly increased. Audio playback service needs to be restarted for this option to take effect."
         app:key="@string/pref_btcrackworkaround"

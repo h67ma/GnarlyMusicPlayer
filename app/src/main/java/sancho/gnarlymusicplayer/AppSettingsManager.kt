@@ -19,6 +19,7 @@ object AppSettingsManager
 	private var accentColorKey: String = DEFAULT_ACCENTCOLOR
 
 	var ignoreAf = false
+	var ignorePrevNext = false
 	var bluetoothCrackingWorkaround = false
 	var noPauseMediaSess = false
 
@@ -95,6 +96,7 @@ object AppSettingsManager
 		PlaybackQueue.autoClean = sharedPref.getBoolean(context.getString(R.string.pref_autoclean), false)
 
 		ignoreAf = sharedPref.getBoolean(context.getString(R.string.pref_ignoreaf), false)
+		ignorePrevNext = sharedPref.getBoolean(context.getString(R.string.pref_ignoreprevnext), false)
 		bluetoothCrackingWorkaround = sharedPref.getBoolean(context.getString(R.string.pref_btcrackworkaround), false)
 		noPauseMediaSess = sharedPref.getBoolean(context.getString(R.string.pref_dontpausemediasess), false)
 

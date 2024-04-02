@@ -156,9 +156,9 @@ class MediaPlaybackService : Service()
 		{
 			ACTION_START_PLAYBACK_SERVICE -> start()
 			ACTION_REPLAY_TRACK -> replay()
-			ACTION_PREV_TRACK -> _sessionCallback.onSkipToPrevious()
+			ACTION_PREV_TRACK -> prevTrack()
 			ACTION_PLAYPAUSE -> playPause()
-			ACTION_NEXT_TRACK -> _sessionCallback.onSkipToNext()
+			ACTION_NEXT_TRACK -> nextTrack(false)
 			ACTION_STOP_PLAYBACK_SERVICE ->	_sessionCallback.onStop()
 			ACTION_UPDATE_MAX_VOLUME -> _player.setVolumeProvider()
 		}
@@ -236,6 +236,18 @@ class MediaPlaybackService : Service()
 		_soundPool.release()
 	}
 
+	/**
+	 * currentControllerInfo is being set before each MediaSession callback, which allows to
+	 * determine the initiator of the event.
+	 *
+	 * Rather hacky, but gets the job done. For now.
+	 */
+	private fun shouldIgnoreMediaSessionPrevNext(): Boolean
+	{
+		return AppSettingsManager.ignorePrevNext &&
+			   _mediaSession.currentControllerInfo.packageName == "com.android.bluetooth"
+	}
+
 	private fun prepareMediaSession()
 	{
 		val playbackStateBuilder = PlaybackStateCompat.Builder()
@@ -256,12 +268,14 @@ class MediaPlaybackService : Service()
 		{
 			override fun onSkipToNext()
 			{
-				nextTrack(false)
+				if (!shouldIgnoreMediaSessionPrevNext())
+					nextTrack(false)
 			}
 
 			override fun onSkipToPrevious()
 			{
-				prevTrack()
+				if (!shouldIgnoreMediaSessionPrevNext())
+					prevTrack()
 			}
 
 			override fun onPlay()

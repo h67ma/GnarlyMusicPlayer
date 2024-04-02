@@ -38,6 +38,7 @@
     <string name="pref_lockvolume_start">sancho.gnarlymusicplayer.preference.volume.lock.start</string>
     <string name="pref_autoclean">sancho.gnarlymusicplayer.preference.autoclean</string>
     <string name="pref_ignoreaf">sancho.gnarlymusicplayer.preference.ignoreaf</string>
+    <string name="pref_ignoreprevnext">sancho.gnarlymusicplayer.preference.ignoreprevnext</string>
     <string name="pref_btcrackworkaround">sancho.gnarlymusicplayer.preference.btcrackworkaround</string>
     <string name="pref_dontpausemediasess">sancho.gnarlymusicplayer.preference.dontpausemediasess</string>
     <string name="no_track">No track</string>
